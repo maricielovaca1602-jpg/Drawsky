@@ -46,7 +46,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 var(--font-ui);
 button{font:inherit;color:inherit;cursor:pointer}
 button:disabled{opacity:.4;cursor:default}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.app{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;height:100%}
+.app{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;height:var(--app-h,100dvh)}
 
 /* top bar */
 .top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
@@ -106,6 +106,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .nimgs img{width:100%;height:100%;object-fit:cover;display:block}
 .nimgs .nx{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;padding:0}
 #noteBtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.selbox{position:absolute;background:rgba(27,123,211,.28);border-radius:2px;pointer-events:none;z-index:2}
+.selmenu{position:fixed;z-index:9;display:flex;gap:2px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.selmenu button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--fg);font-weight:600;font-size:13.5px}
+.selmenu button:first-child{background:var(--accent);color:var(--accent-ink)}
+.nquote{margin:0 0 10px;padding:8px 12px;border-left:3px solid #ffd43b;background:var(--surface-2);border-radius:0 8px 8px 0;color:var(--muted);font-size:13.5px;line-height:1.45;max-height:140px;overflow:auto;-webkit-user-select:text;user-select:text}
 .pnum{position:absolute;right:0;bottom:-19px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .addpage{flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 20px;margin-top:8px;border-radius:14px;border:1.5px dashed var(--muted);background:transparent;font-weight:600;font-size:14px;color:var(--fg)}
 
@@ -459,11 +464,15 @@ input[type=range]{accent-color:var(--accent)}
       <input type="checkbox" class="switch" id="autoSync" aria-label="Subir cambios automáticamente">
     </div>
     <div class="row">
+      <div><div class="lab">Guardar en Drive todo lo que edites</div><p class="hint">Los PDFs que abras desde este aparato, las imágenes y los cuadernos nuevos se suben solos a la carpeta DrawSky de tu primera cuenta cuando empiezas a escribir. Así los ves en la tableta, el celular y la computadora.</p></div>
+      <input type="checkbox" class="switch" id="autoUpload" aria-label="Guardar en Drive todo lo que edites">
+    </div>
+    <div class="row">
       <div><div class="lab">Espacio en la tableta</div><p class="hint" id="cacheInfo">Calculando…</p></div>
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda</div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 13-oct-2026 (7)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -515,6 +524,7 @@ const ICON = {
   list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/>',
   note:'<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5"/><path d="M8.5 9h7M8.5 12.5h4"/>',
   image:'<rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-8.5 8"/>',
+  cursor:'<path d="M9 4.5c1.7 0 3 .8 3 2.2 0-1.4 1.3-2.2 3-2.2M9 19.5c1.7 0 3-.8 3-2.2 0 1.4 1.3 2.2 3 2.2M12 6.7v10.6M10 12h4"/>',
   covers:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M14 5.5A1.5 1.5 0 0 1 15.5 4H20v16h-4.5a1.5 1.5 0 0 1-1.5-1.5z"/>'
 };
 const svg = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
@@ -532,14 +542,15 @@ const store = {
   set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } },
   del(k){ try { localStorage.removeItem(k); } catch(e){} }
 };
-const TOOL_INFO = { hand:{name:'Mover',icon:'hand'}, pen1:{name:'Bolígrafo 1',icon:'pen'}, pen2:{name:'Bolígrafo 2',icon:'pen'}, hl:{name:'Resaltador',icon:'hl'}, eraser:{name:'Borrador',icon:'eraser'} };
+const TOOL_INFO = { hand:{name:'Mover',icon:'hand'}, pen1:{name:'Bolígrafo 1',icon:'pen'}, pen2:{name:'Bolígrafo 2',icon:'pen'}, hl:{name:'Resaltador',icon:'hl'}, eraser:{name:'Borrador',icon:'eraser'}, select:{name:'Seleccionar texto',icon:'cursor'} };
 const SIZE_RANGE = { pen:{min:0.3,max:8,step:0.1,unit:'pt'}, hl:{min:3,max:30,step:0.5,unit:'pt'}, eraser:{min:6,max:80,step:1,unit:'px'} };
 const DEF_FAV = {
   pen:['#1d2b53','#111111','#d63a4a','#1c7ed6','#2f9e44','#e67700','#9c36b5','#7a8594'],
   hl:['#ffd43b','#8ce99a','#74c0fc','#ffa8a8','#e599f7','#ffc078','#63e6be','#ced4da']
 };
 const MAX_FAV = 8;
-const kind = t => t === 'hl' ? 'hl' : t === 'eraser' ? 'eraser' : t === 'hand' ? 'hand' : 'pen';
+const kind = t => t === 'hl' ? 'hl' : t === 'eraser' ? 'eraser' : t === 'hand' ? 'hand' : t === 'select' ? 'select' : 'pen';
+const noOpts = t => kind(t) === 'hand' || kind(t) === 'select';
 const PEN_STYLES = { pluma:'Pluma', boligrafo:'Bolígrafo', lapiz:'Lápiz', estilografo:'Estilógrafo', rotulador:'Rotulador' };
 const constStyle = s => s.t === 'pen' && (s.st === 'estilografo' || s.st === 'rotulador');
 function toolName(t){
@@ -548,7 +559,7 @@ function toolName(t){
   return PEN_STYLES[st] + ' ' + (t === 'pen1' ? 1 : 2);
 }
 const DEF = { sens:0.7, snap:true, finger:false, theme:'system', tool:'pen1', dock:'float', fabPos:null, openNb:[], thumbCols:'1', editCols:'2x2', thumbW:120, presets:[], homeView:'list',
-  tools:{ pen1:{color:'#1d2b53',size:1.2}, pen2:{color:'#d63a4a',size:1.8}, hl:{color:'#ffd43b',size:12}, eraser:{size:24}, hand:{} } };
+  tools:{ pen1:{color:'#1d2b53',size:1.2}, pen2:{color:'#d63a4a',size:1.8}, hl:{color:'#ffd43b',size:12}, eraser:{size:24}, hand:{}, select:{} } };
 const saved = store.get('drawsky:prefs') || {};
 const prefs = Object.assign({}, DEF, saved, {
   tools: Object.assign({}, DEF.tools, saved.tools || {}),
@@ -838,7 +849,7 @@ function renderHome(){
       `<button type="button" class="h-nav" data-hf="${k}" aria-current="${homeFilter === k}">${svg(ic, 20)}<span>${l}</span><b>${counts[k]}</b></button>`).join('') +
     `<h3>Google Drive</h3><button type="button" class="h-nav" data-hf="drive" aria-current="${homeFilter === 'drive'}">${svg('cloud', 20)}<span>En Drive</span><b>${counts.drive}</b></button>` +
     (pend ? `<button type="button" class="h-nav warn" data-sync="1" title="Subir ahora">${svg('share', 20)}<span>Sin subir</span><b>${pend}</b></button>` : '') +
-    (prefs.accounts.some(a => !tokenOk(a.email)) ? `<button type="button" class="h-nav" data-refresh="1">${svg('cloud', 20)}<span>Actualizar lista</span></button>` : '') +
+    (prefs.accounts.length ? `<button type="button" class="h-nav" data-refresh="1">${svg('redo', 20)}<span>Actualizar lista</span></button>` : '') +
     prefs.accounts.map(a => `<button type="button" class="h-nav" data-acc="${esc(a.email)}" title="Abrir un PDF de ${esc(a.email)}"><span class="av">${initial(a)}</span><span>${esc(a.email)}</span></button>`).join('') +
     `<button type="button" class="h-nav" data-acc="">${svg('plus', 20)}<span>${prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive'}</span></button>`;
   $('#hTitle').textContent = { all:'Todos tus archivos', notebook:'Cuadernos', pdf:'PDFs', image:'Imágenes', drive:'En Google Drive' }[homeFilter];
@@ -1098,6 +1109,7 @@ const PDFLIB_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-li
 const CACHE_MAX = 10, SYNC_WAIT = 12000;
 if (!Array.isArray(prefs.accounts)) prefs.accounts = [];
 if (prefs.autoSync === undefined) prefs.autoSync = true;
+if (prefs.autoUpload === undefined) prefs.autoUpload = true;
 const pdfName = n => /\.pdf$/i.test(n) ? n : n + '.pdf';
 const authErr = () => Object.assign(new Error('auth'), { auth:true });
 
@@ -1486,7 +1498,7 @@ const STATE = { saved:['Guardado', 'ok'], dirty:['Sin subir', 'warn'], saving:['
 function renderDriveBtn(){
   const lbl = $('#driveLbl'), st = $('#driveSt'), d = doc;
   if (homeOn || !d){ lbl.textContent = 'Abrir de Drive'; st.hidden = true; return; }
-  if (!d.drive){ lbl.textContent = 'Subir a Drive'; st.hidden = true; return; }
+  if (!d.drive){ lbl.textContent = 'Subir a Drive'; if (d.kind === 'sample'){ st.hidden = true; return; } st.textContent = 'Solo en este aparato'; st.className = 'warn'; st.hidden = false; return; }
   lbl.textContent = 'Guardar en Drive';
   const s = STATE[d.readonly ? 'readonly' : d.dstate || 'saved'] || STATE.saved;
   st.textContent = s[0]; st.className = s[1]; st.hidden = false;
@@ -1499,9 +1511,17 @@ function localSavedMsg(d){
   if (!tokenOk(d.drive.email)) return 'Guardado en la tableta · toca "Guardar en Drive" para subirlo';
   return prefs.autoSync ? 'Guardado en la tableta · se sube a Drive en unos segundos' : 'Guardado en la tableta · toca "Guardar en Drive" para subirlo';
 }
+function autoUpload(d){
+  if (!prefs.autoUpload || d.drive || d.bg || d.syncing || d.autoUpT || d.autoFailed || d.kind === 'sample' || !prefs.accounts.length || !navigator.onLine) return;
+  if (d.kind === 'pdf' && !d.cleanBytes) return;
+  const email = account(prefs.mainAccount) ? prefs.mainAccount : prefs.accounts[0].email;
+  if (!tokenOk(email)) return;
+  d.autoUpT = setTimeout(() => { d.autoUpT = 0; if (!d.drive && docs.includes(d)) uploadNew(d, email, true); }, 4000);
+}
 function markDirty(d){
   d.ver = (d.ver || 0) + 1;
-  if (!d.drive || d.readonly) return;
+  if (!d.drive){ autoUpload(d); return; }
+  if (d.readonly) return;
   d.dirty = true;
   const e = lib.find(x => x.key === d.key); if (e && !e.pending){ e.pending = true; libSave(); }
   if (!d.syncing) driveState(d, !navigator.onLine ? 'offline' : tokenOk(d.drive.email) ? 'dirty' : 'auth');
@@ -1581,7 +1601,7 @@ async function syncDoc(d, opts = {}){
     if (d.syncAgain){ d.syncAgain = false; if (d.dirty) scheduleSync(d, 2000); }
   }
 }
-async function uploadNew(d, email){
+async function uploadNew(d, email, auto){
   if (d.syncing) return;
   d.syncing = true; driveState(d, 'saving'); setStatus('Subiendo a Google Drive…'); renderDriveBtn();
   const st = $('#driveSt'); st.textContent = 'Subiendo…'; st.className = ''; st.hidden = false;
@@ -1591,8 +1611,9 @@ async function uploadNew(d, email){
     const res = await driveUpload(email, null, pk.bytes, { name:fileNameFor(d), mimeType:mime, parents:[await driveFolder(email)] }, mime);
     rekey(d, res, email, false);
     await finishSync(d, pk, res);
-    toast('Listo: está en tu Google Drive, en la carpeta DrawSky.');
+    toast(auto ? `Guardado también en tu Drive (carpeta DrawSky) para verlo en todos tus aparatos.` : 'Listo: está en tu Google Drive, en la carpeta DrawSky.');
   } catch(e){
+    d.autoFailed = true;
     if (e && /encrypt/i.test(e.message || '')) toast('Este PDF está protegido por su autor y no se puede escribir dentro de él.');
     else toast(e && e.auth ? 'Tu sesión de Google venció. Inténtalo otra vez.' : 'No pude subirlo a Drive. Revisa tu internet e inténtalo otra vez.');
     console.warn(e); renderDriveBtn(); setStatus('Guardado en esta tableta');
@@ -1652,8 +1673,9 @@ async function refreshDriveList(force){
 function refreshDriveTap(){
   const a = prefs.accounts.find(x => !tokenOk(x.email));
   if (!navigator.onLine){ toast('Necesitas internet para actualizar la lista de Drive.'); return; }
-  if (a) withToken(a.email, () => { refreshDriveList(true); if (prefs.accounts.some(x => !tokenOk(x.email))) toast('Toca otra vez para actualizar la siguiente cuenta.'); });
-  else refreshDriveList(true);
+  const go = () => refreshDriveList(true).then(() => toast('Lista actualizada con tu Drive'));
+  if (a) withToken(a.email, () => { go(); if (prefs.accounts.some(x => !tokenOk(x.email))) toast('Toca otra vez para actualizar la siguiente cuenta.'); });
+  else go();
 }
 
 /* ---------- opening from Drive ---------- */
@@ -1755,7 +1777,7 @@ function renderDriveSettings(){
   el.innerHTML = prefs.accounts.length ? prefs.accounts.map(a => `<div class="acc"><span class="av">${initial(a)}</span><div><strong>${esc(a.name || a.email)}</strong><small>${esc(a.email)}</small></div><button type="button" class="btn" data-rm="${esc(a.email)}">Quitar</button></div>`).join('')
     : '<p class="hint" style="margin:0">Aún no conectaste ninguna cuenta. Puedes conectar varias (personal, de la universidad…).</p>';
   $('#accAdd').innerHTML = svg('plus', 16) + (prefs.accounts.length ? 'Agregar otra cuenta' : 'Conectar Google Drive');
-  $('#autoSync').checked = !!prefs.autoSync;
+  $('#autoSync').checked = !!prefs.autoSync; $('#autoUpload').checked = !!prefs.autoUpload;
   cacheInfo();
 }
 $('#accList').addEventListener('click', ev => {
@@ -1770,6 +1792,7 @@ $('#accList').addEventListener('click', ev => {
   toast('Cuenta quitada de DrawSky. Tus archivos siguen en Drive.');
 });
 $('#accAdd').addEventListener('click', () => requestToken(null, email => { if (email) toast('Conectada: ' + email); }));
+$('#autoUpload').addEventListener('change', e => { prefs.autoUpload = e.target.checked; savePrefs(); });
 $('#autoSync').addEventListener('change', e => { prefs.autoSync = e.target.checked; savePrefs(); if (prefs.autoSync) docs.forEach(d => { if (d.dirty) scheduleSync(d, 2000); }); });
 $('#freeSpace').addEventListener('click', async () => {
   await pruneCache(true); cacheInfo();
@@ -1799,7 +1822,7 @@ window.addEventListener('online', () => {
   setTimeout(syncPending, 1500);
 });
 window.addEventListener('offline', () => docs.forEach(d => { if (d.drive && d.dirty && !d.syncing) driveState(d, 'offline'); }));
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(syncPending, 800); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible'){ setTimeout(syncPending, 800); setTimeout(() => refreshDriveList(true), 1200); } });
 
 /* ---------- strokes ---------- */
 const r2 = v => Math.round(v * 100) / 100;
@@ -2275,7 +2298,7 @@ function showEraserCursor(e, on){
 viewer.addEventListener('pointerdown', e => {
   if (!doc) return;
   if (e.target.closest && e.target.closest('button')) return;
-  hideNoteChip();
+  hideNoteChip(); if (textSel || !selMenu.hidden) clearSel();
   if (placingNote){
     const pe = e.target.closest && e.target.closest('.page');
     if (pe){
@@ -2302,6 +2325,7 @@ viewer.addEventListener('pointerdown', e => {
   const p = doc.pages[+pageEl.dataset.i]; if (!p) return;
   if (!p.rendered || !p.inkOn) renderPage(p);
   const rect = pageEl.getBoundingClientRect();
+  if (t === 'select'){ beginSelect(e, p, rect); return; }
   active = { id:e.pointerId, mode:t === 'eraser' ? 'erase' : 'draw', p, rect, k:p.wPt / rect.width, tool:t, removed:[], fromTouch:e.pointerType === 'touch',
     t0:performance.now(), sx:e.clientX, sy:e.clientY, maxMove:0, ptype:e.pointerType, before:p.strokes.slice() };
   if (active.mode === 'erase'){ eraseAt(e); showEraserCursor(e, true); }
@@ -2330,6 +2354,7 @@ viewer.addEventListener('pointermove', e => {
   }
   if (!active || e.pointerId !== active.id) return;
   if (active.mode === 'hold') return;
+  if (active.mode === 'select'){ active.maxMove = Math.max(active.maxMove, Math.hypot(e.clientX - active.sx, e.clientY - active.sy)); moveSelect(active, e.clientX, e.clientY); return; }
   if (active.mode === 'pan'){
     viewer.scrollLeft -= e.clientX - active.x; viewer.scrollTop -= e.clientY - active.y;
     active.x = e.clientX; active.y = e.clientY; return;
@@ -2353,6 +2378,7 @@ function endPointer(e){
   if (!active || e.pointerId !== active.id) return;
   if (active.lp) clearTimeout(active.lp);
   if (active.mode === 'hold'){ active = null; return; }
+  if (active.mode === 'select'){ const a = active; active = null; endSelect(a); return; }
   const a = active, tap = prefs.dblTap && a.ptype === 'pen' && a.mode !== 'pan' && performance.now() - a.t0 < 220 && (a.maxMove || 0) < 6;
   let made = null;
   if (a.mode === 'draw') made = endStroke();
@@ -2522,9 +2548,9 @@ window.addEventListener('pointerup', e => endDrag(e, false));
 window.addEventListener('pointercancel', e => endDrag(e, true));
 
 /* ---------- tools: rail ---------- */
-function setTool(t){ tool = t; savePrefs(); renderRail(); if (!wheelWrap.hidden) renderWheelView(); if (t !== 'eraser') ecur.hidden = true; }
+function setTool(t){ clearSel(); tool = t; savePrefs(); renderRail(); if (!wheelWrap.hidden) renderWheelView(); if (t !== 'eraser') ecur.hidden = true; }
 function renderRail(){
-  const items = ['hand', 'pen1', 'pen2', 'hl', 'eraser'];
+  const items = ['hand', 'select', 'pen1', 'pen2', 'hl', 'eraser'];
   const u = doc ? doc.undo.length : 0, r = doc ? doc.redo.length : 0;
   rail.innerHTML = `<button type="button" class="grip" data-grip aria-label="Arrastra para mover la barra o volverla ruedita" title="Arrastra para mover">${svg('grip', 20)}</button>` +
     items.map(t => {
@@ -2547,7 +2573,7 @@ rail.addEventListener('pointerdown', e => { const g = e.target.closest('[data-gr
 rail.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.dataset.grip !== undefined) return;
   if (b.dataset.tool){
-    if (b.dataset.tool === tool && kind(tool) !== 'hand') openWheel(b, 'tool');
+    if (b.dataset.tool === tool && !noOpts(tool)) openWheel(b, 'tool');
     else setTool(b.dataset.tool);
   } else act(b.dataset.act);
 });
@@ -2575,13 +2601,13 @@ const lum = hex => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >>
 const sameColor = (a, b) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
 
 function viewMain(){
-  const items = ['hand', 'pen1', 'pen2', 'hl', 'eraser', 'favs', 'undo', 'redo'];
+  const items = ['hand', 'select', 'pen1', 'pen2', 'hl', 'eraser', 'favs', 'undo', 'redo'], stepA = 360 / items.length;
   const names = { favs:'Bolígrafos favoritos', undo:'Deshacer', redo:'Rehacer' };
   let h = `<svg viewBox="0 0 200 200" class="wsvg" aria-hidden="true"><circle cx="100" cy="100" r="99" class="w-band"/><circle cx="100" cy="100" r="84" class="w-disc"/></svg>`;
   items.forEach((k, i) => {
     const isTool = !!TOOL_INFO[k], icon = isTool ? TOOL_INFO[k].icon : (k === 'favs' ? 'star' : k), name = isTool ? toolName(k) : names[k];
     const c = isTool && prefs.tools[k].color, dis = doc && ((k === 'undo' && !doc.undo.length) || (k === 'redo' && !doc.redo.length));
-    h += `<button type="button" class="wi" style="${pct(58, -90 + i * 45)}${dis ? ';opacity:.3' : ''}" data-${isTool ? 'tool' : 'act'}="${k}" aria-label="${name}" title="${name}"${isTool ? ` aria-pressed="${k === tool}"` : ''}>${svg(icon, 24)}${c ? `<i class="dot" style="background:${c}"></i>` : ''}${isTool ? badge(k) : ''}</button>`;
+    h += `<button type="button" class="wi" style="${pct(58, -90 + i * stepA)}${dis ? ';opacity:.3' : ''}" data-${isTool ? 'tool' : 'act'}="${k}" aria-label="${name}" title="${name}"${isTool ? ` aria-pressed="${k === tool}"` : ''}>${svg(icon, 24)}${c ? `<i class="dot" style="background:${c}"></i>` : ''}${isTool ? badge(k) : ''}</button>`;
   });
   h += `<button type="button" class="wc" data-act="close" aria-label="Cerrar ruedita"><img src="${LOGO}" alt=""></button>`;
   wheel.innerHTML = h;
@@ -2757,7 +2783,7 @@ function positionWheel(){
 function openWheel(anchorEl, view){
   const r = anchorEl.getBoundingClientRect();
   wheelAnchor = { x:r.left + r.width / 2, y:r.top + r.height / 2 };
-  wheelView = view && !(view === 'tool' && kind(tool) === 'hand') ? view : 'main';
+  wheelView = view && !(view === 'tool' && noOpts(tool)) ? view : 'main';
   wheelOpenedAt = performance.now();
   wheelWrap.hidden = false; renderWheelView();
 }
@@ -2798,7 +2824,7 @@ wheelWrap.addEventListener('click', e => {
   else if (d.emode){ prefs.tools.eraser.mode = d.emode; savePrefs(); renderWheelView(); }
   else if (d.tool){
     tool = d.tool; savePrefs(); renderRail(); ecur.hidden = true;
-    if (kind(tool) === 'hand'){ closeWheel(); return; }
+    if (noOpts(tool)){ closeWheel(); if (tool === 'select') toast('Desliza el lápiz sobre el texto del PDF para seleccionarlo'); return; }
     wheelView = 'tool'; renderWheelView();
   }
   else if (d.view){ wheelView = d.view; renderWheelView(); }
@@ -3258,7 +3284,7 @@ async function exportNotes(notes){
   for (const n of notes){
     const imgData = [];
     for (const id of n.imgs || []){ const u = await noteImg(id); if (u) imgData.push(u); }
-    out.push({ id:n.id, x:n.x, y:n.y, text:n.text || '', t:n.t, imgData });
+    out.push({ id:n.id, x:n.x, y:n.y, text:n.text || '', quote:n.quote || undefined, t:n.t, imgData });
   }
   return out;
 }
@@ -3279,7 +3305,7 @@ function renderAllNotes(d){
     if (!p.noteEl){ p.noteEl = document.createElement('div'); p.noteEl.className = 'notes'; p.el.appendChild(p.noteEl); }
     p.noteEl.innerHTML = (p.notes || []).map(n => {
       k++;
-      const has = (n.text || '').trim() || (n.imgs && n.imgs.length);
+      const has = (n.text || '').trim() || n.quote || (n.imgs && n.imgs.length);
       return `<button type="button" class="note-pin${has ? '' : ' empty'}" data-note="${n.id}" style="left:${n.x / p.wPt * 100}%;top:${n.y / p.hPt * 100}%" aria-label="Abrir nota ${k}" title="${esc((n.text || '').slice(0, 80))}">${k}</button>`;
     }).join('');
   }
@@ -3302,7 +3328,7 @@ function openNote(p, n){
 function renderNoteDlg(){
   const { p, n, delArmed } = dlgState;
   dlg.innerHTML = `<header class="sheet-h"><h2>Nota ${noteNum(p.doc, n)} · página ${p.i + 1}</h2><button class="icon-btn" type="button" data-do="noteDone" aria-label="Cerrar">${svg('close')}</button></header>
-    <div class="group" style="border-top:0;padding-top:4px"><textarea id="nText" class="ntext" rows="5" placeholder="Escribe tu nota…">${esc(n.text || '')}</textarea>
+    <div class="group" style="border-top:0;padding-top:4px">${n.quote ? `<blockquote class="nquote">${esc(n.quote)}</blockquote>` : ''}<textarea id="nText" class="ntext" rows="5" placeholder="Escribe tu nota…">${esc(n.text || '')}</textarea>
     <div class="nimgs" id="nImgs">${(n.imgs || []).map(id => `<figure><img data-img="${id}" alt="Imagen de la nota"><button type="button" class="nx" data-do="nImgDel" data-id="${id}" aria-label="Quitar imagen">${svg('close', 14)}</button></figure>`).join('')}</div></div>
     <div class="dlg-foot"><button type="button" class="btn danger${delArmed ? ' armed' : ''}" data-do="noteDel">${svg('trash', 18)}${delArmed ? 'Toca otra vez' : 'Eliminar'}</button><span style="flex:1"></span>
     <label class="btn">${svg('plus', 18)}Imagen<input type="file" id="nFile" accept="image/*" multiple hidden></label>
@@ -3311,7 +3337,7 @@ function renderNoteDlg(){
 }
 function finishNote(st){
   const { p, n } = st;
-  if (!(n.text || '').trim() && !(n.imgs || []).length) p.notes = (p.notes || []).filter(x => x !== n);
+  if (!(n.text || '').trim() && !n.quote && !(n.imgs || []).length) p.notes = (p.notes || []).filter(x => x !== n);
   renderAllNotes(p.doc);
   if (p.doc === doc) save();
 }
@@ -3408,6 +3434,10 @@ async function addNotesPages(pdf, notes, bold, regular){
     page.drawText(String(it.num), { x:M + 3.5, y:y - 10.7, size:9, font:bold, color:rgb(0.106, 0.153, 0.251) });
     page.drawText(safe(bold, `Página ${it.page}`), { x:M + 26, y:y - 11, size:11, font:bold, color:rgb(0.106, 0.153, 0.251) });
     y -= 26;
+    if (it.n.quote){
+      for (const line of wrap('“' + it.n.quote + '”', regular, 10.5)){ need(15); page.drawText(line, { x:M + 8, y:y - 10.5, size:10.5, font:regular, color:rgb(0.42, 0.46, 0.53) }); y -= 14.5; }
+      y -= 4;
+    }
     for (const line of wrap(it.n.text || '', regular, 11)){
       need(16); page.drawText(line, { x:M, y:y - 11, size:11, font:regular, color:rgb(0.15, 0.17, 0.22) }); y -= 15.5;
     }
@@ -3426,6 +3456,109 @@ async function addNotesPages(pdf, notes, bold, regular){
   for (const pg of all){ const c = pg.node.Contents(); if (c && c.asArray) c.asArray().forEach(r => { if (r instanceof PDFLib.PDFRef) made.refs.push(r); }); }
   return made;
 }
+
+/* ---------- select the PDF's own text: note, highlight or copy ---------- */
+async function pageWords(p){
+  if (p.words) return p.words;
+  if (p.src.kind !== 'pdf' || !p.doc.pdf){ p.words = []; return p.words; }
+  const page = await p.doc.pdf.getPage(p.src.index + 1), vp = page.getViewport({ scale:1 }), tc = await page.getTextContent();
+  const words = [];
+  for (const it of tc.items){
+    if (!it.str || !it.str.trim()) continue;
+    const tx = pdfjsLib.Util.transform(vp.transform, it.transform);
+    const fh = Math.hypot(tx[2], tx[3]); if (!fh || Math.abs(tx[1]) > 0.05 * fh) continue;
+    const x = tx[4], y = tx[5], cw = (it.width || 0) / it.str.length; if (!cw) continue;
+    for (const m of it.str.matchAll(/\S+/g)){
+      words.push({ x0:x + m.index * cw, x1:x + (m.index + m[0].length) * cw, y0:y - fh * 0.82, y1:y + fh * 0.22, t:m[0], i:words.length });
+    }
+  }
+  p.words = words;
+  return words;
+}
+function wordAt(words, x, y, near){
+  let best = null, bd = near * near;
+  for (const w of words){
+    const dx = x < w.x0 ? w.x0 - x : x > w.x1 ? x - w.x1 : 0, dy = y < w.y0 ? w.y0 - y : y > w.y1 ? y - w.y1 : 0, d = dx * dx + dy * dy * 4;
+    if (d < bd){ bd = d; best = w; if (!d) break; }
+  }
+  return best;
+}
+/* selected words grouped into line boxes */
+function selLines(sel){
+  const lines = [];
+  for (const w of sel){
+    const l = lines[lines.length - 1];
+    if (l && Math.abs(l.y0 - w.y0) < (w.y1 - w.y0) * 0.5 && w.x0 >= l.x0 - 2){ l.x1 = Math.max(l.x1, w.x1); l.y1 = Math.max(l.y1, w.y1); l.t += ' ' + w.t; }
+    else lines.push({ x0:w.x0, x1:w.x1, y0:w.y0, y1:w.y1, t:w.t });
+  }
+  return lines;
+}
+let textSel = null;
+function drawSel(){
+  document.querySelectorAll('.selbox').forEach(e => e.remove());
+  if (!textSel || !textSel.words.length) return;
+  const p = textSel.p;
+  for (const l of selLines(textSel.words)){
+    const b = document.createElement('div'); b.className = 'selbox';
+    Object.assign(b.style, { left:l.x0 / p.wPt * 100 + '%', top:l.y0 / p.hPt * 100 + '%', width:(l.x1 - l.x0) / p.wPt * 100 + '%', height:(l.y1 - l.y0) / p.hPt * 100 + '%' });
+    p.el.appendChild(b);
+  }
+}
+function clearSel(){ textSel = null; drawSel(); selMenu.hidden = true; }
+function beginSelect(e, p, rect){
+  clearSel();
+  const a = { id:e.pointerId, mode:'select', p, rect, k:p.wPt / rect.width, sx:e.clientX, sy:e.clientY, t0:performance.now(), maxMove:0, words:null, start:null };
+  active = a;
+  pageWords(p).then(w => {
+    a.words = w;
+    if (!w.length && active === a) toast(p.src.kind === 'img' ? 'Una imagen no tiene texto para seleccionar. Mantén presionado para poner una nota.' : 'Esta página no tiene texto seleccionable (parece escaneada). Mantén presionado para poner una nota.');
+    if (active === a) moveSelect(a, a.lx != null ? a.lx : a.sx, a.ly != null ? a.ly : a.sy);
+  }).catch(err => console.warn(err));
+}
+function moveSelect(a, cx, cy){
+  a.lx = cx; a.ly = cy;
+  if (!a.words || !a.words.length) return;
+  const x = (cx - a.rect.left) * a.k, y = (cy - a.rect.top) * a.k;
+  if (!a.start){ a.start = wordAt(a.words, (a.sx - a.rect.left) * a.k, (a.sy - a.rect.top) * a.k, 14); if (!a.start) return; }
+  const cur = wordAt(a.words, x, y, 40) || a.start;
+  const i0 = Math.min(a.start.i, cur.i), i1 = Math.max(a.start.i, cur.i);
+  textSel = { p:a.p, words:a.words.slice(i0, i1 + 1) };
+  drawSel();
+}
+function endSelect(a){
+  if (!textSel || !textSel.words.length) return;
+  const r = a.p.el.getBoundingClientRect(), k = r.width / a.p.wPt, ls = selLines(textSel.words), last = ls[ls.length - 1], first = ls[0];
+  selMenu.hidden = false;
+  const top = r.top + first.y0 * k - selMenu.offsetHeight - 10;
+  selMenu.style.left = clamp(r.left + (first.x0 + last.x1) / 2 * k - selMenu.offsetWidth / 2, 8, innerWidth - selMenu.offsetWidth - 8) + 'px';
+  selMenu.style.top = (top > 60 ? top : r.top + last.y1 * k + 10) + 'px';
+}
+const selMenu = document.createElement('div');
+selMenu.className = 'selmenu'; selMenu.hidden = true;
+selMenu.innerHTML = `<button type="button" data-s="note">${svg('note', 16)}Agregar nota</button><button type="button" data-s="hl">${svg('hl', 16)}Resaltar</button><button type="button" data-s="copy">${svg('copy', 16)}Copiar</button>`;
+document.body.appendChild(selMenu);
+selMenu.addEventListener('click', e => {
+  const b = e.target.closest('[data-s]'); if (!b || !textSel) return;
+  const { p, words } = textSel, ls = selLines(words), text = ls.map(l => l.t).join(' ');
+  if (b.dataset.s === 'copy'){
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast('Texto copiado')).catch(() => toast('No pude copiar el texto.'));
+    clearSel(); return;
+  }
+  if (b.dataset.s === 'hl'){
+    const cfg = prefs.tools.hl;
+    for (const l of ls){
+      const h = (l.y1 - l.y0) * 1.05, ym = (l.y0 + l.y1) / 2, x0 = l.x0 + h * 0.35, x1 = Math.max(x0 + 0.1, l.x1 - h * 0.35);
+      const s = { t:'hl', color:cfg.color, size:r2(h), a:cfg.alpha != null ? cfg.alpha : 0.45, poly:true, pts:[[r2(x0), r2(ym), r2(h)], [r2(x1), r2(ym), r2(h)]] };
+      p.strokes.push(s); p.doc.undo.push({ k:'add', page:p, s });
+    }
+    p.doc.redo.length = 0; drawInk(p); renderRail(); clearSel(); save(); return;
+  }
+  const last = ls[ls.length - 1];
+  clearSel();
+  if (!p.notes) p.notes = [];
+  const n = { id:newId(), x:r2(clamp(last.x1 + 2, 0, p.wPt - 10)), y:r2(clamp(last.y1 + 3, 16, p.hPt)), text:'', quote:text.slice(0, 2000), imgs:[], t:Date.now() };
+  p.notes.push(n); renderAllNotes(p.doc); openNote(p, n);
+});
 
 /* ---------- images (JPG, PNG, WebP): annotate and save into the same image ---------- */
 const IMG_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -3584,12 +3717,14 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){ e.preventDefault(); redo(); return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
-  const map = { p:'pen1', b:'pen2', h:'hl', e:'eraser', m:'hand' };
+  const map = { p:'pen1', b:'pen2', h:'hl', e:'eraser', m:'hand', s:'select' };
   if (map[e.key]) setTool(map[e.key]);
 });
 window.addEventListener('pagehide', () => docs.forEach(flushSave));
 
 /* ---------- start ---------- */
+const setAppH = () => document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+setAppH(); window.addEventListener('resize', setAppH); window.addEventListener('orientationchange', () => setTimeout(setAppH, 300));
 lastW = viewer.clientWidth;
 applyDock();
 if (!prefs.seeded){

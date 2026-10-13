@@ -1,5 +1,5 @@
 /* DrawSky offline shell: the app opens without internet. Pages are fetched fresh when online (so updates arrive), with the cached copy as fallback. */
-const CACHE = 'drawsky-v6';
+const CACHE = 'drawsky-v7';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
@@ -15,7 +15,7 @@ self.addEventListener('fetch', e => {
   if (url.hostname.endsWith('googleapis.com') && !url.hostname.startsWith('fonts')) return; /* Drive calls always go to the network */
   if (url.hostname.endsWith('google.com') || url.hostname.endsWith('gstatic.com')) return; /* Google sign-in and file picker */
   if (req.mode === 'navigate' || url.origin === location.origin){
-    e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r; }).catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
+    e.respondWith(fetch(req.url, { cache:'no-cache', credentials:'same-origin' }).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r; }).catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
     return;
   }
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
