@@ -41,12 +41,13 @@
   --wband:#2c2c30; --wdisc:#161618; --wacc:#b3dcee;
   --shadow:0 10px 30px rgba(0,0,0,.6); color-scheme:dark;
 }
-html,body{height:100%;touch-action:pan-x pan-y}
+html,body{height:100%;touch-action:pan-x pan-y;overflow:hidden;max-width:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 var(--font-ui);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;cursor:pointer}
 button:disabled{opacity:.4;cursor:default}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.app{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;position:fixed;inset:0;height:auto}
+.app{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);position:fixed;inset:0;height:auto;overflow:hidden}
+.app>*{min-width:0}
 
 /* top bar */
 .top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
@@ -66,6 +67,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .btn em.ok{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent)}
 .btn em.warn{background:color-mix(in srgb,#e8a33d 22%,transparent);color:#e8a33d}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface-2);padding:0;flex:none}
+.doc-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:980px){ .word{display:none} #openBtn .lbl{display:none} #openBtn{padding:0 11px} }
+@media (max-width:760px){ #driveBtn em{display:none} }
 @media (max-width:620px){ .btn .lbl,.doc-meta,.btn em{display:none} .btn{padding:0 11px} .word{display:none} }
 
 /* tabs */
@@ -472,7 +476,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 13-oct-2026 (10)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 13-oct-2026 (11)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
