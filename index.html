@@ -89,7 +89,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .pages{display:flex;flex-direction:column;align-items:center;gap:22px;padding:20px 16px 150px;width:max-content;min-width:100%;box-sizing:border-box;transform-origin:0 0}
 .page{position:relative;background:#fff;flex:none;isolation:isolate;box-shadow:0 1px 2px rgba(0,0,0,.2),0 10px 26px rgba(10,22,44,.2)}
 .page canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.page canvas.hl,.page canvas.wet.as-hl{mix-blend-mode:multiply;opacity:.45}
+.page svg.hl,.page svg.ink{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;overflow:hidden}
+.page svg.hl,.wet.as-hl{mix-blend-mode:multiply;opacity:.45}
+.wet{position:absolute;left:0;top:0;pointer-events:none;z-index:3}
 .pnum{position:absolute;right:0;bottom:-19px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .addpage{flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 20px;margin-top:8px;border-radius:14px;border:1.5px dashed var(--muted);background:transparent;font-weight:600;font-size:14px;color:var(--fg)}
 
@@ -521,7 +523,7 @@ const DEF_FAV = {
 };
 const MAX_FAV = 8;
 const kind = t => t === 'hl' ? 'hl' : t === 'eraser' ? 'eraser' : t === 'hand' ? 'hand' : 'pen';
-const PEN_STYLES = { pluma:'Pluma', boligrafo:'Bolígrafo', estilografo:'Estilógrafo', rotulador:'Rotulador' };
+const PEN_STYLES = { pluma:'Pluma', boligrafo:'Bolígrafo', lapiz:'Lápiz', estilografo:'Estilógrafo', rotulador:'Rotulador' };
 const constStyle = s => s.t === 'pen' && (s.st === 'estilografo' || s.st === 'rotulador');
 function toolName(t){
   if (kind(t) !== 'pen') return TOOL_INFO[t].name;
@@ -588,10 +590,11 @@ function drawTemplate(ctx, p, sc){
 /* ---------- documents & pages ---------- */
 const docs = [];
 let doc = null, zoom = 1, docSeq = 0;
-const wetC = document.createElement('canvas'); wetC.className = 'wet';
+const wetC = document.createElement('canvas'); wetC.className = 'wet'; $('#stage').appendChild(wetC);
+document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="dsGrain" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.55" result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/></filter></defs></svg>');
 const wetCtx = wetC.getContext('2d', { desynchronized:true }) || wetC.getContext('2d');
 const DPR = () => Math.min(window.devicePixelRatio || 1, 2);
-const MAX_PX = 2.6e6;
+const MAX_PX = 6e6;
 const addPageBtn = document.createElement('button');
 addPageBtn.type = 'button'; addPageBtn.className = 'addpage'; addPageBtn.innerHTML = svg('plus', 20) + 'Añadir página';
 addPageBtn.addEventListener('click', () => openNewDialog('insert', { pos:'end' }));
@@ -600,8 +603,10 @@ function newDoc(o){ return Object.assign({ id:'d' + (++docSeq), pages:[], undo:[
 function makePage(d, spec){
   const el = document.createElement('div'); el.className = 'page';
   const mk = c => { const cv = document.createElement('canvas'); cv.className = c; cv.width = 0; cv.height = 0; el.appendChild(cv); return cv; };
+  const sv = c => { const e = document.createElementNS(SVGNS, 'svg'); e.setAttribute('class', c); e.setAttribute('preserveAspectRatio', 'none'); el.appendChild(e); return e; };
   const p = { doc:d, src:spec.src, wPt:spec.w, hPt:spec.h, tpl:spec.tpl || null, strokes:spec.strokes || [], el,
-    pdfC:mk('pdf'), hlC:mk('hl'), inkC:mk('ink'), rendered:false, task:null, gen:0, cssW:0, cssH:0, pxScale:1, i:0 };
+    pdfC:mk('pdf'), hlS:sv('hl'), inkS:sv('ink'), inkOn:false, rendered:false, task:null, gen:0, cssW:0, cssH:0, pxScale:1, i:0 };
+  p.pcG = document.createElementNS(SVGNS, 'g'); p.pcG.setAttribute('filter', 'url(#dsGrain)');
   p.num = document.createElement('div'); p.num.className = 'pnum'; el.appendChild(p.num);
   return p;
 }
@@ -640,9 +645,8 @@ async function renderPage(p){
   let d = DPR(); if (p.cssW * p.cssH * d * d > MAX_PX) d = Math.sqrt(MAX_PX / (p.cssW * p.cssH));
   const W = Math.max(1, Math.round(p.cssW * d)), H = Math.max(1, Math.round(p.cssH * d));
   p.pxScale = W / p.wPt;
-  for (const c of [p.hlC, p.inkC]){ c.width = W; c.height = H; }
-  drawInk(p);
-  if (wetC.parentNode === p.el && !(active && active.p === p)){ wetC.width = W; wetC.height = H; }
+  inkViewBox(p);
+  if (!p.inkOn){ p.inkOn = true; drawInk(p); }
   const nc = document.createElement('canvas'); nc.className = 'pdf'; nc.width = W; nc.height = H;
   const ctx = nc.getContext('2d', { alpha:false });
   if (p.task){ try { p.task.cancel(); } catch(_){} p.task = null; }
@@ -654,13 +658,8 @@ async function renderPage(p){
 function releasePage(p){
   p.gen++; p.rendered = false;
   if (p.task){ try { p.task.cancel(); } catch(_){} p.task = null; }
-  for (const c of [p.pdfC, p.hlC, p.inkC]){ c.width = 0; c.height = 0; }
-}
-function drawInk(p){
-  if (!p.hlC.width) return;
-  const h = p.hlC.getContext('2d'), k = p.inkC.getContext('2d');
-  h.clearRect(0, 0, p.hlC.width, p.hlC.height); k.clearRect(0, 0, p.inkC.width, p.inkC.height);
-  for (const s of p.strokes) drawStroke(s.t === 'hl' ? h : k, s, p.pxScale);
+  p.pdfC.width = 0; p.pdfC.height = 0;
+  if (p.inkOn){ p.inkOn = false; p.hlS.replaceChildren(); p.pcG.replaceChildren(); p.inkS.replaceChildren(); }
 }
 let visRaf = 0;
 function updateVisible(){
@@ -738,7 +737,7 @@ function switchTo(d){
   if (doc === d && !homeOn) return;
   leaveDoc();
   homeOn = false; homeEl.hidden = true; appEl.classList.remove('home-on');
-  if (wetC.parentNode) wetC.remove();
+  clearWet();
   doc = d; zoom = d.zoom || 1;
   $('#zoomVal').textContent = Math.round(zoom * 100) + '%';
   mountDoc(); layout();
@@ -766,7 +765,7 @@ function closeDoc(d, discard){
   if (d.pdf){ try { d.pdf.destroy(); } catch(_){} }
   if (doc === d){
     doc = null;
-    if (wetC.parentNode) wetC.remove();
+    clearWet();
     if (!homeOn && docs.length) switchTo(docs[Math.max(0, i - 1)]); else showHome();
   } else renderTabs();
   persistTabs();
@@ -1257,36 +1256,24 @@ function circleOps(x, y, r){
   return `${nf(x + r)} ${nf(y)} m ${nf(x + r)} ${nf(y + k)} ${nf(x + k)} ${nf(y + r)} ${nf(x)} ${nf(y + r)} c ${nf(x - k)} ${nf(y + r)} ${nf(x - r)} ${nf(y + k)} ${nf(x - r)} ${nf(y)} c ${nf(x - r)} ${nf(y - k)} ${nf(x - k)} ${nf(y - r)} ${nf(x)} ${nf(y - r)} c ${nf(x + k)} ${nf(y - r)} ${nf(x + r)} ${nf(y - k)} ${nf(x + r)} ${nf(y)} c f\n`;
 }
 const quadOps = (x0, y0, qx, qy, x1, y1) => `${nf(x0 + (qx - x0) * 2 / 3)} ${nf(y0 + (qy - y0) * 2 / 3)} ${nf(x1 + (qx - x1) * 2 / 3)} ${nf(y1 + (qy - y1) * 2 / 3)} ${nf(x1)} ${nf(y1)} c\n`;
-function strokeOps(s){
-  const P = s.pts; if (!P || !P.length) return '';
-  const c = rgb(s.color), pt = q => nf(q[0]) + ' ' + nf(q[1]), lw = w => nf(Math.max(0.1, w)) + ' w\n';
-  let o = `${c} RG ${c} rg\n`;
-  if (s.poly){
-    o += lw(s.t === 'hl' ? s.size : P[0][2]) + pt(P[0]) + ' m\n';
-    for (let i = 1; i < P.length; i++) o += pt(P[i]) + ' l\n';
-    return o + (s.closed ? 'h S\n' : 'S\n');
+function cmdsPdf(cmds){
+  let o = '', cx = 0, cy = 0, sx = 0, sy = 0;
+  for (const c of cmds){
+    if (c[0] === 'M'){ o += `${nf(c[1])} ${nf(c[2])} m\n`; cx = sx = c[1]; cy = sy = c[2]; }
+    else if (c[0] === 'L'){ o += `${nf(c[1])} ${nf(c[2])} l\n`; cx = c[1]; cy = c[2]; }
+    else if (c[0] === 'Q'){ o += quadOps(cx, cy, c[1], c[2], c[3], c[4]); cx = c[3]; cy = c[4]; }
+    else if (c[0] === 'C'){ o += c.slice(1).map(nf).join(' ') + ' c\n'; cx = c[5]; cy = c[6]; }
+    else { o += 'h\n'; cx = sx; cy = sy; }
   }
-  if (s.t === 'hl' || constStyle(s)){
-    o += lw(s.size) + pt(P[0]) + ' m\n';
-    if (P.length === 1) o += nf(P[0][0] + 0.01) + ' ' + nf(P[0][1]) + ' l\n';
-    let cx = P[0][0], cy = P[0][1];
-    for (let i = 1; i < P.length - 1; i++){
-      const mx = (P[i][0] + P[i + 1][0]) / 2, my = (P[i][1] + P[i + 1][1]) / 2;
-      o += quadOps(cx, cy, P[i][0], P[i][1], mx, my); cx = mx; cy = my;
-    }
-    if (P.length > 1) o += pt(P[P.length - 1]) + ' l\n';
-    return o + 'S\n';
-  }
-  if (P.length === 1) return o + circleOps(P[0][0], P[0][1], Math.max(0.1, P[0][2] / 2));
-  let lx = P[0][0], ly = P[0][1], cw = null;
-  for (let i = 1; i < P.length; i++){
-    const a = P[i - 1], b = P[i], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, w = nf(Math.max(0.1, a[2]));
-    if (w !== cw){ if (cw !== null) o += 'S\n'; o += w + ' w\n' + nf(lx) + ' ' + nf(ly) + ' m\n'; cw = w; }
-    o += quadOps(lx, ly, a[0], a[1], mx, my); lx = mx; ly = my;
-  }
-  const l = P[P.length - 1], w = nf(Math.max(0.1, l[2]));
-  if (w !== cw) o += 'S\n' + w + ' w\n' + nf(lx) + ' ' + nf(ly) + ' m\n';
-  return o + pt(l) + ' l\nS\n';
+  return o;
+}
+function strokePdf(s){
+  if (!s.pts || !s.pts.length) return '';
+  const g = strokeGeom(s), c = rgb(s.color), path = cmdsPdf(g.cmds);
+  let o = g.mode === 'fill' ? `${c} rg\n${path}f\n` : `${c} RG ${nf(Math.max(0.2, g.w))} w ${g.cap === 'square' ? 2 : 1} J\n${path}S\n`;
+  if (g.alpha != null) o = `q /DSkyA${Math.round(g.alpha * 100)} gs\n${o}Q\n`;
+  else if (g.cap === 'square') o = `q\n${o}Q\n`;
+  return o;
 }
 function tplOps(sp){
   const t = sp.tpl; if (!t || t.type === 'none') return '';
@@ -1316,8 +1303,8 @@ function pageOps(sp, b, rot){
   let o = 'q\n' + m.map(nf).join(' ') + ' cm\n1 J 1 j\n';
   const tp = tplOps(sp); if (tp) o += 'q /DSkyT gs\n' + tp + 'Q\n';
   const hl = sp.strokes.filter(s => s.t === 'hl'), pen = sp.strokes.filter(s => s.t !== 'hl');
-  if (hl.length) o += 'q /DSkyHL gs\n' + hl.map(strokeOps).join('') + 'Q\n';
-  for (const s of pen) o += s.st === 'rotulador' && !s.poly ? 'q /DSkyMk gs\n' + strokeOps(s) + 'Q\n' : strokeOps(s);
+  if (hl.length) o += 'q /DSkyHL gs\n' + hl.map(strokePdf).join('') + 'Q\n';
+  for (const s of pen.filter(x => x.st === 'lapiz').concat(pen.filter(x => x.st !== 'lapiz'))) o += strokePdf(s);
   return o + 'Q\n';
 }
 function hasBytes(u8, str){
@@ -1361,7 +1348,7 @@ async function packDoc(d){
   }
   const pdf = await PDFDocument.load(clean, { updateMetadata:false });
   const ctx = pdf.context, pages = pdf.getPages(), enc = new TextEncoder();
-  const GS = { DSkyT:{ Type:'ExtGState', CA:0.42, ca:0.62 }, DSkyHL:{ Type:'ExtGState', CA:0.45, ca:0.45, BM:'Multiply' }, DSkyMk:{ Type:'ExtGState', CA:0.9, ca:0.9 } };
+  const GS = { DSkyT:{ Type:'ExtGState', CA:0.42, ca:0.62 }, DSkyHL:{ Type:'ExtGState', CA:0.45, ca:0.45, BM:'Multiply' }, DSkyA78:{ Type:'ExtGState', CA:0.78, ca:0.78 }, DSkyA82:{ Type:'ExtGState', CA:0.82, ca:0.82 } };
   const meta = snap.map((s, i) => {
     const pg = pages[i], node = pg.node, base = baseRefs(node, ctx);
     const o = { src:{ kind:'pdf', index:i }, w:r2(s.wPt), h:r2(s.hPt), tpl:s.tpl, strokes:s.strokes, base:base.map(r => [r.objectNumber, r.generationNumber]), ink:[] };
@@ -1724,35 +1711,151 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 /* ---------- strokes ---------- */
 const r2 = v => Math.round(v * 100) / 100;
-function drawStroke(ctx, s, sc){
-  const P = s.pts; if (!P.length) return;
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = s.color; ctx.fillStyle = s.color;
-  if (s.poly){
-    ctx.lineWidth = Math.max(0.5, (s.t === 'hl' ? s.size : P[0][2]) * sc);
-    ctx.beginPath(); ctx.moveTo(P[0][0] * sc, P[0][1] * sc);
-    for (let i = 1; i < P.length; i++) ctx.lineTo(P[i][0] * sc, P[i][1] * sc);
-    if (s.closed) ctx.closePath();
-    ctx.stroke(); return;
+/* ---------- ink: one geometry for screen (vector, always sharp), thumbnails and the PDF ---------- */
+const SVGNS = 'http://www.w3.org/2000/svg', KAPPA = 0.5523;
+/* how each pen type is painted */
+const PEN_LOOK = {
+  pluma:{ fill:true, nib:true, taper:true },
+  boligrafo:{ fill:true },
+  lapiz:{ fill:true, alpha:0.78, grain:true },
+  estilografo:{ fill:false },
+  rotulador:{ fill:false, alpha:0.82, cap:'square' }
+};
+const NIB = [Math.cos(Math.PI / 6), -Math.sin(Math.PI / 6)];
+const geomCache = new WeakMap(), elCache = new WeakMap();
+function circleCmds(x, y, r){
+  const k = r * KAPPA;
+  return [['M', x + r, y], ['C', x + r, y + k, x + k, y + r, x, y + r], ['C', x - k, y + r, x - r, y + k, x - r, y],
+    ['C', x - r, y - k, x - k, y - r, x, y - r], ['C', x + k, y - r, x + r, y - k, x + r, y], ['Z']];
+}
+function centerCmds(P){
+  const c = [['M', P[0][0], P[0][1]]];
+  if (P.length === 1){ c.push(['L', P[0][0] + 0.01, P[0][1]]); return c; }
+  for (let i = 1; i < P.length - 1; i++) c.push(['Q', P[i][0], P[i][1], (P[i][0] + P[i + 1][0]) / 2, (P[i][1] + P[i + 1][1]) / 2]);
+  const l = P[P.length - 1]; c.push(['L', l[0], l[1]]);
+  return c;
+}
+/* filled outline of a variable-width stroke, with round ends; split at sharp turns so it never folds */
+function outlineRun(pts, R, out){
+  const m = pts.length, Lp = [], Rp = [], T = [];
+  for (let i = 0; i < m; i++){
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(m - 1, i + 1)];
+    let dx = b[0] - a[0], dy = b[1] - a[1]; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
+    const r = R[i], x = pts[i][0], y = pts[i][1];
+    T.push([dx, dy]); Lp.push([x - dy * r, y + dx * r]); Rp.push([x + dy * r, y - dx * r]);
   }
-  if (s.t === 'hl' || constStyle(s)){
-    ctx.save(); if (s.st === 'rotulador') ctx.globalAlpha = .9;
-    ctx.lineWidth = Math.max(0.5, s.size * sc); ctx.beginPath(); ctx.moveTo(P[0][0] * sc, P[0][1] * sc);
-    if (P.length === 1) ctx.lineTo(P[0][0] * sc + 0.01, P[0][1] * sc);
-    for (let i = 1; i < P.length - 1; i++){
-      ctx.quadraticCurveTo(P[i][0] * sc, P[i][1] * sc, (P[i][0] + P[i + 1][0]) / 2 * sc, (P[i][1] + P[i + 1][1]) / 2 * sc);
+  out.push(['M', Lp[0][0], Lp[0][1]]);
+  for (let i = 1; i < m - 1; i++) out.push(['Q', Lp[i][0], Lp[i][1], (Lp[i][0] + Lp[i + 1][0]) / 2, (Lp[i][1] + Lp[i + 1][1]) / 2]);
+  out.push(['L', Lp[m - 1][0], Lp[m - 1][1]]);
+  { /* end cap */
+    const [tx, ty] = T[m - 1], nx = -ty, ny = tx, r = R[m - 1], k = r * KAPPA, p = pts[m - 1], A = Lp[m - 1], C = Rp[m - 1];
+    const B = [p[0] + tx * r, p[1] + ty * r];
+    out.push(['C', A[0] + tx * k, A[1] + ty * k, B[0] + nx * k, B[1] + ny * k, B[0], B[1]]);
+    out.push(['C', B[0] - nx * k, B[1] - ny * k, C[0] + tx * k, C[1] + ty * k, C[0], C[1]]);
+  }
+  for (let i = m - 2; i > 0; i--) out.push(['Q', Rp[i][0], Rp[i][1], (Rp[i][0] + Rp[i - 1][0]) / 2, (Rp[i][1] + Rp[i - 1][1]) / 2]);
+  out.push(['L', Rp[0][0], Rp[0][1]]);
+  { /* start cap */
+    const [tx, ty] = T[0], nx = -ty, ny = tx, r = R[0], k = r * KAPPA, p = pts[0], A = Rp[0], C = Lp[0];
+    const B = [p[0] - tx * r, p[1] - ty * r];
+    out.push(['C', A[0] - tx * k, A[1] - ty * k, B[0] - nx * k, B[1] - ny * k, B[0], B[1]]);
+    out.push(['C', B[0] + nx * k, B[1] + ny * k, C[0] - tx * k, C[1] - ty * k, C[0], C[1]]);
+  }
+  out.push(['Z']);
+}
+function outlineCmds(P0, s, look){
+  /* drop repeated points, then smooth the positions slightly */
+  const P = [];
+  for (const q of P0) if (!P.length || Math.abs(q[0] - P[P.length - 1][0]) + Math.abs(q[1] - P[P.length - 1][1]) > 0.02) P.push(q);
+  const n = P.length;
+  const S = P.map((q, i) => i === 0 || i === n - 1 ? q : [(P[i - 1][0] + 2 * q[0] + P[i + 1][0]) / 4, (P[i - 1][1] + 2 * q[1] + P[i + 1][1]) / 4, q[2]]);
+  const R = S.map(q => Math.max(0.12, q[2] / 2));
+  if (n === 1) return circleCmds(S[0][0], S[0][1], R[0]);
+  if (look.nib || look.taper){
+    const D = [0]; for (let i = 1; i < n; i++) D.push(D[i - 1] + Math.hypot(S[i][0] - S[i - 1][0], S[i][1] - S[i - 1][1]));
+    const tot = D[n - 1], tl = Math.min(tot * 0.28, (s.size || 1) * 5);
+    for (let i = 0; i < n; i++){
+      let f = 1;
+      if (look.nib){
+        const a = S[Math.max(0, i - 1)], b = S[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy);
+        if (l) f *= 0.32 + 0.68 * Math.abs((dx * NIB[1] - dy * NIB[0]) / l);
+      }
+      if (look.taper && tl > 0) f *= (0.45 + 0.55 * Math.min(1, D[i] / tl)) * (0.6 + 0.4 * Math.min(1, (tot - D[i]) / tl));
+      R[i] = Math.max(0.12, R[i] * f);
     }
-    if (P.length > 1){ const l = P[P.length - 1]; ctx.lineTo(l[0] * sc, l[1] * sc); }
-    ctx.stroke(); ctx.restore(); return;
   }
-  if (P.length === 1){ ctx.beginPath(); ctx.arc(P[0][0] * sc, P[0][1] * sc, Math.max(0.5, P[0][2] * sc / 2), 0, Math.PI * 2); ctx.fill(); return; }
-  let lx = P[0][0] * sc, ly = P[0][1] * sc;
-  for (let i = 1; i < P.length; i++){
-    const a = P[i - 1], b = P[i], mx = (a[0] + b[0]) / 2 * sc, my = (a[1] + b[1]) / 2 * sc;
-    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.quadraticCurveTo(a[0] * sc, a[1] * sc, mx, my);
-    ctx.lineWidth = Math.max(0.5, a[2] * sc); ctx.stroke(); lx = mx; ly = my;
+  const out = []; let a = 0;
+  for (let i = 1; i < n - 1; i++){
+    const ax = S[i][0] - S[i - 1][0], ay = S[i][1] - S[i - 1][1], bx = S[i + 1][0] - S[i][0], by = S[i + 1][1] - S[i][1];
+    const la = Math.hypot(ax, ay), lb = Math.hypot(bx, by);
+    if (la && lb && (ax * bx + ay * by) / (la * lb) < -0.2){ outlineRun(S.slice(a, i + 1), R.slice(a, i + 1), out); a = i; }
   }
-  const l = P[P.length - 1];
-  ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(l[0] * sc, l[1] * sc); ctx.lineWidth = Math.max(0.5, l[2] * sc); ctx.stroke();
+  if (n - a >= 2) outlineRun(S.slice(a), R.slice(a), out);
+  return out;
+}
+const cmdsToD = cmds => cmds.map(c => c[0] + c.slice(1).map(v => Math.round(v * 100) / 100).join(' ')).join('');
+function strokeGeom(s, live){
+  const P = s.pts, st = s.st || 'pluma';
+  let g = !live && geomCache.get(s);
+  if (g && g.pts === P && g.n === P.length && g.st === st) return g;
+  const look = s.t === 'hl' ? { fill:false } : PEN_LOOK[st] || PEN_LOOK.pluma;
+  g = { pts:P, n:P.length, st, alpha:look.alpha, grain:!!look.grain, cap:look.cap || 'round' };
+  if (!P.length){ g.mode = 'fill'; g.cmds = []; }
+  else if (s.poly){ g.mode = 'stroke'; g.w = s.t === 'hl' ? s.size : P[0][2]; g.cmds = centerCmds(s.closed ? P.concat([P[0]]) : P); if (s.closed) g.cmds.push(['Z']); g.cap = 'round'; }
+  else if (look.fill){ g.mode = 'fill'; g.cmds = outlineCmds(P, s, look); }
+  else { g.mode = 'stroke'; g.w = s.t === 'hl' ? s.size : st === 'rotulador' ? s.size * 1.6 : s.size; g.cmds = centerCmds(P); }
+  g.d = cmdsToD(g.cmds);
+  if (!live) geomCache.set(s, g);
+  return g;
+}
+/* canvas painting (live stroke, thumbnails); ctx units: page points × sc */
+function drawStroke(ctx, s, sc, live){
+  if (!s.pts.length) return;
+  const g = strokeGeom(s, live), path = g.p2 || (g.p2 = new Path2D(g.d));
+  ctx.save(); ctx.scale(sc, sc);
+  if (g.alpha != null) ctx.globalAlpha *= g.alpha;
+  if (g.mode === 'fill'){ ctx.fillStyle = s.color; ctx.fill(path); }
+  else { ctx.strokeStyle = s.color; ctx.lineWidth = Math.max(0.2, g.w); ctx.lineCap = g.cap; ctx.lineJoin = 'round'; ctx.stroke(path); }
+  ctx.restore();
+}
+/* vector element for the page */
+function strokeEl(s){
+  const g = strokeGeom(s);
+  let el = elCache.get(s);
+  if (el && el._g === g) return el;
+  el = document.createElementNS(SVGNS, 'path');
+  el.setAttribute('d', g.d);
+  if (g.mode === 'fill') el.setAttribute('fill', s.color);
+  else {
+    el.setAttribute('fill', 'none'); el.setAttribute('stroke', s.color); el.setAttribute('stroke-width', Math.max(0.2, g.w));
+    el.setAttribute('stroke-linecap', g.cap); el.setAttribute('stroke-linejoin', 'round');
+  }
+  if (g.alpha != null) el.setAttribute('opacity', g.alpha);
+  el._g = g; elCache.set(s, el);
+  return el;
+}
+function inkLayer(s, p){ return s.t === 'hl' ? p.hlS : s.st === 'lapiz' ? p.pcG : p.inkS; }
+function drawInk(p){
+  if (!p.inkOn) return;
+  const hl = [], pc = [], pen = [];
+  for (const s of p.strokes) (s.t === 'hl' ? hl : s.st === 'lapiz' ? pc : pen).push(strokeEl(s));
+  p.hlS.replaceChildren(...hl); p.pcG.replaceChildren(...pc); p.inkS.replaceChildren(p.pcG, ...pen);
+}
+function inkViewBox(p){ const vb = `0 0 ${p.wPt} ${p.hPt}`; p.hlS.setAttribute('viewBox', vb); p.inkS.setAttribute('viewBox', vb); }
+
+/* live stroke: a screen-sized layer at full resolution */
+function sizeWet(){
+  const w = viewer.clientWidth, h = viewer.clientHeight, d = DPR(), W = Math.round(w * d), H = Math.round(h * d);
+  if (wetC.width !== W || wetC.height !== H){ wetC.width = W; wetC.height = H; wetC.style.width = w + 'px'; wetC.style.height = h + 'px'; }
+}
+function clearWet(){ wetCtx.setTransform(1, 0, 0, 1, 0, 0); wetCtx.clearRect(0, 0, wetC.width, wetC.height); }
+function paintWet(a){
+  clearWet();
+  const vr = viewer.getBoundingClientRect(), d = wetC.width / Math.max(1, viewer.clientWidth), sc = d / a.k;
+  wetCtx.setTransform(sc, 0, 0, sc, (a.rect.left - vr.left) * d, (a.rect.top - vr.top) * d);
+  wetCtx.save(); wetCtx.beginPath(); wetCtx.rect(0, 0, a.p.wPt, a.p.hPt); wetCtx.clip();
+  drawStroke(wetCtx, a.stroke, 1, true);
+  wetCtx.restore();
 }
 
 let active = null, lastPenT = 0;
@@ -1761,15 +1864,10 @@ function beginStroke(e){
   const s = { t:a.tool === 'hl' ? 'hl' : 'pen', color:cfg.color, size:cfg.size, pts:[] };
   if (s.t === 'pen') s.st = cfg.style || 'pluma';
   Object.assign(a, { stroke:s, pr:null, drawn:1, shape:null, travel:0, hold:null, ht:0, raf:0 });
-  if (wetC.parentNode !== p.el) p.el.appendChild(wetC);
-  if (wetC.width !== p.inkC.width || wetC.height !== p.inkC.height){ wetC.width = p.inkC.width; wetC.height = p.inkC.height; }
-  else wetCtx.clearRect(0, 0, wetC.width, wetC.height);
+  sizeWet(); clearWet();
   wetC.classList.toggle('as-hl', s.t === 'hl');
   addPoint(e);
-  const sc = p.pxScale, q = s.pts[0];
-  a.lx = q[0] * sc; a.ly = q[1] * sc;
-  if (s.t === 'pen' && !constStyle(s)){ wetCtx.fillStyle = s.color; wetCtx.beginPath(); wetCtx.arc(a.lx, a.ly, Math.max(0.5, q[2] * sc / 2), 0, Math.PI * 2); wetCtx.fill(); }
-  else drawLive();
+  drawLive();
 }
 function addPoint(ev){
   const a = active, s = a.stroke;
@@ -1778,10 +1876,11 @@ function addPoint(ev){
   if (a.shape === 'line'){ s.pts[1] = [x, y, s.pts[1][2]]; return; }
   const raw = ev.pointerType === 'pen' ? (ev.pressure > 0 ? ev.pressure : 0.5) : 0.5;
   a.pr = a.pr == null ? raw : a.pr * 0.5 + raw * 0.5;
-  /* pluma follows pressure fully, bolígrafo only a little, estilógrafo and rotulador keep one width */
+  /* pluma follows pressure fully, lápiz a lot, bolígrafo only a little, estilógrafo and rotulador keep one width */
   const w = (s.t === 'hl' || constStyle(s)) ? s.size
-    : s.st === 'boligrafo' ? s.size * (0.8 + 0.4 * a.pr)
-    : s.size * ((1 - prefs.sens) + prefs.sens * (0.2 + 1.25 * a.pr));
+    : s.st === 'boligrafo' ? s.size * (0.85 + 0.3 * a.pr)
+    : s.st === 'lapiz' ? s.size * (0.65 + 0.6 * a.pr)
+    : s.size * ((1 - prefs.sens) + prefs.sens * (0.15 + 1.35 * a.pr));
   const n = s.pts.length;
   if (n){
     const l = s.pts[n - 1], dx = x - l[0], dy = y - l[1], minD = 0.35 * a.k;
@@ -1888,31 +1987,17 @@ function snapShape(){
   drawLive();
 }
 function drawLive(){
-  const a = active, s = a.stroke, sc = a.p.pxScale;
-  if (s.t === 'hl' || a.shape || constStyle(s)){
-    if (!a.raf) a.raf = requestAnimationFrame(() => {
-      a.raf = 0; if (active !== a) return;
-      wetCtx.clearRect(0, 0, wetC.width, wetC.height); drawStroke(wetCtx, s, sc);
-    });
-    return;
-  }
-  wetCtx.lineCap = 'round'; wetCtx.lineJoin = 'round'; wetCtx.strokeStyle = s.color;
-  const P = s.pts;
-  for (let i = Math.max(1, a.drawn); i < P.length; i++){
-    const p0 = P[i - 1], p1 = P[i], mx = (p0[0] + p1[0]) / 2 * sc, my = (p0[1] + p1[1]) / 2 * sc;
-    wetCtx.beginPath(); wetCtx.moveTo(a.lx, a.ly); wetCtx.quadraticCurveTo(p0[0] * sc, p0[1] * sc, mx, my);
-    wetCtx.lineWidth = Math.max(0.5, p0[2] * sc); wetCtx.stroke(); a.lx = mx; a.ly = my;
-  }
-  a.drawn = P.length;
+  const a = active; if (!a || !a.stroke) return;
+  paintWet(a);
 }
 function endStroke(){
   const a = active; clearTimeout(a.ht); if (a.raf) cancelAnimationFrame(a.raf);
   const s = a.stroke, p = a.p;
-  wetCtx.clearRect(0, 0, wetC.width, wetC.height);
+  clearWet();
   if (!s || !s.pts.length) return null;
   s.pts = s.pts.map(q => [r2(q[0]), r2(q[1]), r2(q[2])]);
   p.strokes.push(s);
-  if (p.inkC.width) drawStroke((s.t === 'hl' ? p.hlC : p.inkC).getContext('2d'), s, p.pxScale);
+  if (p.inkOn) inkLayer(s, p).appendChild(strokeEl(s));
   p.doc.undo.push({ k:'add', page:p, s }); p.doc.redo.length = 0;
   renderRail(); save();
   return s;
@@ -2090,7 +2175,7 @@ viewer.addEventListener('pointerdown', e => {
   if (e.pointerType === 'pen'){ lastPenT = performance.now(); touches.clear(); cancelPinch(); }
   stopInertia();
   if (e.pointerType === 'touch' && (!prefs.finger || touches.size > 0 || isPalm(e))){
-    if (active && active.fromTouch && active.mode === 'draw'){ clearTimeout(active.ht); wetCtx.clearRect(0, 0, wetC.width, wetC.height); active = null; }
+    if (active && active.fromTouch && active.mode === 'draw'){ clearTimeout(active.ht); clearWet(); active = null; }
     onTouchDown(e); return;
   }
   if (active) return;
@@ -2103,7 +2188,7 @@ viewer.addEventListener('pointerdown', e => {
   const pageEl = e.target.closest && e.target.closest('.page');
   if (!pageEl) return;
   const p = doc.pages[+pageEl.dataset.i]; if (!p) return;
-  if (!p.rendered || !p.inkC.width) renderPage(p);
+  if (!p.rendered || !p.inkOn) renderPage(p);
   const rect = pageEl.getBoundingClientRect();
   active = { id:e.pointerId, mode:t === 'eraser' ? 'erase' : 'draw', p, rect, k:p.wPt / rect.width, tool:t, removed:[], fromTouch:e.pointerType === 'touch',
     t0:performance.now(), sx:e.clientX, sy:e.clientY, maxMove:0, ptype:e.pointerType, before:p.strokes.slice() };
@@ -2126,7 +2211,7 @@ viewer.addEventListener('pointermove', e => {
   active.maxMove = Math.max(active.maxMove || 0, Math.hypot(e.clientX - active.sx, e.clientY - active.sy));
   if (active.mode === 'draw' && penButton(e)){
     penBtnSeen = true; clearTimeout(active.ht); if (active.raf) cancelAnimationFrame(active.raf);
-    wetCtx.clearRect(0, 0, wetC.width, wetC.height);
+    clearWet();
     active.mode = 'erase'; active.removed = []; active.lastE = null; active.before = active.p.strokes.slice();
     eraseAt(e); showEraserCursor(e, true); return;
   }
@@ -2343,7 +2428,7 @@ rail.addEventListener('click', e => {
    main: tools (with size badges) · tool: favorite color slices, "+" for any color, size, pen type, save pen
    size: a dial you turn with the pen or finger · color: hue ring + shade square · favs: saved pens */
 const wcap = $('#wcap'), LOGO = document.querySelector('.logo').src;
-const STYLE_SHORT = { pluma:'Plu', boligrafo:'Bol', estilografo:'Est', rotulador:'Rot' };
+const STYLE_SHORT = { pluma:'Plu', boligrafo:'Bol', lapiz:'Láp', estilografo:'Est', rotulador:'Rot' };
 let wheelAnchor = { x:0, y:0 }, wheelView = 'main', wheelOpenedAt = 0, hsv = { h:210, s:.6, v:.4 }, wdrag = null;
 const pol = (r, deg) => { const a = deg * Math.PI / 180; return [100 + r * Math.cos(a), 100 + r * Math.sin(a)]; };
 const pct = (r, deg) => { const [x, y] = pol(r, deg); return `left:${x / 2}%;top:${y / 2}%`; };
@@ -2490,7 +2575,7 @@ function viewFavs(){
   wheel.innerHTML = s + `<button type="button" class="wc" data-view="main" aria-label="Volver a herramientas">${svg('back', 24)}</button>`;
   wcap.innerHTML = `<div class="cap-txt"><strong>Bolígrafos favoritos</strong><span>${ps.length ? 'Toca uno para usarlo' : 'Aún no tienes. En un bolígrafo, toca la estrella para guardarlo.'}</span></div>`;
 }
-const STYLE_DESC = { pluma:'Se engrosa según la presión', boligrafo:'Casi uniforme, cambia un poco con la presión', estilografo:'Grosor siempre igual, trazo limpio', rotulador:'Uniforme, más grueso y algo translúcido' };
+const STYLE_DESC = { pluma:'Tinta: se engrosa con la presión y la dirección, con puntas finas', boligrafo:'Fino y parejo, apenas cambia con la presión', lapiz:'Grafito con textura: suave y algo translúcido', estilografo:'Grosor siempre igual, trazo técnico y nítido', rotulador:'Punta ancha cuadrada y translúcida, como plumón' };
 function viewStyle(){
   const cur = prefs.tools[tool].style || 'pluma', keys = Object.keys(PEN_STYLES), step = 360 / keys.length;
   let s = `<svg viewBox="0 0 200 200" class="wsvg"><circle cx="100" cy="100" r="99" class="w-band"/>`;
@@ -2838,7 +2923,6 @@ drFoot.addEventListener('click', e => {
     doc.pages = P.filter(p => !gone.has(p));
     gone.forEach(p => { releasePage(p); });
     doc.undo = doc.undo.filter(h => !gone.has(h.page)); doc.redo = doc.redo.filter(h => !gone.has(h.page));
-    if (wetC.parentNode && !doc.pages.some(p => p.el === wetC.parentNode)) wetC.remove();
     sel = new Set(); delArmed = false;
     toast(gone.size === 1 ? 'Página eliminada' : 'Páginas eliminadas');
     pagesChanged();
