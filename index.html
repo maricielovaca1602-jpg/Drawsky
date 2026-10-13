@@ -90,7 +90,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .page{position:relative;background:#fff;flex:none;isolation:isolate;box-shadow:0 1px 2px rgba(0,0,0,.2),0 10px 26px rgba(10,22,44,.2)}
 .page canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .page svg.hl,.page svg.ink{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;overflow:hidden}
-.page svg.hl,.wet.as-hl{mix-blend-mode:multiply;opacity:.45}
+.page svg.hl,.wet.as-hl{mix-blend-mode:multiply}
+.alpha{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600}
+.alpha input{width:130px;accent-color:var(--accent)}
+.alpha b{min-width:36px;color:var(--fg);font-variant-numeric:tabular-nums}
 .wet{position:absolute;left:0;top:0;pointer-events:none;z-index:3}
 .pnum{position:absolute;right:0;bottom:-19px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .addpage{flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 20px;margin-top:8px;border-radius:14px;border:1.5px dashed var(--muted);background:transparent;font-weight:600;font-size:14px;color:var(--fg)}
@@ -592,7 +595,7 @@ const docs = [];
 let doc = null, zoom = 1, docSeq = 0;
 const wetC = document.createElement('canvas'); wetC.className = 'wet'; $('#stage').appendChild(wetC);
 document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="dsGrain" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.55" result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/></filter></defs></svg>');
-const wetCtx = wetC.getContext('2d', { desynchronized:true }) || wetC.getContext('2d');
+const wetCtx = wetC.getContext('2d');
 const DPR = () => Math.min(window.devicePixelRatio || 1, 2);
 const MAX_PX = 6e6;
 const addPageBtn = document.createElement('button');
@@ -793,7 +796,7 @@ async function makeThumb(d){
     const sc = w / p.wPt, ctx = cv.getContext('2d');
     await renderBase(p, ctx, sc, () => true, false);
     for (const s of p.strokes){
-      if (s.t === 'hl'){ ctx.save(); ctx.globalAlpha = .45; ctx.globalCompositeOperation = 'multiply'; drawStroke(ctx, s, sc); ctx.restore(); }
+      if (s.t === 'hl'){ ctx.save(); ctx.globalCompositeOperation = 'multiply'; drawStroke(ctx, s, sc); ctx.restore(); }
       else drawStroke(ctx, s, sc);
     }
     const e = lib.find(x => x.key === d.key);
@@ -1348,7 +1351,7 @@ async function packDoc(d){
   }
   const pdf = await PDFDocument.load(clean, { updateMetadata:false });
   const ctx = pdf.context, pages = pdf.getPages(), enc = new TextEncoder();
-  const GS = { DSkyT:{ Type:'ExtGState', CA:0.42, ca:0.62 }, DSkyHL:{ Type:'ExtGState', CA:0.45, ca:0.45, BM:'Multiply' }, DSkyA78:{ Type:'ExtGState', CA:0.78, ca:0.78 }, DSkyA82:{ Type:'ExtGState', CA:0.82, ca:0.82 } };
+  const GS = { DSkyT:{ Type:'ExtGState', CA:0.42, ca:0.62 }, DSkyHL:{ Type:'ExtGState', BM:'Multiply' } };
   const meta = snap.map((s, i) => {
     const pg = pages[i], node = pg.node, base = baseRefs(node, ctx);
     const o = { src:{ kind:'pdf', index:i }, w:r2(s.wPt), h:r2(s.hPt), tpl:s.tpl, strokes:s.strokes, base:base.map(r => [r.objectNumber, r.generationNumber]), ink:[] };
@@ -1356,7 +1359,9 @@ async function packDoc(d){
     node.normalize();
     const res = node.Resources(), old = res.lookupMaybe(PDFName.of('ExtGState'), PDFDict);
     const gs = old ? old.clone(ctx) : ctx.obj({});
-    for (const k in GS) gs.set(PDFName.of(k), ctx.obj(GS[k]));
+    const gsd = Object.assign({}, GS);
+    for (const st of s.strokes){ const g = strokeGeom(st); if (g.alpha != null){ const a = Math.round(g.alpha * 100); gsd['DSkyA' + a] = { Type:'ExtGState', CA:a / 100, ca:a / 100 }; } }
+    for (const k in gsd) gs.set(PDFName.of(k), ctx.obj(gsd[k]));
     res.set(PDFName.of('ExtGState'), gs);
     const b = pg.getCropBox(), rot = ((pg.getRotation().angle % 360) + 360) % 360;
     const ref = ctx.register(ctx.flateStream(enc.encode(pageOps(s, { x0:b.x, y0:b.y, x1:b.x + b.width, y1:b.y + b.height }, rot))));
@@ -1798,7 +1803,7 @@ function strokeGeom(s, live){
   const P = s.pts, st = s.st || 'pluma';
   let g = !live && geomCache.get(s);
   if (g && g.pts === P && g.n === P.length && g.st === st) return g;
-  const look = s.t === 'hl' ? { fill:false } : PEN_LOOK[st] || PEN_LOOK.pluma;
+  const look = s.t === 'hl' ? { fill:false, alpha:s.a != null ? s.a : 0.45 } : PEN_LOOK[st] || PEN_LOOK.pluma;
   g = { pts:P, n:P.length, st, alpha:look.alpha, grain:!!look.grain, cap:look.cap || 'round' };
   if (!P.length){ g.mode = 'fill'; g.cmds = []; }
   else if (s.poly){ g.mode = 'stroke'; g.w = s.t === 'hl' ? s.size : P[0][2]; g.cmds = centerCmds(s.closed ? P.concat([P[0]]) : P); if (s.closed) g.cmds.push(['Z']); g.cap = 'round'; }
@@ -1862,7 +1867,7 @@ let active = null, lastPenT = 0;
 function beginStroke(e){
   const a = active, p = a.p, cfg = prefs.tools[a.tool];
   const s = { t:a.tool === 'hl' ? 'hl' : 'pen', color:cfg.color, size:cfg.size, pts:[] };
-  if (s.t === 'pen') s.st = cfg.style || 'pluma';
+  if (s.t === 'pen') s.st = cfg.style || 'pluma'; else s.a = cfg.alpha != null ? cfg.alpha : 0.45;
   Object.assign(a, { stroke:s, pr:null, drawn:1, shape:null, travel:0, hold:null, ht:0, raf:0 });
   sizeWet(); clearWet();
   wetC.classList.toggle('as-hl', s.t === 'hl');
@@ -2070,6 +2075,7 @@ function eraseSplit(p, pts, r){
       if (run.length < 2 && s.t === 'hl') continue;
       const ns = { t:s.t, color:s.color, size:s.size, pts:run.map(q => [r2(q[0]), r2(q[1]), r2(q[2])]) };
       if (s.st) ns.st = s.st;
+      if (s.a != null) ns.a = s.a;
       next.push(ns);
     }
   }
@@ -2492,8 +2498,15 @@ function viewTool(){
   wheel.innerHTML = h;
   const sub = kd === 'pen' ? `${PEN_STYLES[cfg.style || 'pluma']} · toca un color o + para cualquiera` : kd === 'hl' ? 'Toca un color o + para cualquiera'
     : (cfg.mode === 'partial' ? 'Parcial: borra solo lo que tocas, por ejemplo una letra' : 'Trazo: borra el trazo completo que tocas');
-  wcap.innerHTML = `<div class="cap-txt"><strong>${toolName(tool)}</strong><span>${sub}</span></div>`;
+  const al = Math.round((cfg.alpha != null ? cfg.alpha : 0.45) * 100);
+  wcap.innerHTML = `<div class="cap-txt"><strong>${toolName(tool)}</strong><span>${sub}</span></div>` +
+    (kd === 'hl' ? `<label class="alpha">Intensidad<input type="range" id="hlAlpha" min="15" max="100" step="5" value="${al}" aria-label="Intensidad del resaltador"><b id="hlAlphaOut">${al}%</b></label>` : '');
 }
+wcap.addEventListener('input', e => {
+  if (e.target.id !== 'hlAlpha') return;
+  const v = +e.target.value; prefs.tools.hl.alpha = v / 100; savePrefs();
+  $('#hlAlphaOut').textContent = v + '%';
+});
 const DIAL_A0 = -225, DIAL_SW = 270;
 function niceTicks(min, max){
   const raw = (max - min) / 8, steps = [0.5, 1, 2, 2.5, 5, 10, 20];
@@ -2747,7 +2760,7 @@ function queueThumb(p, cv){
     try { await renderBase(p, ctx, sc, () => cv.isConnected, false); } catch(_){}
     if (!cv.isConnected) return;
     for (const s of p.strokes){
-      if (s.t === 'hl'){ ctx.save(); ctx.globalAlpha = .45; ctx.globalCompositeOperation = 'multiply'; drawStroke(ctx, s, sc); ctx.restore(); }
+      if (s.t === 'hl'){ ctx.save(); ctx.globalCompositeOperation = 'multiply'; drawStroke(ctx, s, sc); ctx.restore(); }
       else drawStroke(ctx, s, sc);
     }
   });
