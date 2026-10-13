@@ -770,7 +770,7 @@ function showHome(){
   homeOn = true; homeEl.hidden = false; appEl.classList.add('home-on');
   $('#docName').textContent = 'Inicio';
   $('#docMeta').textContent = `${lib.length} ${lib.length === 1 ? 'archivo' : 'archivos'}`;
-  renderHome(); renderTabs(); renderDriveBtn();
+  renderHome(); renderTabs(); renderDriveBtn(); refreshDriveList();
 }
 function addDoc(d){ docs.push(d); switchTo(d); persistTabs(); }
 function flushSave(d){ if (d.saveT){ clearTimeout(d.saveT); d.saveT = 0; store.set('drawsky:doc:' + d.key, serialize(d)); } }
@@ -838,6 +838,7 @@ function renderHome(){
       `<button type="button" class="h-nav" data-hf="${k}" aria-current="${homeFilter === k}">${svg(ic, 20)}<span>${l}</span><b>${counts[k]}</b></button>`).join('') +
     `<h3>Google Drive</h3><button type="button" class="h-nav" data-hf="drive" aria-current="${homeFilter === 'drive'}">${svg('cloud', 20)}<span>En Drive</span><b>${counts.drive}</b></button>` +
     (pend ? `<button type="button" class="h-nav warn" data-sync="1" title="Subir ahora">${svg('share', 20)}<span>Sin subir</span><b>${pend}</b></button>` : '') +
+    (prefs.accounts.some(a => !tokenOk(a.email)) ? `<button type="button" class="h-nav" data-refresh="1">${svg('cloud', 20)}<span>Actualizar lista</span></button>` : '') +
     prefs.accounts.map(a => `<button type="button" class="h-nav" data-acc="${esc(a.email)}" title="Abrir un PDF de ${esc(a.email)}"><span class="av">${initial(a)}</span><span>${esc(a.email)}</span></button>`).join('') +
     `<button type="button" class="h-nav" data-acc="">${svg('plus', 20)}<span>${prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive'}</span></button>`;
   $('#hTitle').textContent = { all:'Todos tus archivos', notebook:'Cuadernos', pdf:'PDFs', image:'Imágenes', drive:'En Google Drive' }[homeFilter];
@@ -884,7 +885,7 @@ function deleteEntry(e){
   libDelArmed = null;
   const d = docs.find(x => x.key === e.key); if (d) closeDoc(d, true);
   store.del('drawsky:doc:' + e.key);
-  if (e.drive) idb.del(e.drive.id);
+  if (e.drive){ idb.del(e.drive.id); prefs.hiddenDrive = (prefs.hiddenDrive || []).concat([e.drive.id]).slice(-500); savePrefs(); }
   lib = lib.filter(x => x !== e); libSave(); persistTabs();
   $('#docMeta').textContent = `${lib.length} ${lib.length === 1 ? 'archivo' : 'archivos'}`;
   renderHome(); toast(e.drive ? 'Quitado de DrawSky. Sigue en tu Google Drive.' : 'Eliminado de la tableta');
@@ -910,6 +911,7 @@ $('#hSide').addEventListener('click', e => {
   const a = e.target.closest('[data-acc]');
   if (a){ if (a.dataset.acc) openPicker(a.dataset.acc); else requestToken(null, (email, tk) => { if (email) showPicker(email, tk); }); return; }
   if (e.target.closest('[data-sync]')){ syncPendingTap(); return; }
+  if (e.target.closest('[data-refresh]')){ refreshDriveTap(); return; }
   const b = e.target.closest('[data-hf]'); if (!b) return;
   homeFilter = b.dataset.hf; renderHome();
 });
@@ -1152,6 +1154,7 @@ function requestToken(hint, done){
         if (!a){ a = { email }; prefs.accounts.push(a); }
         a.name = u.displayName || email;
         savePrefs(); renderDriveSettings(); if (homeOn) renderHome();
+        setTimeout(() => refreshDriveList(true), 300);
         end(email, r.access_token);
       } catch(e){ console.warn(e); toast('No pude confirmar tu cuenta de Google. Inténtalo otra vez.'); end(null); }
     },
@@ -1621,6 +1624,38 @@ function syncPendingTap(){
   else { toast('Subiendo cambios pendientes…'); syncPending(); }
 }
 
+/* Inicio lists, on every device, the Drive files DrawSky has opened or created */
+let driveListAt = 0;
+async function refreshDriveList(force){
+  if (!navigator.onLine || (!force && Date.now() - driveListAt < 60000)) return;
+  driveListAt = Date.now();
+  const hidden = new Set(prefs.hiddenDrive || []);
+  let changed = false;
+  for (const a of prefs.accounts){
+    if (!tokenOk(a.email)) continue;
+    try {
+      const q = encodeURIComponent("trashed=false and (mimeType='application/pdf' or mimeType='image/jpeg' or mimeType='image/png' or mimeType='image/webp')");
+      const r = await (await gfetch(a.email, `${DRIVE}/files?q=${q}&pageSize=300&fields=files(id,name,mimeType,modifiedTime,viewedByMeTime,owners(displayName,emailAddress))&includeItemsFromAllDrives=true&supportsAllDrives=true`)).json();
+      for (const f of r.files || []){
+        if (hidden.has(f.id)) continue;
+        const key = 'gd:' + f.id, t = Math.max(Date.parse(f.modifiedTime) || 0, Date.parse(f.viewedByMeTime) || 0) || Date.now();
+        const o = f.owners && f.owners[0], owner = !o || o.emailAddress === a.email ? 'Tú' : o.displayName;
+        let e = lib.find(x => x.key === key);
+        if (!e){ lib.push({ key, created:t, opened:t, name:stripExt(f.name), kind:/^image\//.test(f.mimeType) ? 'image' : 'pdf', drive:{ email:a.email, id:f.id }, owner }); changed = true; continue; }
+        if (t > (e.opened || 0) + 5000){ e.opened = t; changed = true; }
+        const nm = stripExt(f.name); if (nm !== e.name && !docs.some(d => d.key === key)){ e.name = nm; changed = true; }
+      }
+    } catch(err){ console.warn(err); }
+  }
+  if (changed){ libSave(); if (homeOn) renderHome(); }
+}
+function refreshDriveTap(){
+  const a = prefs.accounts.find(x => !tokenOk(x.email));
+  if (!navigator.onLine){ toast('Necesitas internet para actualizar la lista de Drive.'); return; }
+  if (a) withToken(a.email, () => { refreshDriveList(true); if (prefs.accounts.some(x => !tokenOk(x.email))) toast('Toca otra vez para actualizar la siguiente cuenta.'); });
+  else refreshDriveList(true);
+}
+
 /* ---------- opening from Drive ---------- */
 function showPicker(email, tk){
   if (!pickerReady){ loadGoogle(); toast('El selector de Google todavía está cargando. Inténtalo otra vez en unos segundos.'); return; }
@@ -1648,6 +1683,7 @@ function openFromDrive(){
 }
 async function openDriveFile(email, id, nameHint){
   const key = 'gd:' + id;
+  if ((prefs.hiddenDrive || []).includes(id)){ prefs.hiddenDrive = prefs.hiddenDrive.filter(x => x !== id); savePrefs(); }
   const open = docs.find(d => d.key === key); if (open){ switchTo(open); return; }
   if (!window.pdfjsLib){ toast('No se pudo cargar el lector de PDF. Revisa tu conexión y recarga la página.'); return; }
   if (!workerMode) setupWorker();
@@ -2054,7 +2090,6 @@ function endStroke(){
   s.pts = s.pts.map(q => [r2(q[0]), r2(q[1]), r2(q[2])]);
   p.strokes.push(s);
   if (p.inkOn) inkLayer(s, p).appendChild(strokeEl(s));
-  if (s.t === 'hl') setTimeout(() => showNoteChip(p, s), 0);
   p.doc.undo.push({ k:'add', page:p, s }); p.doc.redo.length = 0;
   renderRail(); save();
   return s;
@@ -2202,20 +2237,30 @@ function isPalm(e){ return performance.now() - lastPenT < 700 || (e.width > 48 &
 function onTouchDown(e){
   if (isPalm(e)) return;
   stopInertia();
-  touches.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  touches.set(e.pointerId, { x:e.clientX, y:e.clientY, sx:e.clientX, sy:e.clientY });
   try { viewer.setPointerCapture(e.pointerId); } catch(_){}
   vel = { x:0, y:0, t:performance.now() };
+  clearTimeout(touchLP);
   if (touches.size === 2) startPinch();
+  else if (touches.size === 1){
+    const pe = e.target.closest && e.target.closest('.page'), id = e.pointerId;
+    if (pe) touchLP = setTimeout(() => {
+      const t = touches.get(id); if (!t || touches.size !== 1 || Math.hypot(t.x - t.sx, t.y - t.sy) > 10) return;
+      const p = doc && doc.pages[+pe.dataset.i]; if (p) showNoteChipAt(p, t.sx, t.sy);
+    }, LONG_MS);
+  }
 }
+let touchLP = 0;
 function onTouchMove(e){
   const t = touches.get(e.pointerId);
   if (performance.now() - lastPenT < 300){ touches.clear(); cancelPinch(); return; }
   const dx = e.clientX - t.x, dy = e.clientY - t.y; t.x = e.clientX; t.y = e.clientY;
+  if (Math.hypot(t.x - t.sx, t.y - t.sy) > 10) clearTimeout(touchLP);
   if (touches.size === 1){ viewer.scrollLeft -= dx; viewer.scrollTop -= dy; recordVel(dx, dy); }
   else if (pinch) updatePinch();
 }
 function onTouchUp(e){
-  touches.delete(e.pointerId);
+  touches.delete(e.pointerId); clearTimeout(touchLP);
   if (pinch && touches.size < 2){ endPinch(); vel.t = 0; }
   else if (touches.size === 0) startInertia();
 }
@@ -2261,7 +2306,20 @@ viewer.addEventListener('pointerdown', e => {
     t0:performance.now(), sx:e.clientX, sy:e.clientY, maxMove:0, ptype:e.pointerType, before:p.strokes.slice() };
   if (active.mode === 'erase'){ eraseAt(e); showEraserCursor(e, true); }
   else beginStroke(e);
+  const a0 = active; a0.lp = setTimeout(() => longPress(a0), LONG_MS);
 });
+/* hold the pen (or a finger) still on the page ~1 second: offer a note right there */
+const LONG_MS = 1000;
+function longPress(a){
+  if (active !== a || (a.maxMove || 0) > 8 || (a.mode !== 'draw' && a.mode !== 'erase')) return;
+  clearTimeout(a.ht); if (a.raf) cancelAnimationFrame(a.raf);
+  if (a.mode === 'erase'){
+    if (a.removed.length){ for (const r of a.removed.slice().reverse()) a.p.strokes.splice(r.idx, 0, r.s); a.removed = []; drawInk(a.p); }
+    else if (a.changed && a.before){ a.p.strokes = a.before; a.changed = false; drawInk(a.p); }
+  }
+  clearWet(); a.stroke = null; a.mode = 'hold';
+  showNoteChipAt(a.p, a.sx, a.sy);
+}
 
 viewer.addEventListener('pointermove', e => {
   if (e.pointerType === 'pen') lastPenT = performance.now();
@@ -2271,6 +2329,7 @@ viewer.addEventListener('pointermove', e => {
     showEraserCursor(e, er);
   }
   if (!active || e.pointerId !== active.id) return;
+  if (active.mode === 'hold') return;
   if (active.mode === 'pan'){
     viewer.scrollLeft -= e.clientX - active.x; viewer.scrollTop -= e.clientY - active.y;
     active.x = e.clientX; active.y = e.clientY; return;
@@ -2292,6 +2351,8 @@ viewer.addEventListener('pointermove', e => {
 function endPointer(e){
   if (touches.has(e.pointerId)){ onTouchUp(e); return; }
   if (!active || e.pointerId !== active.id) return;
+  if (active.lp) clearTimeout(active.lp);
+  if (active.mode === 'hold'){ active = null; return; }
   const a = active, tap = prefs.dblTap && a.ptype === 'pen' && a.mode !== 'pan' && performance.now() - a.t0 < 220 && (a.maxMove || 0) < 6;
   let made = null;
   if (a.mode === 'draw') made = endStroke();
@@ -2550,6 +2611,10 @@ function viewTool(){
     h += btn(150, `data-emode="stroke" aria-pressed="${m === 'stroke'}"`, 'eraser', 'Borrar el trazo completo', '<em class="bdg txt">Trazo</em>');
     h += btn(210, `data-emode="partial" aria-pressed="${m === 'partial'}"`, 'eraser', 'Borrar solo una parte', '<em class="bdg txt">Parcial</em>');
   }
+  if (kd === 'hl'){
+    const al = Math.round((cfg.alpha != null ? cfg.alpha : 0.45) * 100);
+    h += btn(90, 'data-view="alpha"', 'hl', `Intensidad ${al}%`, `<em class="bdg">${al}%</em>`);
+  }
   if (kd === 'pen'){
     const st = cfg.style || 'pluma', saved = presetIndex() >= 0;
     h += btn(90, 'data-view="style"', 'pen', `Tipo de trazo: ${PEN_STYLES[st]}`, `<em class="bdg txt">${STYLE_SHORT[st]}</em>`);
@@ -2567,6 +2632,7 @@ wcap.addEventListener('input', e => {
   if (e.target.id !== 'hlAlpha') return;
   const v = +e.target.value; prefs.tools.hl.alpha = v / 100; savePrefs();
   $('#hlAlphaOut').textContent = v + '%';
+  if (wheelView === 'alpha') wheel.querySelectorAll('[data-alpha]').forEach(x => x.classList.toggle('on', Math.abs(+x.dataset.alpha - v) < 3));
 });
 const DIAL_A0 = -225, DIAL_SW = 270;
 function niceTicks(min, max){
@@ -2615,7 +2681,7 @@ function updatePreview(){
   i.style.width = px + 'px'; i.style.height = px + 'px';
   i.style.background = kd === 'eraser' ? 'transparent' : cfg.color;
   i.style.border = kd === 'eraser' ? '1.5px solid #13213a' : '0';
-  i.style.opacity = kd === 'hl' ? '.55' : '1';
+  i.style.opacity = kd === 'hl' ? String(cfg.alpha != null ? cfg.alpha : 0.45) : '1';
 }
 function viewColor(){
   hsv = hex2hsv(prefs.tools[tool].color);
@@ -2650,6 +2716,21 @@ function viewFavs(){
   wcap.innerHTML = `<div class="cap-txt"><strong>Bolígrafos favoritos</strong><span>${ps.length ? 'Toca uno para usarlo' : 'Aún no tienes. En un bolígrafo, toca la estrella para guardarlo.'}</span></div>`;
 }
 const STYLE_DESC = { pluma:'Tinta: se engrosa con la presión y la dirección, con puntas finas', boligrafo:'Fino y parejo, apenas cambia con la presión', lapiz:'Grafito con textura: suave y algo translúcido', estilografo:'Grosor siempre igual, trazo técnico y nítido', rotulador:'Punta ancha cuadrada y translúcida, como plumón' };
+const ALPHAS = [15, 30, 45, 60, 80, 100];
+function viewAlpha(){
+  const cfg = prefs.tools.hl, cur = Math.round((cfg.alpha != null ? cfg.alpha : 0.45) * 100), step = 360 / ALPHAS.length;
+  let s = `<svg viewBox="0 0 200 200" class="wsvg"><circle cx="100" cy="100" r="99" class="w-band"/>`;
+  ALPHAS.forEach((v, i) => {
+    const a0 = -90 - step / 2 + i * step + 1.5, a1 = a0 + step - 3, [x, y] = pol(68, (a0 + a1) / 2);
+    s += `<path d="${sector(40, 96, a0, a1)}" fill="#ffffff" class="w-slice${Math.abs(v - cur) < 3 ? ' on' : ''}" data-alpha="${v}"><title>Intensidad ${v}%</title></path>`;
+    s += `<path d="${sector(40, 96, a0, a1)}" fill="${cfg.color}" fill-opacity="${v / 100}" style="pointer-events:none"/>`;
+    s += `<text x="${x}" y="${y}" class="w-olabel" fill="#13213a" style="fill:#13213a" text-anchor="middle" dominant-baseline="central" pointer-events="none">${v}%</text>`;
+  });
+  s += `<circle cx="100" cy="100" r="38" class="w-disc"/></svg>`;
+  wheel.innerHTML = s + `<button type="button" class="wc" data-view="tool" aria-label="Volver">${svg('back', 24)}</button>`;
+  wcap.innerHTML = `<div class="cap-txt"><strong>Intensidad del resaltador: ${cur}%</strong><span>Menos: casi transparente · 100%: marcado como plumón</span></div>
+    <label class="alpha"><input type="range" id="hlAlpha" min="10" max="100" step="5" value="${cur}" aria-label="Intensidad del resaltador"><b id="hlAlphaOut">${cur}%</b></label>`;
+}
 function viewStyle(){
   const cur = prefs.tools[tool].style || 'pluma', keys = Object.keys(PEN_STYLES), step = 360 / keys.length;
   let s = `<svg viewBox="0 0 200 200" class="wsvg"><circle cx="100" cy="100" r="99" class="w-band"/>`;
@@ -2663,7 +2744,7 @@ function viewStyle(){
   wcap.innerHTML = `<div class="cap-txt"><strong>Tipo de trazo: ${PEN_STYLES[cur]}</strong><span>${STYLE_DESC[cur]}</span></div>`;
 }
 function renderWheelView(){
-  ({ main:viewMain, tool:viewTool, size:viewSize, color:viewColor, favs:viewFavs, style:viewStyle })[wheelView]();
+  ({ main:viewMain, tool:viewTool, size:viewSize, color:viewColor, favs:viewFavs, style:viewStyle, alpha:viewAlpha })[wheelView]();
   wheel.classList.toggle('colorv', wheelView === 'color');
   positionWheel();
 }
@@ -2710,8 +2791,9 @@ function applyPreset(i){
 }
 wheelWrap.addEventListener('click', e => {
   if (e.target === wheelWrap){ if (performance.now() - wheelOpenedAt > 350) closeWheel(); return; }
-  const t = e.target.closest('[data-tool],[data-act],[data-view],[data-color],[data-preset],[data-step],[data-style],[data-emode],#favBtn'); if (!t) return;
+  const t = e.target.closest('[data-tool],[data-act],[data-view],[data-color],[data-preset],[data-step],[data-style],[data-emode],[data-alpha],#favBtn'); if (!t) return;
   const d = t.dataset;
+  if (d.alpha){ prefs.tools.hl.alpha = +d.alpha / 100; savePrefs(); renderRail(); wheelView = 'tool'; renderWheelView(); toast('Intensidad del resaltador: ' + d.alpha + '%'); return; }
   if (d.style){ prefs.tools[tool].style = d.style; savePrefs(); renderRail(); wheelView = 'tool'; renderWheelView(); }
   else if (d.emode){ prefs.tools.eraser.mode = d.emode; savePrefs(); renderWheelView(); }
   else if (d.tool){
@@ -3266,16 +3348,17 @@ pagesEl.addEventListener('click', e => {
 /* after a highlight: offer to attach a note */
 const noteChip = document.createElement('button');
 noteChip.type = 'button'; noteChip.className = 'note-chip'; noteChip.hidden = true;
-noteChip.innerHTML = svg('plus', 16) + 'Agregar nota';
+noteChip.innerHTML = svg('note', 16) + 'Agregar nota aquí';
 document.body.appendChild(noteChip);
 let noteChipT = 0, noteChipAt = null;
-function showNoteChip(p, s){
-  const b = bbox(s), r = p.el.getBoundingClientRect(), k = r.width / p.wPt;
-  noteChipAt = { p, x:b[2], y:b[1] };
+function showNoteChipAt(p, cx, cy){
+  const r = p.el.getBoundingClientRect(), k = p.wPt / r.width;
+  noteChipAt = { p, x:(cx - r.left) * k, y:(cy - r.top) * k };
   noteChip.hidden = false;
-  noteChip.style.left = clamp(r.left + b[2] * k + 8, 8, innerWidth - noteChip.offsetWidth - 8) + 'px';
-  noteChip.style.top = clamp(r.top + b[1] * k - noteChip.offsetHeight - 6, 60, innerHeight - noteChip.offsetHeight - 70) + 'px';
-  clearTimeout(noteChipT); noteChipT = setTimeout(hideNoteChip, 5000);
+  noteChip.style.left = clamp(cx - noteChip.offsetWidth / 2, 8, innerWidth - noteChip.offsetWidth - 8) + 'px';
+  noteChip.style.top = clamp(cy - noteChip.offsetHeight - 28, 60, innerHeight - noteChip.offsetHeight - 70) + 'px';
+  try { navigator.vibrate && navigator.vibrate(15); } catch(_){}
+  clearTimeout(noteChipT); noteChipT = setTimeout(hideNoteChip, 6000);
 }
 function hideNoteChip(){ noteChip.hidden = true; clearTimeout(noteChipT); }
 noteChip.addEventListener('click', () => { const a = noteChipAt; hideNoteChip(); if (a && docs.includes(a.p.doc)) addNote(a.p, a.x, a.y); });
@@ -3517,6 +3600,7 @@ prefs.openNb.map(loadNotebook).filter(Boolean).forEach(d => { docs.push(d); libT
 showHome();
 loadGoogle();
 setTimeout(syncPending, 4000);
+setTimeout(() => refreshDriveList(true), 2500);
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if (document.fonts && document.fonts.ready){
   document.fonts.ready.then(() => { docs.forEach(d => { if (d.kind === 'sample') d.pages.forEach(p => p.rendered = false); }); updateVisible(); });
