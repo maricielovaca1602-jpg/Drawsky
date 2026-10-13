@@ -472,7 +472,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 13-oct-2026 (8)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 13-oct-2026 (9)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -755,7 +755,48 @@ addMenu.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; addMenu.hidden = true;
   if (b.dataset.m === 'drive') openFromDrive(); else if (b.dataset.m === 'pdf') $('#file').click(); else openNewDialog('new');
 });
-function persistTabs(){ prefs.openNb = docs.filter(d => d.kind === 'notebook' && !d.drive).map(d => d.key); savePrefs(); }
+function persistTabs(){
+  if (restoring) return;
+  prefs.openNb = docs.filter(d => d.kind === 'notebook' && !d.drive).map(d => d.key);
+  const ses = prefs.session || (prefs.session = { view:{} });
+  ses.tabs = docs.filter(d => d.kind === 'sample' || d.drive || (d.kind === 'notebook' && !d.drive)).map(d => d.key);
+  ses.cur = homeOn || !doc ? null : doc.key;
+  savePrefs();
+}
+/* where you were reading: page, position inside it and zoom, per file */
+function saveView(){
+  if (!doc || homeOn || restoring) return;
+  const p = doc.pages[doc.cur]; if (!p) return;
+  const ses = prefs.session || (prefs.session = { view:{} }); ses.view = ses.view || {};
+  ses.view[doc.key] = { z:r2(zoom), pg:doc.cur, off:r2((viewer.scrollTop - p.el.offsetTop) / Math.max(1, p.cssH) * 1000) / 1000, x:Math.round(viewer.scrollLeft) };
+  const keys = Object.keys(ses.view); if (keys.length > 80) delete ses.view[keys[0]];
+  ses.cur = doc.key;
+  savePrefs();
+}
+let saveViewT = 0, restoring = false;
+viewer.addEventListener('scroll', () => { clearTimeout(saveViewT); saveViewT = setTimeout(saveView, 500); }, { passive:true });
+async function restoreSession(){
+  const ses = prefs.session; if (!ses || !Array.isArray(ses.tabs) || !ses.tabs.length) return;
+  restoring = true;
+  try {
+    for (const key of ses.tabs){
+      if (docs.some(d => d.key === key)) continue;
+      try {
+        if (key === 'muestra'){ docs.push(sampleDoc()); continue; }
+        if (key.startsWith('gd:')){
+          const e = lib.find(x => x.key === key); if (!e || !e.drive) continue;
+          if (!(navigator.onLine && tokenOk(e.drive.email)) && !(await idb.get(e.drive.id))) continue;
+          await openDriveFile(e.drive.email, e.drive.id, e.name, true);
+          continue;
+        }
+        const nb = loadNotebook(key); if (nb){ docs.push(nb); libTouch(nb); }
+      } catch(err){ console.warn(err); }
+    }
+  } finally { restoring = false; }
+  const d = ses.cur && docs.find(x => x.key === ses.cur);
+  if (d) switchTo(d); else showHome();
+  renderTabs(); persistTabs();
+}
 function leaveDoc(){
   if (!doc || homeOn) return;
   doc.sx = viewer.scrollLeft; doc.sy = viewer.scrollTop; doc.zoom = zoom;
@@ -764,18 +805,24 @@ function leaveDoc(){
   doc.pages.forEach(releasePage);
 }
 function switchTo(d){
+  if (!restoring) setTimeout(persistTabs, 0);
   if (doc === d && !homeOn) return;
   leaveDoc();
   homeOn = false; homeEl.hidden = true; appEl.classList.remove('home-on');
   clearWet();
+  const rv = !d.viewDone && prefs.session && prefs.session.view && prefs.session.view[d.key];
+  if (rv){ d.zoom = rv.z || 1; }
+  d.viewDone = true;
   doc = d; zoom = d.zoom || 1;
   $('#zoomVal').textContent = Math.round(zoom * 100) + '%';
   mountDoc(); layout();
+  if (rv && d.pages[rv.pg]){ const p = d.pages[rv.pg]; d.sy = p.el.offsetTop + (rv.off || 0) * p.cssH; d.sx = rv.x || 0; }
   viewer.scrollLeft = d.sx; viewer.scrollTop = d.sy; updateVisible();
   renderTabs(); renderRail(); updateDocMeta();
   libTouch(d, { opened:Date.now() }); thumbSoon(d);
 }
 function showHome(){
+  if (!restoring) setTimeout(persistTabs, 0);
   leaveDoc();
   closeWheel();
   homeOn = true; homeEl.hidden = false; appEl.classList.add('home-on');
@@ -1703,7 +1750,7 @@ function openFromDrive(){
   if (!navigator.onLine){ toast('Necesitas internet para elegir archivos de Drive. Los que ya abriste están en Inicio.'); return; }
   chooseAccount('¿De qué cuenta?', openPicker);
 }
-async function openDriveFile(email, id, nameHint){
+async function openDriveFile(email, id, nameHint, quiet){
   const key = 'gd:' + id;
   if ((prefs.hiddenDrive || []).includes(id)){ prefs.hiddenDrive = prefs.hiddenDrive.filter(x => x !== id); savePrefs(); }
   const open = docs.find(d => d.key === key); if (open){ switchTo(open); return; }
@@ -3720,7 +3767,7 @@ document.addEventListener('keydown', e => {
   const map = { p:'pen1', b:'pen2', h:'hl', e:'eraser', m:'hand', s:'select' };
   if (map[e.key]) setTool(map[e.key]);
 });
-window.addEventListener('pagehide', () => docs.forEach(flushSave));
+window.addEventListener('pagehide', () => { docs.forEach(flushSave); saveView(); });
 
 /* ---------- start ---------- */
 const setAppH = () => document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
@@ -3732,8 +3779,9 @@ if (!prefs.seeded){
   if (!lib.some(e => e.key === 'muestra')) lib.push({ key:'muestra', name:'Hoja de prueba', kind:'sample', pages:2, created:Date.now(), opened:Date.now() });
   libSave(); prefs.seeded = true; savePrefs();
 }
-prefs.openNb.map(loadNotebook).filter(Boolean).forEach(d => { docs.push(d); libTouch(d); });
 showHome();
+if (prefs.session && Array.isArray(prefs.session.tabs)) restoreSession();
+else prefs.openNb.map(loadNotebook).filter(Boolean).forEach(d => { docs.push(d); libTouch(d); });
 loadGoogle();
 setTimeout(syncPending, 4000);
 setTimeout(() => refreshDriveList(true), 2500);
