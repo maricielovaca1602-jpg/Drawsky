@@ -63,6 +63,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .btn.danger.armed{background:var(--danger);color:#fff;border-color:transparent}
 .btn[aria-disabled="true"]{opacity:.65;cursor:default}
 .btn em{font-style:normal;font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--line);color:var(--muted)}
+.btn em.ok{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent)}
+.btn em.warn{background:color-mix(in srgb,#e8a33d 22%,transparent);color:#e8a33d}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface-2);padding:0;flex:none}
 @media (max-width:620px){ .btn .lbl,.doc-meta,.btn em{display:none} .btn{padding:0 11px} .word{display:none} }
 
@@ -244,6 +246,21 @@ input[type=range]{accent-color:var(--accent)}
 .h-nav b{font-weight:600;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
 .h-nav[aria-current="true"]{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
 .h-nav em{font-style:normal;font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:99px;background:var(--line);color:var(--muted)}
+.h-nav span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-nav .av,.acc .av{flex:none;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:12px;font-weight:700}
+.h-nav.warn{color:#e8a33d}
+.pend{color:#e8a33d;font-weight:600}
+.acc-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.acc{display:flex;align-items:center;gap:10px}
+.acc .av{width:32px;height:32px;font-size:14px}
+.acc div{flex:1;min-width:0}
+.acc strong,.acc small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc small{color:var(--muted);font-size:12.5px}
+.acc .btn{height:34px;padding:0 12px;font-size:13px}
+.acc-pick{display:flex;flex-direction:column;gap:8px;padding:14px 0}
+.acc-pick button{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:12px 14px;font-weight:600}
+.acc-pick button .av{width:32px;height:32px;font-size:14px;flex:none;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700}
+.acc-pick button span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .h-main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .h-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px}
 .h-top h2{margin:0;font:700 22px/1.2 var(--font-display);flex:1 1 100%}
@@ -305,7 +322,7 @@ input[type=range]{accent-color:var(--accent)}
     </div>
     <div class="actions">
       <button class="btn primary" id="openBtn" type="button"><span id="icOpen"></span><span class="lbl">Abrir PDF</span></button>
-      <button class="btn" id="driveBtn" type="button" aria-disabled="true"><span id="icDrive"></span><span class="lbl">Drive</span><em>Fase 2</em></button>
+      <button class="btn" id="driveBtn" type="button"><span id="icDrive"></span><span class="lbl" id="driveLbl">Drive</span><em id="driveSt" hidden></em></button>
       <button class="icon-btn" id="setBtn" type="button" aria-label="Ajustes"></button>
     </div>
     <input type="file" id="file" accept="application/pdf,.pdf" hidden>
@@ -326,6 +343,7 @@ input[type=range]{accent-color:var(--accent)}
           <h2 id="hTitle">Todos tus archivos</h2>
           <input type="search" class="h-search" id="hSearch" placeholder="Buscar por nombre" aria-label="Buscar archivos">
           <div class="seg" id="hView"><button type="button" data-hv="list" aria-label="Ver como lista" title="Lista"></button><button type="button" data-hv="grid" aria-label="Ver como portadas" title="Portadas"></button></div>
+          <button class="btn" type="button" id="hDrive"><span id="icH3"></span>Abrir de Drive</button>
           <button class="btn" type="button" id="hOpen"><span id="icH1"></span>Abrir PDF</button>
           <button class="btn primary" type="button" id="hNew"><span id="icH2"></span>Cuaderno nuevo</button>
         </div>
@@ -349,6 +367,7 @@ input[type=range]{accent-color:var(--accent)}
 
 <div class="ecur" id="ecur" hidden></div>
 <div class="menu" id="addMenu" hidden>
+  <button type="button" data-m="drive"><span id="icM3"></span>Abrir de Google Drive</button>
   <button type="button" data-m="pdf"><span id="icM1"></span>Abrir PDF de la tableta</button>
   <button type="button" data-m="nb"><span id="icM2"></span>Cuaderno nuevo</button>
 </div>
@@ -414,8 +433,21 @@ input[type=range]{accent-color:var(--accent)}
       <p class="hint">Si al presionar el botón se abre el menú de Samsung en vez de borrar: Ajustes de la tableta › Funciones avanzadas › S Pen › desactiva Air Command.</p>
     </div>
     <div class="group">
-      <div class="lab">Dónde se guarda</div>
-      <p class="hint">En esta fase todo se guarda solo en esta tableta. Los cuadernos vuelven a abrirse solos; un PDF recupera tus trazos cuando lo vuelves a abrir. La conexión con Google Drive llega en la Fase 2.</p>
+      <div class="lab">Cuentas de Google Drive</div>
+      <div class="acc-list" id="accList"></div>
+      <div class="chips"><button type="button" class="cb" id="accAdd"></button></div>
+    </div>
+    <div class="row">
+      <div><div class="lab">Subir cambios automáticamente</div><p class="hint">Unos segundos después de que dejas de escribir, DrawSky guarda en el mismo archivo de Drive. Apagado: solo sube cuando tocas "Guardar en Drive".</p></div>
+      <input type="checkbox" class="switch" id="autoSync" aria-label="Subir cambios automáticamente">
+    </div>
+    <div class="row">
+      <div><div class="lab">Espacio en la tableta</div><p class="hint" id="cacheInfo">Calculando…</p></div>
+      <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
+    </div>
+    <div class="group">
+      <div class="lab">Cómo se guarda</div>
+      <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
 </div>
@@ -472,7 +504,7 @@ $('#setBtn').innerHTML = svg('settings'); $('#sheetClose').innerHTML = svg('clos
 $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); $('#zFit').innerHTML = svg('fit', 20);
 $('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20);
 $('#icM1').innerHTML = svg('pdf', 20); $('#icM2').innerHTML = svg('book', 20);
-$('#icH1').innerHTML = svg('folder', 20); $('#icH2').innerHTML = svg('plus', 20);
+$('#icH1').innerHTML = svg('folder', 20); $('#icH3').innerHTML = svg('cloud', 20); $('#icM3').innerHTML = svg('cloud', 20); $('#icH2').innerHTML = svg('plus', 20);
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
 
 /* ---------- prefs ---------- */
@@ -654,8 +686,9 @@ function updateDocMeta(){
   if (!doc) return;
   $('#docName').textContent = doc.name;
   const n = doc.pages.length, pages = `${n} ${n === 1 ? 'página' : 'páginas'}`;
-  $('#docMeta').textContent = doc.kind === 'sample' ? pages + ' · ejemplo para probar el S Pen' : doc.kind === 'notebook' ? pages + ' · cuaderno' : pages + ' · PDF de la tableta';
+  $('#docMeta').textContent = doc.kind === 'sample' ? pages + ' · ejemplo para probar el S Pen' : doc.drive ? pages + ' · Drive · ' + doc.drive.email : doc.kind === 'notebook' ? pages + ' · cuaderno en la tableta' : pages + ' · PDF de la tableta';
   $('#pageTotal').textContent = n;
+  renderDriveBtn();
 }
 function mountDoc(){
   pagesEl.innerHTML = '';
@@ -691,12 +724,13 @@ function openAddMenu(anchor){
 document.addEventListener('pointerdown', e => { if (!addMenu.hidden && !addMenu.contains(e.target) && !e.target.closest('#tabAdd')) addMenu.hidden = true; }, true);
 addMenu.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; addMenu.hidden = true;
-  if (b.dataset.m === 'pdf') $('#file').click(); else openNewDialog('new');
+  if (b.dataset.m === 'drive') openFromDrive(); else if (b.dataset.m === 'pdf') $('#file').click(); else openNewDialog('new');
 });
-function persistTabs(){ prefs.openNb = docs.filter(d => d.kind === 'notebook').map(d => d.key); savePrefs(); }
+function persistTabs(){ prefs.openNb = docs.filter(d => d.kind === 'notebook' && !d.drive).map(d => d.key); savePrefs(); }
 function leaveDoc(){
   if (!doc || homeOn) return;
   doc.sx = viewer.scrollLeft; doc.sy = viewer.scrollTop; doc.zoom = zoom;
+  if (doc.drive && doc.dirty && prefs.autoSync) scheduleSync(doc, 400);
   if (active){ clearTimeout(active.ht); active = null; }
   doc.pages.forEach(releasePage);
 }
@@ -717,14 +751,15 @@ function showHome(){
   closeWheel();
   homeOn = true; homeEl.hidden = false; appEl.classList.add('home-on');
   $('#docName').textContent = 'Inicio';
-  $('#docMeta').textContent = `${lib.length} ${lib.length === 1 ? 'archivo' : 'archivos'} en esta tableta`;
-  renderHome(); renderTabs();
+  $('#docMeta').textContent = `${lib.length} ${lib.length === 1 ? 'archivo' : 'archivos'}`;
+  renderHome(); renderTabs(); renderDriveBtn();
 }
 function addDoc(d){ docs.push(d); switchTo(d); persistTabs(); }
 function flushSave(d){ if (d.saveT){ clearTimeout(d.saveT); d.saveT = 0; store.set('drawsky:doc:' + d.key, serialize(d)); } }
 function closeDoc(d, discard){
   const i = docs.indexOf(d); if (i < 0) return;
-  if (discard){ clearTimeout(d.saveT); d.saveT = 0; } else flushSave(d);
+  if (discard){ clearTimeout(d.saveT); d.saveT = 0; clearTimeout(d.syncT); d.syncT = 0; d.dirty = false; }
+  else { flushSave(d); if (d.drive && d.dirty) scheduleSync(d, 50); }
   clearTimeout(d.thumbT);
   docs.splice(i, 1);
   d.pages.forEach(releasePage);
@@ -735,7 +770,7 @@ function closeDoc(d, discard){
     if (!homeOn && docs.length) switchTo(docs[Math.max(0, i - 1)]); else showHome();
   } else renderTabs();
   persistTabs();
-  if (!discard && d.kind === 'notebook') toast('Cuaderno cerrado. Lo encuentras en Inicio.');
+  if (!discard && (d.kind === 'notebook' || d.drive)) toast(d.drive ? 'Cerrado. Lo encuentras en Inicio.' : 'Cuaderno cerrado. Lo encuentras en Inicio.');
 }
 
 /* ---------- library (Inicio) ---------- */
@@ -777,19 +812,23 @@ function relTime(t){
   return new Date(t).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' });
 }
 function renderHome(){
-  const counts = { all:lib.length, notebook:lib.filter(e => e.kind !== 'pdf').length, pdf:lib.filter(e => e.kind === 'pdf').length };
+  const counts = { all:lib.length, notebook:lib.filter(e => e.kind !== 'pdf').length, pdf:lib.filter(e => e.kind === 'pdf').length, drive:lib.filter(e => e.drive).length };
+  const pend = lib.filter(e => e.pending && e.drive).length;
   $('#hSide').innerHTML = `<h3>Archivos</h3>` +
     [['all', 'Todos', 'pages'], ['notebook', 'Cuadernos', 'book'], ['pdf', 'PDFs', 'pdf']].map(([k, l, ic]) =>
       `<button type="button" class="h-nav" data-hf="${k}" aria-current="${homeFilter === k}">${svg(ic, 20)}<span>${l}</span><b>${counts[k]}</b></button>`).join('') +
-    `<h3>Nube</h3><button type="button" class="h-nav" data-hf="drive">${svg('cloud', 20)}<span>Google Drive</span><em>Fase 2</em></button>`;
-  $('#hTitle').textContent = { all:'Todos tus archivos', notebook:'Cuadernos', pdf:'PDFs' }[homeFilter];
-  let list = lib.filter(e => homeFilter === 'all' || (homeFilter === 'pdf' ? e.kind === 'pdf' : e.kind !== 'pdf'));
+    `<h3>Google Drive</h3><button type="button" class="h-nav" data-hf="drive" aria-current="${homeFilter === 'drive'}">${svg('cloud', 20)}<span>En Drive</span><b>${counts.drive}</b></button>` +
+    (pend ? `<button type="button" class="h-nav warn" data-sync="1" title="Subir ahora">${svg('share', 20)}<span>Sin subir</span><b>${pend}</b></button>` : '') +
+    prefs.accounts.map(a => `<button type="button" class="h-nav" data-acc="${esc(a.email)}" title="Abrir un PDF de ${esc(a.email)}"><span class="av">${initial(a)}</span><span>${esc(a.email)}</span></button>`).join('') +
+    `<button type="button" class="h-nav" data-acc="">${svg('plus', 20)}<span>${prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive'}</span></button>`;
+  $('#hTitle').textContent = { all:'Todos tus archivos', notebook:'Cuadernos', pdf:'PDFs', drive:'En Google Drive' }[homeFilter];
+  let list = lib.filter(e => homeFilter === 'all' || (homeFilter === 'drive' ? !!e.drive : homeFilter === 'pdf' ? e.kind === 'pdf' : e.kind !== 'pdf'));
   if (homeQuery) list = list.filter(e => (e.name || '').toLowerCase().includes(homeQuery));
   list.sort((a, b) => (b.opened || 0) - (a.opened || 0));
   document.querySelectorAll('#hView button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.hv === prefs.homeView)));
   const grid = prefs.homeView === 'grid';
   const acts = (e, armed) => `<span class="h-acts">
-        <button type="button" data-ha="share" aria-label="Subir o compartir" title="Subir o compartir">${svg('share', 20)}</button>
+        <button type="button" data-ha="share" aria-label="${e.drive ? 'Ver en Google Drive' : 'Subir a Google Drive'}" title="${e.drive ? 'Ver en Google Drive' : 'Subir a Google Drive'}">${svg('share', 20)}</button>
         <button type="button" data-ha="ren" aria-label="Cambiar nombre" title="Cambiar nombre">${svg('edit', 20)}</button>
         <button type="button" data-ha="del" class="${armed ? 'armed' : ''}" aria-label="${armed ? 'Toca otra vez para eliminar' : 'Eliminar'}" title="${armed ? 'Toca otra vez para eliminar' : 'Eliminar'}">${svg('trash', 20)}</button>
       </span>`;
@@ -800,15 +839,15 @@ function renderHome(){
       const ic = e.kind === 'pdf' ? 'pdf' : 'book';
       return `<div class="h-card h-item" role="button" tabindex="0" data-key="${esc(e.key)}" aria-label="Abrir ${esc(e.name)}">
         <div class="cover">${e.thumb ? `<img src="${e.thumb}" alt="">` : svg(ic, 28)}</div>
-        <strong>${esc(e.name)}</strong><small>${KIND_LABEL[e.kind] || 'Archivo'} · ${relTime(e.opened)}</small>${acts(e, libDelArmed === e.key)}</div>`;
+        <strong>${esc(e.name)}</strong><small>${e.drive ? svg('cloud', 12) + ' ' : ''}${KIND_LABEL[e.kind] || 'Archivo'} · ${e.pending ? '<span class="pend">sin subir</span>' : relTime(e.opened)}</small>${acts(e, libDelArmed === e.key)}</div>`;
     }).join('') + '</div>';
     $('#hList').innerHTML = h; return;
   }
   h += list.map(e => {
     const open = docs.some(d => d.key === e.key), armed = libDelArmed === e.key, ic = e.kind === 'pdf' ? 'pdf' : 'book';
     return `<div class="h-row h-item" role="button" tabindex="0" data-key="${esc(e.key)}" aria-label="Abrir ${esc(e.name)}">
-      <div class="h-name">${e.thumb ? `<img src="${e.thumb}" alt="">` : `<span class="ph">${svg(ic, 20)}</span>`}<div><strong>${esc(e.name)}</strong><small>${svg(ic, 13)}${KIND_LABEL[e.kind] || 'Archivo'} · ${open ? 'abierto en una pestaña' : 'en esta tableta'}</small></div></div>
-      <span class="h-cell c-author">Tú</span><span class="h-cell c-date">${relTime(e.opened)}</span><span class="h-cell c-pages">${e.pages || '—'}</span>
+      <div class="h-name">${e.thumb ? `<img src="${e.thumb}" alt="">` : `<span class="ph">${svg(ic, 20)}</span>`}<div><strong>${esc(e.name)}</strong><small>${svg(e.drive ? 'cloud' : ic, 13)}${KIND_LABEL[e.kind] || 'Archivo'} · ${open ? 'abierto en una pestaña' : e.drive ? 'Drive · ' + esc(e.drive.email) : 'en esta tableta'}${e.pending ? ' · <span class="pend">sin subir</span>' : ''}</small></div></div>
+      <span class="h-cell c-author">${esc(e.owner || 'Tú')}</span><span class="h-cell c-date">${relTime(e.opened)}</span><span class="h-cell c-pages">${e.pages || '—'}</span>
       ${acts(e, armed)}</div>`;
   }).join('');
   $('#hList').innerHTML = h;
@@ -816,6 +855,7 @@ function renderHome(){
 function openEntry(e){
   const d = docs.find(x => x.key === e.key);
   if (d){ switchTo(d); return; }
+  if (e.drive){ openDriveEntry(e); return; }
   if (e.kind === 'notebook'){ const nb = loadNotebook(e.key); if (nb) addDoc(nb); else toast('No encontré este cuaderno en la tableta.'); return; }
   if (e.kind === 'sample'){ addDoc(sampleDoc()); return; }
   toast(`Elige "${e.name}" en tu tableta para abrirlo con tus anotaciones.`);
@@ -825,9 +865,10 @@ function deleteEntry(e){
   libDelArmed = null;
   const d = docs.find(x => x.key === e.key); if (d) closeDoc(d, true);
   store.del('drawsky:doc:' + e.key);
+  if (e.drive) idb.del(e.drive.id);
   lib = lib.filter(x => x !== e); libSave(); persistTabs();
-  $('#docMeta').textContent = `${lib.length} ${lib.length === 1 ? 'archivo' : 'archivos'} en esta tableta`;
-  renderHome(); toast('Eliminado de la tableta');
+  $('#docMeta').textContent = `${lib.length} ${lib.length === 1 ? 'archivo' : 'archivos'}`;
+  renderHome(); toast(e.drive ? 'Quitado de DrawSky. Sigue en tu Google Drive.' : 'Eliminado de la tableta');
 }
 function openRenameDialog(e){
   dlgState = { kind:'ren', key:e.key, name:e.name };
@@ -840,14 +881,17 @@ function openRenameDialog(e){
 function doRename(){
   const st = dlgState, name = (st.name || '').trim(); if (!name){ toast('Escribe un nombre.'); return; }
   const e = lib.find(x => x.key === st.key); if (e) e.name = name; libSave();
+  if (e && e.drive) renameOnDrive(e.drive.email, e.drive.id, name);
   const d = docs.find(x => x.key === st.key);
   if (d){ d.name = name; flushSave(d); store.set('drawsky:doc:' + d.key, serialize(d)); }
   else { const s = store.get('drawsky:doc:' + st.key); if (s){ s.name = name; store.set('drawsky:doc:' + st.key, s); } }
   closeDlg(); renderTabs(); if (homeOn) renderHome(); else updateDocMeta();
 }
 $('#hSide').addEventListener('click', e => {
+  const a = e.target.closest('[data-acc]');
+  if (a){ if (a.dataset.acc) openPicker(a.dataset.acc); else requestToken(null, (email, tk) => { if (email) showPicker(email, tk); }); return; }
+  if (e.target.closest('[data-sync]')){ syncPendingTap(); return; }
   const b = e.target.closest('[data-hf]'); if (!b) return;
-  if (b.dataset.hf === 'drive'){ toast('La conexión con Google Drive llega en la Fase 2.'); return; }
   homeFilter = b.dataset.hf; renderHome();
 });
 $('#hSearch').addEventListener('input', e => { homeQuery = e.target.value.trim().toLowerCase(); renderHome(); });
@@ -860,10 +904,15 @@ $('#hList').addEventListener('click', ev => {
   const a = ev.target.closest('[data-ha]');
   if (!a){ libDelArmed = null; openEntry(e); return; }
   const k = a.dataset.ha;
-  if (k === 'share') toast('Subir y compartir llega en la Fase 2, con Google Drive.');
+  if (k === 'share'){
+    if (e.drive) window.open(`https://drive.google.com/file/d/${encodeURIComponent(e.drive.id)}/view`, '_blank', 'noopener');
+    else if (e.kind === 'sample') toast('La hoja de prueba no se sube a Drive.');
+    else if (e.kind === 'notebook'){ openEntry(e); if (doc && doc.key === e.key) $('#driveBtn').click(); }
+    else { toast(`Abre "${e.name}" y toca "Subir a Drive".`); $('#file').click(); }
+  }
   else if (k === 'ren') openRenameDialog(e);
   else if (k === 'del'){
-    if (libDelArmed !== e.key){ libDelArmed = e.key; renderHome(); toast(e.kind === 'pdf' ? 'Toca otra vez: se borran tus anotaciones de este PDF en la tableta.' : 'Toca otra vez para eliminarlo de la tableta.'); return; }
+    if (libDelArmed !== e.key){ libDelArmed = e.key; renderHome(); toast(e.drive ? (e.pending ? 'Toca otra vez: tiene cambios sin subir a Drive que se perderán.' : 'Toca otra vez para quitarlo de DrawSky (no se borra de tu Drive).') : e.kind === 'pdf' ? 'Toca otra vez: se borran tus anotaciones de este PDF en la tableta.' : 'Toca otra vez para eliminarlo de la tableta.'); return; }
     deleteEntry(e);
   }
 });
@@ -875,12 +924,12 @@ function serialize(d){
 }
 function save(){
   if (!doc) return;
-  const d = doc; setStatus('Guardando…'); clearTimeout(d.saveT);
+  const d = doc; setStatus('Guardando…'); clearTimeout(d.saveT); markDirty(d);
   d.saveT = setTimeout(() => {
     d.saveT = 0;
     const ok = store.set('drawsky:doc:' + d.key, serialize(d));
     libTouch(d); thumbSoon(d);
-    if (d === doc) setStatus(ok ? 'Guardado en esta tableta' : 'No hay espacio para guardar en la tableta; no cierres la página');
+    if (d === doc && !d.syncing) setStatus(ok ? localSavedMsg(d) : 'No hay espacio para guardar en la tableta; no cierres la página');
   }, 600);
 }
 function buildPages(d, savedData, fallback){
@@ -935,7 +984,7 @@ function drawSample(i, ctx, sc){
     y += 18;
     ctx.fillStyle = ink; ctx.font = '700 12px Figtree, sans-serif'; ctx.fillText('Zona libre para figuras', 48, y); y += 12;
     ctx.setLineDash([4, 4]); ctx.strokeStyle = '#b7c6d8'; ctx.lineWidth = 1; ctx.strokeRect(48, y, 499, H - 60 - y); ctx.setLineDash([]);
-    ctx.fillStyle = '#9aa9bd'; ctx.font = '400 8.5px Figtree, sans-serif'; ctx.fillText('DrawSky · Fase 1 · prototipo', 48, H - 34);
+    ctx.fillStyle = '#9aa9bd'; ctx.font = '400 8.5px Figtree, sans-serif'; ctx.fillText('DrawSky', 48, H - 34);
   } else {
     ctx.fillStyle = ink; ctx.font = '700 18px "Bricolage Grotesque", Figtree, sans-serif'; ctx.fillText('Mis apuntes', 48, 64);
     ctx.fillStyle = soft; ctx.font = '400 10.5px Figtree, sans-serif'; ctx.fillText('Esta hoja usa la plantilla rayada. Cámbiala o quítala con el botón de plantilla de abajo.', 48, 80);
@@ -952,6 +1001,7 @@ function sampleDoc(){
   return d;
 }
 function loadNotebook(key){
+  if (String(key).startsWith('gd:')) return null;
   const s = store.get('drawsky:doc:' + key);
   if (!s || s.v !== 2 || !Array.isArray(s.pages) || !s.pages.length) return null;
   const d = newDoc({ name:s.name || 'Cuaderno', key, kind:'notebook' });
@@ -999,13 +1049,14 @@ async function openPdf(file){
   if (!workerMode) setupWorker();
   loading(true, 'Abriendo ' + file.name + '…');
   try {
-    const buf = await file.arrayBuffer();
-    const pdf = await loadPdfDoc(buf);
+    const up = await unpack(await file.arrayBuffer());
+    const pdf = await loadPdfDoc(up.clean);
     const first = await pdf.getPage(1), vp = first.getViewport({ scale:1 });
     const d = newDoc({ name:file.name.replace(/\.pdf$/i, ''), key, kind:'pdf', pdf });
+    Object.assign(d, { cleanBytes:up.clean, srcCount:pdf.numPages, ver:0 });
     const fb = [];
     for (let i = 0; i < pdf.numPages; i++) fb.push({ src:{ kind:'pdf', index:i }, w:vp.width, h:vp.height, tpl:null, strokes:[] });
-    buildPages(d, store.get('drawsky:doc:' + key), fb);
+    buildPages(d, store.get('drawsky:doc:' + key) || (up.data ? { v:2, pages:up.data.pages } : null), fb);
     addDoc(d);
     setStatus(d.restored ? 'Recuperé tus trazos de la última vez' : 'Listo para escribir con el S Pen');
   } catch(err){
@@ -1015,7 +1066,661 @@ async function openPdf(file){
 }
 $('#openBtn').addEventListener('click', () => $('#file').click());
 $('#file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openPdf(f); });
-$('#driveBtn').addEventListener('click', () => toast('La conexión con Google Drive llega en la Fase 2.'));
+/* ---------- Google Drive ---------- */
+const G = { clientId:'484469934201-pri7mreqjttbktotiqbf3l41pudsbns6.apps.googleusercontent.com', apiKey:'AIzaSyDi58wfoTTwRyawyZ6sqfiXqrLi9ncK1ck', appId:'484469934201', scope:'https://www.googleapis.com/auth/drive.file' };
+const DRIVE = 'https://www.googleapis.com/drive/v3', UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
+const FFIELDS = 'id,name,headRevisionId,modifiedTime,parents,trashed,owners(displayName,emailAddress)';
+const PDFLIB_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+const CACHE_MAX = 10, SYNC_WAIT = 12000;
+if (!Array.isArray(prefs.accounts)) prefs.accounts = [];
+if (prefs.autoSync === undefined) prefs.autoSync = true;
+const pdfName = n => /\.pdf$/i.test(n) ? n : n + '.pdf';
+const authErr = () => Object.assign(new Error('auth'), { auth:true });
+
+/* scripts */
+const scriptP = {};
+function loadScript(src){
+  return scriptP[src] || (scriptP[src] = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.async = true;
+    s.onload = () => res();
+    s.onerror = () => { delete scriptP[src]; s.remove(); rej(new Error('No cargó ' + src)); };
+    document.head.appendChild(s);
+  }));
+}
+const needPdfLib = () => window.PDFLib ? Promise.resolve() : loadScript(PDFLIB_URL);
+let pickerReady = false;
+function loadGoogle(){
+  if (!navigator.onLine) return;
+  loadScript('https://accounts.google.com/gsi/client').catch(() => {});
+  if (!pickerReady) loadScript('https://apis.google.com/js/api.js')
+    .then(() => new Promise(r => gapi.load('picker', { callback:r, onerror:r })))
+    .then(() => { pickerReady = !!(window.google && google.picker); }).catch(() => {});
+}
+
+/* accounts & tokens (one token per Google account, about 1 hour each) */
+const TOK_KEY = 'drawsky:tok';
+const tokens = store.get(TOK_KEY) || {};
+const tokenOk = email => { const t = email && tokens[email]; return t && t.exp > Date.now() + 60000 ? t.t : null; };
+function dropToken(email){ delete tokens[email]; store.set(TOK_KEY, tokens); }
+const account = email => prefs.accounts.find(a => a.email === email);
+const initial = a => esc(((a.name || a.email || '?').trim()[0] || '?').toUpperCase());
+
+/* must be called directly from a tap: Google opens its sign-in window */
+function requestToken(hint, done){
+  const oa = window.google && google.accounts && google.accounts.oauth2;
+  if (!oa){
+    loadGoogle();
+    toast(navigator.onLine ? 'Google todavía está cargando. Inténtalo otra vez en unos segundos.' : 'Necesitas internet para conectar con Google Drive.');
+    done(null); return;
+  }
+  let fin = false;
+  const end = (...a) => { if (!fin){ fin = true; done(...a); } };
+  const client = oa.initTokenClient({
+    client_id:G.clientId, scope:G.scope,
+    callback: async r => {
+      if (!r || !r.access_token){ end(null); return; }
+      if (oa.hasGrantedAllScopes && !oa.hasGrantedAllScopes(r, G.scope)){ toast('Para usar Drive, marca la casilla de permiso de Google Drive al conectar.'); end(null); return; }
+      try {
+        const res = await fetch(DRIVE + '/about?fields=user(displayName,emailAddress,photoLink)', { headers:{ Authorization:'Bearer ' + r.access_token } });
+        if (!res.ok) throw new Error('about ' + res.status);
+        const u = (await res.json()).user || {}, email = u.emailAddress;
+        if (!email) throw new Error('sin correo');
+        tokens[email] = { t:r.access_token, exp:Date.now() + (+r.expires_in || 3600) * 1000 }; store.set(TOK_KEY, tokens);
+        let a = account(email);
+        if (!a){ a = { email }; prefs.accounts.push(a); }
+        a.name = u.displayName || email;
+        savePrefs(); renderDriveSettings(); if (homeOn) renderHome();
+        end(email, r.access_token);
+      } catch(e){ console.warn(e); toast('No pude confirmar tu cuenta de Google. Inténtalo otra vez.'); end(null); }
+    },
+    error_callback: e => {
+      end(null);
+      if (e && e.type === 'popup_failed_to_open') toast('El navegador bloqueó la ventana de Google. Permite ventanas emergentes para esta página.');
+    }
+  });
+  client.requestAccessToken(hint ? { prompt:'', login_hint:hint } : { prompt:'select_account' });
+}
+function withToken(email, fn){
+  const t = tokenOk(email);
+  if (t){ fn(email, t); return; }
+  requestToken(email, (got, tk) => {
+    if (!got) return;
+    if (email && got !== email){ toast(`Entraste con ${got}. Para este archivo elige ${email}.`); return; }
+    fn(got, tk);
+  });
+}
+function chooseAccount(title, cb){
+  if (!prefs.accounts.length){ requestToken(null, email => { if (email) cb(email); }); return; }
+  if (prefs.accounts.length === 1){ cb(prefs.accounts[0].email); return; }
+  dlgState = { kind:'acc', cb };
+  dlg.setAttribute('aria-label', title);
+  dlg.innerHTML = `<header class="sheet-h"><h2>${esc(title)}</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="acc-pick">${prefs.accounts.map(a => `<button type="button" data-do="acc" data-email="${esc(a.email)}"><span class="av">${initial(a)}</span><span><strong>${esc(a.name || a.email)}</strong><br><small>${esc(a.email)}</small></span></button>`).join('')}
+    <button type="button" data-do="accNew"><span class="av">${svg('plus', 18)}</span><span>Otra cuenta de Google</span></button></div>`;
+  dlgWrap.hidden = false;
+}
+
+/* Drive REST */
+async function gfetch(email, url, opt = {}){
+  const t = tokenOk(email);
+  if (!t) throw authErr();
+  const r = await fetch(url, Object.assign({}, opt, { headers:Object.assign({ Authorization:'Bearer ' + t }, opt.headers || {}) }));
+  if (r.status === 401){ dropToken(email); throw authErr(); }
+  if (!r.ok){
+    let body = ''; try { body = await r.text(); } catch(_){}
+    throw Object.assign(new Error('Drive ' + r.status + ' ' + body.slice(0, 300)), { status:r.status });
+  }
+  return r;
+}
+const driveMeta = (email, id) => gfetch(email, `${DRIVE}/files/${id}?supportsAllDrives=true&fields=${FFIELDS}`).then(r => r.json());
+async function driveUpload(email, id, bytes, meta){
+  const target = id ? `${UPLOAD}/files/${id}` : `${UPLOAD}/files`, method = id ? 'PATCH' : 'POST';
+  try {
+    const init = await gfetch(email, `${target}?uploadType=resumable&supportsAllDrives=true&fields=${FFIELDS}`, { method,
+      headers:{ 'Content-Type':'application/json; charset=UTF-8', 'X-Upload-Content-Type':'application/pdf' }, body:JSON.stringify(meta || {}) });
+    const loc = init.headers.get('Location');
+    if (loc){
+      const r = await fetch(loc, { method:'PUT', headers:{ 'Content-Type':'application/pdf' }, body:bytes });
+      if (r.ok) return r.json();
+      throw Object.assign(new Error('upload ' + r.status), { status:r.status });
+    }
+  } catch(e){ if (e.auth || e.status === 404) throw e; console.warn('Subida por partes falló; intento de una vez', e); }
+  const b = 'drawsky' + Math.random().toString(36).slice(2);
+  const body = new Blob([`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta || {})}\r\n--${b}\r\nContent-Type: application/pdf\r\n\r\n`, bytes, `\r\n--${b}--`]);
+  const r = await gfetch(email, `${target}?uploadType=multipart&supportsAllDrives=true&fields=${FFIELDS}`, { method, headers:{ 'Content-Type':'multipart/related; boundary=' + b }, body });
+  return r.json();
+}
+async function driveFolder(email){
+  const q = encodeURIComponent("name='DrawSky' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+  const r = await (await gfetch(email, `${DRIVE}/files?q=${q}&fields=files(id)&pageSize=1`)).json();
+  if (r.files && r.files[0]) return r.files[0].id;
+  const c = await (await gfetch(email, `${DRIVE}/files?fields=id`, { method:'POST', headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify({ name:'DrawSky', mimeType:'application/vnd.google-apps.folder' }) })).json();
+  return c.id;
+}
+function renameOnDrive(email, id, name){
+  if (!navigator.onLine || !tokenOk(email)) return;
+  gfetch(email, `${DRIVE}/files/${id}?supportsAllDrives=true&fields=id`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ name:pdfName(name) }) })
+    .catch(e => console.warn(e));
+}
+
+/* offline copies of Drive files (IndexedDB), limited to the most recent ones */
+const idb = (() => {
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('drawsky', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('files');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => { dbp = null; rej(r.error); };
+  }));
+  const run = (mode, fn) => open().then(db => new Promise((res, rej) => {
+    const t = db.transaction('files', mode), q = fn(t.objectStore('files'));
+    t.oncomplete = () => res(q && q.result); t.onerror = t.onabort = () => rej(t.error);
+  }));
+  return {
+    get:k => run('readonly', s => s.get(k)).catch(() => null),
+    put:(k, v) => run('readwrite', s => s.put(v, k)),
+    del:k => run('readwrite', s => s.delete(k)).catch(() => {}),
+    all:() => run('readonly', s => s.getAll()).then(a => (a || []).filter(Boolean)).catch(() => [])
+  };
+})();
+async function cachePut(id, v){
+  try { await idb.put(id, Object.assign({ id, t:Date.now() }, v)); }
+  catch(e){ console.warn(e); toast('La tableta no tiene espacio para guardar este archivo sin conexión.'); return; }
+  pruneCache(false);
+}
+async function pruneCache(all){
+  const items = (await idb.all()).sort((a, b) => b.t - a.t);
+  const keep = id => docs.some(d => d.drive && d.drive.id === id) || lib.some(e => e.drive && e.drive.id === id && e.pending);
+  let n = 0;
+  for (const it of items){
+    if (keep(it.id)){ n++; continue; }
+    if (!all && n < CACHE_MAX){ n++; continue; }
+    await idb.del(it.id);
+    if (all){ const e = lib.find(x => x.drive && x.drive.id === it.id); if (e && !e.readonly) store.del('drawsky:doc:' + e.key); }
+  }
+}
+async function cacheInfo(){
+  const el = $('#cacheInfo'); if (!el) return;
+  const items = await idb.all();
+  const mb = items.reduce((s, it) => s + ((it.bytes && it.bytes.byteLength) || 0), 0) / 1048576;
+  el.textContent = items.length
+    ? `${items.length} ${items.length === 1 ? 'archivo de Drive guardado' : 'archivos de Drive guardados'} para usar sin internet (${mb < 0.1 ? '<0.1' : mb.toFixed(1)} MB). DrawSky guarda como máximo los ${CACHE_MAX} más recientes; los demás se vuelven a descargar al abrirlos.`
+    : 'No hay archivos de Drive guardados en la tableta.';
+}
+
+/* ---------- writing strokes into the PDF (flatten) and reading them back ---------- */
+const nf = v => { const r = Math.round(v * 100) / 100; return Object.is(r, -0) ? '0' : String(r); };
+function rgb(c){ const m = /^#?([0-9a-f]{6})$/i.exec(c || ''); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16 & 255, n >> 8 & 255, n & 255].map(v => nf(v / 255)).join(' '); }
+function circleOps(x, y, r){
+  const k = r * 0.5523;
+  return `${nf(x + r)} ${nf(y)} m ${nf(x + r)} ${nf(y + k)} ${nf(x + k)} ${nf(y + r)} ${nf(x)} ${nf(y + r)} c ${nf(x - k)} ${nf(y + r)} ${nf(x - r)} ${nf(y + k)} ${nf(x - r)} ${nf(y)} c ${nf(x - r)} ${nf(y - k)} ${nf(x - k)} ${nf(y - r)} ${nf(x)} ${nf(y - r)} c ${nf(x + k)} ${nf(y - r)} ${nf(x + r)} ${nf(y - k)} ${nf(x + r)} ${nf(y)} c f\n`;
+}
+const quadOps = (x0, y0, qx, qy, x1, y1) => `${nf(x0 + (qx - x0) * 2 / 3)} ${nf(y0 + (qy - y0) * 2 / 3)} ${nf(x1 + (qx - x1) * 2 / 3)} ${nf(y1 + (qy - y1) * 2 / 3)} ${nf(x1)} ${nf(y1)} c\n`;
+function strokeOps(s){
+  const P = s.pts; if (!P || !P.length) return '';
+  const c = rgb(s.color), pt = q => nf(q[0]) + ' ' + nf(q[1]), lw = w => nf(Math.max(0.1, w)) + ' w\n';
+  let o = `${c} RG ${c} rg\n`;
+  if (s.poly){
+    o += lw(s.t === 'hl' ? s.size : P[0][2]) + pt(P[0]) + ' m\n';
+    for (let i = 1; i < P.length; i++) o += pt(P[i]) + ' l\n';
+    return o + (s.closed ? 'h S\n' : 'S\n');
+  }
+  if (s.t === 'hl' || constStyle(s)){
+    o += lw(s.size) + pt(P[0]) + ' m\n';
+    if (P.length === 1) o += nf(P[0][0] + 0.01) + ' ' + nf(P[0][1]) + ' l\n';
+    let cx = P[0][0], cy = P[0][1];
+    for (let i = 1; i < P.length - 1; i++){
+      const mx = (P[i][0] + P[i + 1][0]) / 2, my = (P[i][1] + P[i + 1][1]) / 2;
+      o += quadOps(cx, cy, P[i][0], P[i][1], mx, my); cx = mx; cy = my;
+    }
+    if (P.length > 1) o += pt(P[P.length - 1]) + ' l\n';
+    return o + 'S\n';
+  }
+  if (P.length === 1) return o + circleOps(P[0][0], P[0][1], Math.max(0.1, P[0][2] / 2));
+  let lx = P[0][0], ly = P[0][1], cw = null;
+  for (let i = 1; i < P.length; i++){
+    const a = P[i - 1], b = P[i], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, w = nf(Math.max(0.1, a[2]));
+    if (w !== cw){ if (cw !== null) o += 'S\n'; o += w + ' w\n' + nf(lx) + ' ' + nf(ly) + ' m\n'; cw = w; }
+    o += quadOps(lx, ly, a[0], a[1], mx, my); lx = mx; ly = my;
+  }
+  const l = P[P.length - 1], w = nf(Math.max(0.1, l[2]));
+  if (w !== cw) o += 'S\n' + w + ' w\n' + nf(lx) + ' ' + nf(ly) + ' m\n';
+  return o + pt(l) + ' l\nS\n';
+}
+function tplOps(sp){
+  const t = sp.tpl; if (!t || t.type === 'none') return '';
+  const g = clamp(t.mm || 7, 2, 30) * MM, W = sp.wPt, H = sp.hPt;
+  let o = '';
+  if (t.type === 'lines'){
+    o += '0.412 0.549 0.725 RG 0.55 w\n';
+    for (let y = g * 2.5; y < H - g * 0.6; y += g) o += `0 ${nf(y)} m ${nf(W)} ${nf(y)} l\n`;
+    return o + 'S\n';
+  }
+  const ox = (W % g) / 2, oy = (H % g) / 2;
+  if (t.type === 'grid'){
+    o += '0.412 0.549 0.725 RG 0.55 w\n';
+    for (let x = ox; x <= W; x += g) o += `${nf(x)} 0 m ${nf(x)} ${nf(H)} l\n`;
+    for (let y = oy; y <= H; y += g) o += `0 ${nf(y)} m ${nf(W)} ${nf(y)} l\n`;
+    return o + 'S\n';
+  }
+  const r = Math.max(0.55, g * 0.035);
+  o += '0.373 0.49 0.667 rg\n';
+  for (let x = ox; x <= W; x += g) for (let y = oy; y <= H; y += g) o += circleOps(x, y, r);
+  return o;
+}
+/* strokes are stored in the page's on-screen coordinates (top-left origin); this matrix maps them onto the PDF page */
+function pageOps(sp, b, rot){
+  const { x0, y0, x1, y1 } = b;
+  const m = { 0:[1, 0, 0, -1, x0, y1], 90:[0, 1, 1, 0, x0, y0], 180:[-1, 0, 0, 1, x1, y0], 270:[0, -1, -1, 0, x1, y1] }[rot] || [1, 0, 0, -1, x0, y1];
+  let o = 'q\n' + m.map(nf).join(' ') + ' cm\n1 J 1 j\n';
+  const tp = tplOps(sp); if (tp) o += 'q /DSkyT gs\n' + tp + 'Q\n';
+  const hl = sp.strokes.filter(s => s.t === 'hl'), pen = sp.strokes.filter(s => s.t !== 'hl');
+  if (hl.length) o += 'q /DSkyHL gs\n' + hl.map(strokeOps).join('') + 'Q\n';
+  for (const s of pen) o += s.st === 'rotulador' && !s.poly ? 'q /DSkyMk gs\n' + strokeOps(s) + 'Q\n' : strokeOps(s);
+  return o + 'Q\n';
+}
+function hasBytes(u8, str){
+  const m = Array.from(str, c => c.charCodeAt(0)), n = u8.length - m.length;
+  for (let i = u8.indexOf(m[0]); i >= 0 && i <= n; i = u8.indexOf(m[0], i + 1)){
+    let j = 1; while (j < m.length && u8[i + j] === m[j]) j++;
+    if (j === m.length) return true;
+  }
+  return false;
+}
+async function inflate(u8){
+  const s = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate'));
+  return new Uint8Array(await new Response(s).arrayBuffer());
+}
+/* the Contents of a page as a list of indirect references (what the page had before DrawSky ink) */
+function baseRefs(node, ctx){
+  const { PDFName, PDFRef, PDFArray } = PDFLib, C = PDFName.of('Contents');
+  const v = node.get(C); if (!v) return [];
+  const arr = v instanceof PDFRef ? ctx.lookup(v) : v;
+  let refs;
+  if (arr instanceof PDFArray) refs = arr.asArray().map(e => e instanceof PDFRef ? e : ctx.register(e));
+  else refs = [v instanceof PDFRef ? v : ctx.register(v)];
+  node.set(C, ctx.obj(refs));
+  return refs;
+}
+async function packDoc(d){
+  await needPdfLib();
+  const { PDFDocument, PDFName, PDFDict } = PDFLib;
+  const snap = d.pages.map(p => ({ p, src:Object.assign({}, p.src), wPt:p.wPt, hPt:p.hPt, tpl:p.tpl ? Object.assign({}, p.tpl) : null, strokes:p.strokes.slice() }));
+  const ver = d.ver || 0;
+  const inPlace = !!d.cleanBytes && snap.length === d.srcCount && snap.every((s, i) => s.src.kind === 'pdf' && s.src.index === i);
+  let clean = d.cleanBytes;
+  if (!inPlace){
+    const out = await PDFDocument.create({ updateMetadata:false });
+    const idx = snap.filter(s => s.src.kind === 'pdf').map(s => s.src.index);
+    let copied = [];
+    if (idx.length){ const src = await PDFDocument.load(d.cleanBytes, { updateMetadata:false }); copied = await out.copyPages(src, idx); }
+    let k = 0;
+    for (const s of snap){ if (s.src.kind === 'pdf') out.addPage(copied[k++]); else out.addPage([s.wPt, s.hPt]); }
+    clean = await out.save({ useObjectStreams:false, updateFieldAppearances:false });
+  }
+  const pdf = await PDFDocument.load(clean, { updateMetadata:false });
+  const ctx = pdf.context, pages = pdf.getPages(), enc = new TextEncoder();
+  const GS = { DSkyT:{ Type:'ExtGState', CA:0.42, ca:0.62 }, DSkyHL:{ Type:'ExtGState', CA:0.45, ca:0.45, BM:'Multiply' }, DSkyMk:{ Type:'ExtGState', CA:0.9, ca:0.9 } };
+  const meta = snap.map((s, i) => {
+    const pg = pages[i], node = pg.node, base = baseRefs(node, ctx);
+    const o = { src:{ kind:'pdf', index:i }, w:r2(s.wPt), h:r2(s.hPt), tpl:s.tpl, strokes:s.strokes, base:base.map(r => [r.objectNumber, r.generationNumber]), ink:[] };
+    if (!s.strokes.length && !(s.tpl && s.tpl.type !== 'none')) return o;
+    node.normalize();
+    const res = node.Resources(), old = res.lookupMaybe(PDFName.of('ExtGState'), PDFDict);
+    const gs = old ? old.clone(ctx) : ctx.obj({});
+    for (const k in GS) gs.set(PDFName.of(k), ctx.obj(GS[k]));
+    res.set(PDFName.of('ExtGState'), gs);
+    const b = pg.getCropBox(), rot = ((pg.getRotation().angle % 360) + 360) % 360;
+    const ref = ctx.register(ctx.flateStream(enc.encode(pageOps(s, { x0:b.x, y0:b.y, x1:b.x + b.width, y1:b.y + b.height }, rot))));
+    node.addContentStream(ref);
+    o.ink = [[ref.objectNumber, ref.generationNumber]];
+    return o;
+  });
+  const data = { v:1, app:'DrawSky', name:d.name, kind:d.kind, pages:meta };
+  pdf.catalog.set(PDFName.of('DrawSky'), ctx.register(ctx.flateStream(enc.encode(JSON.stringify(data)))));
+  const bytes = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
+  data.pages.forEach(sp => { delete sp.base; delete sp.ink; });
+  return { bytes, clean, rebuilt:!inPlace, snap, ver, data, n:pages.length };
+}
+/* removes DrawSky ink from a saved PDF: returns the clean PDF plus the editable strokes */
+async function unpack(buf){
+  const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  if (!hasBytes(u8, '/DrawSky')) return { clean:u8, data:null };
+  try {
+    await needPdfLib();
+    const { PDFDocument, PDFName, PDFRef, PDFArray } = PDFLib;
+    const pdf = await PDFDocument.load(u8, { updateMetadata:false });
+    const ctx = pdf.context, K = PDFName.of('DrawSky'), C = PDFName.of('Contents');
+    const jr = pdf.catalog.get(K);
+    if (!(jr instanceof PDFRef)) return { clean:u8, data:null };
+    const js = ctx.lookup(jr);
+    let raw = js.contents;
+    const f = js.dict.get(PDFName.of('Filter'));
+    if (f && String(f) === '/FlateDecode') raw = await inflate(raw);
+    const data = JSON.parse(new TextDecoder().decode(raw));
+    const pages = pdf.getPages();
+    if (!data || data.v !== 1 || !Array.isArray(data.pages) || data.pages.length !== pages.length) throw new Error('no coincide');
+    const key = r => r.objectNumber + ' ' + r.generationNumber;
+    const keepAll = new Set();
+    const plans = pages.map((pg, i) => {
+      const sp = data.pages[i], cur = ctx.lookup(pg.node.get(C));
+      const curRefs = cur instanceof PDFArray ? cur.asArray().filter(x => x instanceof PDFRef) : [];
+      const have = new Set(curRefs.map(key));
+      if (!(sp.ink || []).every(r => have.has(r[0] + ' ' + r[1]))) throw new Error('trazos movidos');
+      const base = (sp.base || []).map(r => PDFRef.of(r[0], r[1]));
+      base.forEach(r => keepAll.add(key(r)));
+      return { pg, base, curRefs };
+    });
+    for (const { pg, base, curRefs } of plans){
+      for (const r of curRefs) if (!keepAll.has(key(r))) ctx.delete(r);
+      if (base.length) pg.node.set(C, ctx.obj(base)); else pg.node.delete(C);
+    }
+    pdf.catalog.delete(K); ctx.delete(jr);
+    const clean = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
+    data.pages.forEach((sp, i) => { sp.src = { kind:'pdf', index:i }; delete sp.base; delete sp.ink; });
+    return { clean, data };
+  } catch(e){ console.warn('Trazos de DrawSky no utilizables', e); return { clean:u8, data:null, broken:true }; }
+}
+async function applyPacked(d, pk){
+  d.cleanBytes = pk.clean; d.srcCount = pk.n;
+  if (!pk.rebuilt) return;
+  const live = !d.bg && docs.includes(d);
+  const npdf = live ? await loadPdfDoc(pk.clean) : null;
+  const map = new Map(), at = new Map();
+  pk.snap.forEach((s, i) => { at.set(s.p, i); if (s.src.kind === 'pdf' && !map.has(s.src.index)) map.set(s.src.index, i); });
+  for (const p of d.pages){
+    if (at.has(p)) p.src = { kind:'pdf', index:at.get(p) };
+    else if (p.src.kind === 'pdf') p.src = map.has(p.src.index) ? { kind:'pdf', index:map.get(p.src.index) } : { kind:'blank' };
+  }
+  d.undo.length = 0; d.redo.length = 0;
+  if (!live) return;
+  const old = d.pdf; d.pdf = npdf;
+  if (old){ try { old.destroy(); } catch(_){} }
+  d.pages.forEach(p => { p.rendered = false; });
+  if (d === doc && !homeOn){ updateVisible(); renderRail(); }
+}
+
+/* ---------- sync ---------- */
+const STATE = { saved:['Guardado', 'ok'], dirty:['Sin subir', 'warn'], saving:['Subiendo…', ''], offline:['Sin conexión', 'warn'], auth:['Toca para subir', 'warn'], error:['Reintentar', 'warn'], readonly:['Solo en la tableta', 'warn'] };
+function renderDriveBtn(){
+  const lbl = $('#driveLbl'), st = $('#driveSt'), d = doc;
+  if (homeOn || !d){ lbl.textContent = 'Abrir de Drive'; st.hidden = true; return; }
+  if (!d.drive){ lbl.textContent = 'Subir a Drive'; st.hidden = true; return; }
+  lbl.textContent = 'Guardar en Drive';
+  const s = STATE[d.readonly ? 'readonly' : d.dstate || 'saved'] || STATE.saved;
+  st.textContent = s[0]; st.className = s[1]; st.hidden = false;
+}
+function driveState(d, st){ d.dstate = st; if (d === doc && !homeOn) renderDriveBtn(); }
+function localSavedMsg(d){
+  if (!d.drive) return 'Guardado en esta tableta';
+  if (d.readonly) return 'Guardado en esta tableta (este PDF está protegido y no se puede escribir en Drive)';
+  if (!navigator.onLine) return 'Guardado en la tableta · se sube a Drive cuando vuelva internet';
+  if (!tokenOk(d.drive.email)) return 'Guardado en la tableta · toca "Guardar en Drive" para subirlo';
+  return prefs.autoSync ? 'Guardado en la tableta · se sube a Drive en unos segundos' : 'Guardado en la tableta · toca "Guardar en Drive" para subirlo';
+}
+function markDirty(d){
+  d.ver = (d.ver || 0) + 1;
+  if (!d.drive || d.readonly) return;
+  d.dirty = true;
+  const e = lib.find(x => x.key === d.key); if (e && !e.pending){ e.pending = true; libSave(); }
+  if (!d.syncing) driveState(d, !navigator.onLine ? 'offline' : tokenOk(d.drive.email) ? 'dirty' : 'auth');
+  if (prefs.autoSync) scheduleSync(d, SYNC_WAIT);
+}
+function scheduleSync(d, ms){ clearTimeout(d.syncT); d.syncT = setTimeout(() => { d.syncT = 0; if (d.dirty) syncDoc(d); }, ms); }
+/* the doc now lives in Drive under a new file id */
+function rekey(d, res, email, keepOld){
+  const oldKey = d.key, newKey = 'gd:' + res.id, e = lib.find(x => x.key === oldKey);
+  const thumb = e && e.thumb;
+  if (e){ if (keepOld) e.pending = false; else lib.splice(lib.indexOf(e), 1); }
+  store.del('drawsky:doc:' + oldKey);
+  d.key = newKey; d.drive = { email, id:res.id, rev:res.headRevisionId };
+  d.name = (res.name || d.name).replace(/\.pdf$/i, '');
+  libTouch(d, { drive:{ email, id:res.id }, thumb, owner:'Tú', opened:Date.now() });
+  store.set('drawsky:doc:' + newKey, serialize(d));
+  if (!d.bg){ persistTabs(); renderTabs(); if (d === doc && !homeOn) updateDocMeta(); }
+}
+async function finishSync(d, pk, res){
+  d.drive.rev = res.headRevisionId;
+  await applyPacked(d, pk);
+  await cachePut(d.drive.id, { bytes:pk.clean, rev:d.drive.rev, data:pk.data, n:pk.n, name:d.name });
+  if ((d.ver || 0) === pk.ver) d.dirty = false;
+  store.set('drawsky:doc:' + d.key, serialize(d));
+  libTouch(d, { drive:{ email:d.drive.email, id:d.drive.id }, pending:!!d.dirty });
+  driveState(d, d.dirty ? 'dirty' : 'saved');
+  if (d.dirty && prefs.autoSync) scheduleSync(d, 3000);
+  if (d === doc && !homeOn) setStatus(d.dirty ? 'Subido a Drive · hay cambios nuevos por subir' : 'Guardado en Google Drive');
+  if (homeOn) renderHome();
+}
+function syncFailed(d, e, interactive){
+  if (e && e.auth){ driveState(d, 'auth'); if (interactive) toast('Tu sesión de Google venció. Toca "Guardar en Drive" otra vez.'); return; }
+  if (e && /encrypt/i.test(e.message || '')){
+    d.readonly = true; driveState(d, 'readonly');
+    const le = lib.find(x => x.key === d.key); if (le){ le.readonly = true; le.pending = false; libSave(); }
+    toast('Este PDF está protegido por su autor: tus trazos se guardan en la tableta, pero Drive no deja escribir dentro de él.');
+    return;
+  }
+  console.warn(e);
+  driveState(d, navigator.onLine ? 'error' : 'offline');
+  if (interactive) toast(navigator.onLine ? 'No pude subir a Drive. Tus cambios siguen guardados en la tableta; vuelvo a intentarlo en un minuto.' : 'Sin internet: se sube cuando vuelva la conexión.');
+  if (navigator.onLine) scheduleSync(d, 60000);
+}
+async function syncDoc(d, opts = {}){
+  if (!d.drive || d.readonly) return;
+  if (d.syncing){ d.syncAgain = true; return; }
+  clearTimeout(d.syncT); d.syncT = 0;
+  const email = d.drive.email;
+  if (!navigator.onLine){ driveState(d, 'offline'); return; }
+  if (!tokenOk(email)){ driveState(d, 'auth'); return; }
+  d.syncing = true; d.syncAgain = false; driveState(d, 'saving');
+  if (!d.bg) flushSave(d);
+  try {
+    const pk = await packDoc(d);
+    let meta = null;
+    try { meta = await driveMeta(email, d.drive.id); } catch(e){ if (e.auth || e.status !== 404) throw e; }
+    let res;
+    if (meta && !meta.trashed && meta.headRevisionId === d.drive.rev){
+      res = await driveUpload(email, d.drive.id, pk.bytes, {});
+    } else {
+      /* changed somewhere else (or deleted): never overwrite, save a copy */
+      const lost = !meta || meta.trashed, oldId = d.drive.id;
+      const name = pdfName(lost ? d.name : d.name + ' (copia DrawSky)');
+      const parents = !lost && meta.parents && meta.parents.length ? meta.parents : null;
+      try { res = await driveUpload(email, null, pk.bytes, { name, mimeType:'application/pdf', parents:parents || [await driveFolder(email)] }); }
+      catch(e){ if (e.auth || !parents) throw e; res = await driveUpload(email, null, pk.bytes, { name, mimeType:'application/pdf', parents:[await driveFolder(email)] }); }
+      rekey(d, res, email, !lost);
+      if (!lost) idb.del(oldId);
+      toast(lost ? 'El archivo ya no estaba en tu Drive: lo guardé de nuevo en la carpeta DrawSky.' : `Este archivo cambió en otro lugar. Para no pisar nada, guardé tus trazos como copia: ${res.name}`);
+    }
+    await finishSync(d, pk, res);
+  } catch(e){ syncFailed(d, e, opts.interactive); }
+  finally {
+    d.syncing = false;
+    if (d.syncAgain){ d.syncAgain = false; if (d.dirty) scheduleSync(d, 2000); }
+  }
+}
+async function uploadNew(d, email){
+  if (d.syncing) return;
+  d.syncing = true; driveState(d, 'saving'); setStatus('Subiendo a Google Drive…'); renderDriveBtn();
+  const st = $('#driveSt'); st.textContent = 'Subiendo…'; st.className = ''; st.hidden = false;
+  try {
+    flushSave(d);
+    const pk = await packDoc(d);
+    const res = await driveUpload(email, null, pk.bytes, { name:pdfName(d.name), mimeType:'application/pdf', parents:[await driveFolder(email)] });
+    rekey(d, res, email, false);
+    await finishSync(d, pk, res);
+    toast('Listo: está en tu Google Drive, en la carpeta DrawSky.');
+  } catch(e){
+    if (e && /encrypt/i.test(e.message || '')) toast('Este PDF está protegido por su autor y no se puede escribir dentro de él.');
+    else toast(e && e.auth ? 'Tu sesión de Google venció. Inténtalo otra vez.' : 'No pude subirlo a Drive. Revisa tu internet e inténtalo otra vez.');
+    console.warn(e); renderDriveBtn(); setStatus('Guardado en esta tableta');
+  } finally { d.syncing = false; }
+}
+/* uploads pending changes, also from files that are not open */
+let syncingAll = false;
+async function syncPending(){
+  if (!navigator.onLine || syncingAll) return;
+  syncingAll = true;
+  try {
+    for (const d of docs.slice()) if (d.drive && d.dirty && !d.readonly && tokenOk(d.drive.email)) await syncDoc(d);
+    for (const e of lib.slice()){
+      if (!e.pending || !e.drive || e.readonly || docs.some(d => d.key === e.key) || !tokenOk(e.drive.email)) continue;
+      const c = await idb.get(e.drive.id), s = store.get('drawsky:doc:' + e.key);
+      if (!c || !s || !Array.isArray(s.pages)) continue;
+      const d = { bg:true, key:e.key, name:e.name, kind:e.kind, drive:{ email:e.drive.email, id:e.drive.id, rev:c.rev }, cleanBytes:c.bytes, srcCount:c.n,
+        pages:s.pages.map(sp => ({ src:sp.src, wPt:sp.w, hPt:sp.h, tpl:sp.tpl, strokes:sp.strokes || [] })), undo:[], redo:[], ver:0, dirty:true };
+      await syncDoc(d);
+    }
+  } finally { syncingAll = false; }
+  if (homeOn) renderHome();
+}
+function syncPendingTap(){
+  const need = lib.find(e => e.pending && e.drive && !tokenOk(e.drive.email));
+  if (!navigator.onLine){ toast('Sin internet: se suben solos cuando vuelva la conexión.'); return; }
+  if (need) withToken(need.drive.email, () => { toast('Subiendo cambios pendientes…'); syncPending(); });
+  else { toast('Subiendo cambios pendientes…'); syncPending(); }
+}
+
+/* ---------- opening from Drive ---------- */
+function showPicker(email, tk){
+  if (!pickerReady){ loadGoogle(); toast('El selector de Google todavía está cargando. Inténtalo otra vez en unos segundos.'); return; }
+  const P = google.picker, pdfs = () => new P.DocsView(P.ViewId.DOCS).setMimeTypes('application/pdf');
+  const pk = new P.PickerBuilder()
+    .addView(pdfs().setIncludeFolders(true).setParent('root'))
+    .addView(pdfs().setOwnedByMe(false))
+    .addView(pdfs().setStarred(true))
+    .addView(pdfs())
+    .enableFeature(P.Feature.SUPPORT_DRIVES)
+    .setOAuthToken(tk).setDeveloperKey(G.apiKey).setAppId(G.appId).setLocale('es')
+    .setTitle('Elige un PDF · ' + email)
+    .setSize(Math.max(320, Math.min(innerWidth - 24, 1051)), Math.max(360, Math.min(innerHeight - 24, 650)))
+    .setCallback(r => {
+      if (r[P.Response.ACTION] !== P.Action.PICKED) return;
+      const f = r[P.Response.DOCUMENTS][0];
+      openDriveFile(email, f[P.Document.ID], f[P.Document.NAME]);
+    }).build();
+  pk.setVisible(true);
+}
+const openPicker = email => withToken(email, showPicker);
+function openFromDrive(){
+  if (!navigator.onLine){ toast('Necesitas internet para elegir archivos de Drive. Los que ya abriste están en Inicio.'); return; }
+  chooseAccount('¿De qué cuenta?', openPicker);
+}
+async function openDriveFile(email, id, nameHint){
+  const key = 'gd:' + id;
+  const open = docs.find(d => d.key === key); if (open){ switchTo(open); return; }
+  if (!window.pdfjsLib){ toast('No se pudo cargar el lector de PDF. Revisa tu conexión y recarga la página.'); return; }
+  if (!workerMode) setupWorker();
+  const e0 = lib.find(x => x.key === key);
+  loading(true, 'Abriendo ' + (nameHint || 'archivo de Drive') + '…');
+  try {
+    let meta = null;
+    if (navigator.onLine && tokenOk(email)){
+      try { meta = await driveMeta(email, id); }
+      catch(err){
+        if (err.status === 404 && !(e0 && e0.pending)){ toast('Ese archivo ya no está en Drive o es de otra cuenta.'); return; }
+        if (!err.auth && err.status !== 404) console.warn(err);
+      }
+    }
+    const cached = await idb.get(id), local = store.get('drawsky:doc:' + key);
+    const pending = !!(e0 && e0.pending && local);
+    let clean, rev, data = null, cdata = null;
+    if (cached && (pending || !meta || meta.headRevisionId === cached.rev)){
+      clean = cached.bytes; rev = cached.rev; cdata = cached.data;
+      data = local && local.v === 2 ? local : cached.data;
+    } else if (meta){
+      loading(true, 'Descargando ' + meta.name + '…');
+      const buf = await (await gfetch(email, `${DRIVE}/files/${id}?alt=media&supportsAllDrives=true`)).arrayBuffer();
+      const up = await unpack(buf);
+      clean = up.clean; rev = meta.headRevisionId; data = cdata = up.data;
+      if (up.broken) toast('Este PDF se modificó con otra app: tus trazos anteriores quedan fijos, pero puedes seguir escribiendo encima.');
+    } else {
+      toast(navigator.onLine ? 'Conecta tu cuenta de Google para abrir este archivo.' : 'Este archivo no está guardado sin conexión. Conéctate a internet para abrirlo.');
+      return;
+    }
+    const pdf = await loadPdfDoc(clean);
+    const first = await pdf.getPage(1), vp = first.getViewport({ scale:1 });
+    const name = ((meta && meta.name) || (e0 && e0.name) || (data && data.name) || nameHint || 'Archivo de Drive').replace(/\.pdf$/i, '');
+    const d = newDoc({ name, key, kind:(data && data.kind === 'notebook') || (e0 && e0.kind === 'notebook') ? 'notebook' : 'pdf', pdf });
+    Object.assign(d, { cleanBytes:clean, srcCount:pdf.numPages, drive:{ email, id, rev }, ver:0, dirty:pending });
+    d.readonly = hasBytes(clean, '/Encrypt');
+    const fb = [];
+    for (let i = 0; i < pdf.numPages; i++) fb.push({ src:{ kind:'pdf', index:i }, w:vp.width, h:vp.height, tpl:null, strokes:[] });
+    buildPages(d, data && Array.isArray(data.pages) ? { v:2, pages:data.pages } : null, fb);
+    cachePut(id, { bytes:clean, rev, data:cdata, n:pdf.numPages, name });
+    addDoc(d);
+    store.set('drawsky:doc:' + key, serialize(d));
+    const owner = meta && meta.owners && meta.owners[0] ? (meta.owners[0].emailAddress === email ? 'Tú' : meta.owners[0].displayName) : (e0 && e0.owner) || 'Tú';
+    libTouch(d, { drive:{ email, id }, owner, pending, readonly:d.readonly });
+    driveState(d, d.readonly ? 'readonly' : pending ? (navigator.onLine ? 'dirty' : 'offline') : 'saved');
+    setStatus(d.readonly ? 'Este PDF está protegido: tus trazos se guardan solo en la tableta' : !meta && navigator.onLine === false ? 'Sin internet: abierto desde la tableta' : d.restored ? 'Tus trazos están listos para editar' : 'Listo para escribir con el S Pen');
+    if (pending && !d.readonly) scheduleSync(d, 1500);
+  } catch(err){
+    console.warn(err);
+    toast(err && err.auth ? 'Tu sesión de Google venció. Toca el archivo otra vez.' : err && err.name === 'PasswordException' ? 'Este PDF tiene contraseña. Quítasela para anotarlo.' : 'No pude abrir este archivo de Drive. Revisa tu internet e inténtalo otra vez.');
+  } finally { loading(false); }
+}
+function openDriveEntry(e){
+  const { email, id } = e.drive;
+  if (navigator.onLine && !tokenOk(email) && account(email)){
+    let done = false;
+    requestToken(email, got => { if (done) return; done = true; openDriveFile(email, id, e.name); });
+    return;
+  }
+  openDriveFile(email, id, e.name);
+}
+
+/* ---------- Drive settings ---------- */
+function renderDriveSettings(){
+  const el = $('#accList'); if (!el) return;
+  el.innerHTML = prefs.accounts.length ? prefs.accounts.map(a => `<div class="acc"><span class="av">${initial(a)}</span><div><strong>${esc(a.name || a.email)}</strong><small>${esc(a.email)}</small></div><button type="button" class="btn" data-rm="${esc(a.email)}">Quitar</button></div>`).join('')
+    : '<p class="hint" style="margin:0">Aún no conectaste ninguna cuenta. Puedes conectar varias (personal, de la universidad…).</p>';
+  $('#accAdd').innerHTML = svg('plus', 16) + (prefs.accounts.length ? 'Agregar otra cuenta' : 'Conectar Google Drive');
+  $('#autoSync').checked = !!prefs.autoSync;
+  cacheInfo();
+}
+$('#accList').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-rm]'); if (!b) return;
+  const email = b.dataset.rm;
+  if (lib.some(e => e.pending && e.drive && e.drive.email === email)){ toast('Esta cuenta tiene cambios sin subir. Súbelos antes de quitarla.'); return; }
+  const t = tokens[email];
+  if (t && window.google && google.accounts && google.accounts.oauth2) try { google.accounts.oauth2.revoke(t.t, () => {}); } catch(_){}
+  dropToken(email);
+  prefs.accounts = prefs.accounts.filter(a => a.email !== email); savePrefs();
+  renderDriveSettings(); if (homeOn) renderHome();
+  toast('Cuenta quitada de DrawSky. Tus archivos siguen en Drive.');
+});
+$('#accAdd').addEventListener('click', () => requestToken(null, email => { if (email) toast('Conectada: ' + email); }));
+$('#autoSync').addEventListener('change', e => { prefs.autoSync = e.target.checked; savePrefs(); if (prefs.autoSync) docs.forEach(d => { if (d.dirty) scheduleSync(d, 2000); }); });
+$('#freeSpace').addEventListener('click', async () => {
+  await pruneCache(true); cacheInfo();
+  toast('Listo. Se borraron las copias sin conexión; tus archivos siguen en Drive.');
+});
+$('#driveBtn').addEventListener('click', () => {
+  if (homeOn || !doc){ openFromDrive(); return; }
+  const d = doc;
+  if (d.kind === 'sample'){ toast('La hoja de prueba no se sube a Drive. Crea un cuaderno o abre un PDF.'); return; }
+  if (d.readonly){ toast('Este PDF está protegido por su autor: Drive no deja escribir dentro de él. Tus trazos quedan guardados en la tableta.'); return; }
+  if (d.drive){
+    if (!navigator.onLine){ toast('Sin internet: tus cambios están guardados en la tableta y se suben solos cuando vuelva la conexión.'); return; }
+    withToken(d.drive.email, () => {
+      if (!d.dirty && !d.syncing){ driveState(d, 'saved'); toast('Ya está guardado en Drive.'); return; }
+      d.dirty = true; syncDoc(d, { interactive:true });
+    });
+    return;
+  }
+  if (!navigator.onLine){ toast('Necesitas internet para subir a Drive.'); return; }
+  if (d.kind === 'pdf' && !d.cleanBytes){ toast('Vuelve a abrir este PDF para subirlo.'); return; }
+  chooseAccount('Subir a Google Drive', email => withToken(email, () => uploadNew(d, email)));
+});
+$('#hDrive').addEventListener('click', openFromDrive);
+window.addEventListener('online', () => {
+  loadGoogle();
+  docs.forEach(d => { if (d.drive && d.dirty && !d.syncing) driveState(d, tokenOk(d.drive.email) ? 'dirty' : 'auth'); });
+  setTimeout(syncPending, 1500);
+});
+window.addEventListener('offline', () => docs.forEach(d => { if (d.drive && d.dirty && !d.syncing) driveState(d, 'offline'); }));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(syncPending, 800); });
 
 /* ---------- strokes ---------- */
 const r2 = v => Math.round(v * 100) / 100;
@@ -2269,6 +2974,8 @@ dlg.addEventListener('click', e => {
   else if (d === 'create') createNotebook();
   else if (d === 'insert') insertPages();
   else if (d === 'rename') doRename();
+  else if (d === 'acc'){ const cb = st.cb, em = b.dataset.email; closeDlg(); cb(em); }
+  else if (d === 'accNew'){ const cb = st.cb; closeDlg(); requestToken(null, em => { if (em) cb(em); }); }
   else if (d === 'minus' || d === 'plus'){ st.count = clamp(st.count + (d === 'plus' ? 1 : -1), 1, 50); $('#fCount').textContent = st.count; }
 });
 dlg.addEventListener('input', e => {
@@ -2288,6 +2995,7 @@ function syncSheet(){
   $('#snap').checked = prefs.snap; $('#finger').checked = prefs.finger; $('#dblTap').checked = !!prefs.dblTap;
   document.querySelectorAll('#themeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tv === prefs.theme)));
   document.querySelectorAll('#dockSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dv === prefs.dock)));
+  renderDriveSettings();
 }
 function openSheet(){ syncSheet(); sheetWrap.hidden = false; }
 function closeSheet(){ sheetWrap.hidden = true; }
@@ -2328,6 +3036,9 @@ if (!prefs.seeded){
 }
 prefs.openNb.map(loadNotebook).filter(Boolean).forEach(d => { docs.push(d); libTouch(d); });
 showHome();
+loadGoogle();
+setTimeout(syncPending, 4000);
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if (document.fonts && document.fonts.ready){
   document.fonts.ready.then(() => { docs.forEach(d => { if (d.kind === 'sample') d.pages.forEach(p => p.rendered = false); }); updateVisible(); });
 }
