@@ -174,6 +174,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .rail button[aria-pressed="true"]{background:var(--sel-bg);color:var(--sel-ink);box-shadow:inset 0 -3px 0 var(--sel-line)}
 .rail button:disabled{opacity:.3}
 .rail .grip{height:22px;color:var(--muted);cursor:grab}
+.rail.min{gap:4px;opacity:.92}
 .rail hr{border:0;height:1px;width:24px;background:var(--line);margin:4px auto;flex:none}
 .rail button svg{width:20px;height:20px}
 .rail button.rc{width:26px;height:26px;margin:2px 0;border-radius:8px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
@@ -573,7 +574,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (15)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (16)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -2830,7 +2831,19 @@ function renderRail(){
   const items = ['hand', 'select', 'lasso', 'text', 'pen1', 'pen2', 'hl', 'eraser'];
   const kdR = kind(tool), favR = kdR === 'pen' || kdR === 'text' ? prefs.fav.pen : kdR === 'hl' ? prefs.fav.hl : null, curC = prefs.tools[tool] && prefs.tools[tool].color;
   const u = doc ? doc.undo.length : 0, r = doc ? doc.redo.length : 0;
+  const fold = rail.classList.contains('left') ? (prefs.railMin ? 'right' : 'left') : (prefs.railMin ? 'left' : 'right');
+  rail.classList.toggle('min', !!prefs.railMin);
+  if (prefs.railMin){
+    const c0 = prefs.tools[tool] && prefs.tools[tool].color;
+    rail.innerHTML = `<button type="button" data-act="railmin" aria-label="Mostrar la barra completa" title="Mostrar la barra">${svg(fold, 18)}</button>` +
+      `<button type="button" data-tool="${tool}" aria-pressed="true" aria-label="${toolName(tool)}" title="${toolName(tool)}">${svg(TOOL_INFO[tool].icon)}${c0 ? `<i class="dot" style="background:${c0}"></i>` : ''}</button>` +
+      `<button type="button" data-act="undo" aria-label="Deshacer" title="Deshacer" ${u ? '' : 'disabled'}>${svg('undo')}</button>`;
+    const c = prefs.tools[tool] && prefs.tools[tool].color;
+    fab.style.setProperty('--tc', c || 'var(--accent)'); fab.innerHTML = svg(TOOL_INFO[tool].icon, 26);
+    return;
+  }
   rail.innerHTML = `<button type="button" class="grip" data-grip aria-label="Arrastra para mover la barra o volverla ruedita" title="Arrastra para mover">${svg('grip', 20)}</button>` +
+    `<button type="button" data-act="railmin" aria-label="Contraer la barra" title="Contraer la barra">${svg(fold, 18)}</button>` +
     items.map(t => {
       const c = prefs.tools[t] && prefs.tools[t].color;
       return `<button type="button" data-tool="${t}" aria-label="${toolName(t)}" title="${toolName(t)}${t === tool ? ' (toca otra vez para color y grosor)' : ''}" aria-pressed="${t === tool}">${svg(TOOL_INFO[t].icon)}${c ? `<i class="dot" style="background:${c}"></i>` : ''}</button>`;
@@ -2845,6 +2858,7 @@ function renderRail(){
 let clearArmed = false;
 function act(a){
   if (a !== 'clearpage') clearArmed = false;
+  if (a === 'railmin'){ prefs.railMin = !prefs.railMin; savePrefs(); closeToolPanel(); renderRail(); return; }
   if (a === 'hlstyle'){ const c = prefs.tools.hl; c.style = c.style === 'rotulador' ? 'resaltador' : 'rotulador'; savePrefs(); toast(c.style === 'rotulador' ? 'Rotulador: trazo de plumón, sin transparencia de resaltado' : 'Resaltador'); return; }
   if (a === 'pstraight'){ const c = prefs.tools[tool]; c.straight = !c.straight; savePrefs(); return; }
   if (a.startsWith('pdash:')){ prefs.tools[tool].dash = a.slice(6); savePrefs(); return; }
