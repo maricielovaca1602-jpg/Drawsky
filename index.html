@@ -214,6 +214,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .wpal .sq{width:24px;min-width:24px;height:24px;border-radius:7px}
 .wsep{flex-basis:100%;height:0}
 .doc-name{cursor:text}
+.crumbs{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px}
+.crumb{border:0;background:transparent;color:var(--accent);font:inherit;padding:2px 4px;border-radius:8px}
+.crumb.cur{color:var(--fg)}
+.csep{color:var(--muted);font-weight:400}
+.h-card .cover{position:relative}
+.h-card .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .name-edit{font:inherit;font-weight:600;color:var(--fg);background:var(--surface-2);border:1px solid var(--accent);border-radius:8px;padding:2px 8px;width:100%;box-sizing:border-box;-webkit-user-select:text;user-select:text}
 .dot{position:absolute;right:6px;bottom:6px;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px var(--surface)}
 
@@ -566,6 +572,10 @@ input[type=range]{accent-color:var(--accent)}
       <input type="checkbox" class="switch" id="autoSync" aria-label="Subir cambios automáticamente">
     </div>
     <div class="row">
+      <div><div class="lab">Ver todo mi Drive en Inicio</div><p class="hint">Muestra tus carpetas, PDFs e imágenes de Drive dentro de DrawSky, sin la ventanita de Google. Pide a Google un permiso más amplio (ver y editar todo tu Drive); puedes apagarlo cuando quieras y DrawSky vuelve al permiso pequeño.</p></div>
+      <input type="checkbox" class="switch" id="fullDrive" aria-label="Ver todo mi Drive en Inicio">
+    </div>
+    <div class="row">
       <div><div class="lab">Guardar en Drive todo lo que edites</div><p class="hint">Los PDFs que abras desde este aparato, las imágenes y los cuadernos nuevos se suben solos a la carpeta DrawSky de tu primera cuenta cuando empiezas a escribir. Así los ves en la tableta, el celular y la computadora.</p></div>
       <input type="checkbox" class="switch" id="autoUpload" aria-label="Guardar en Drive todo lo que edites">
     </div>
@@ -574,7 +584,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (16)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (17)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -1029,11 +1039,12 @@ function renderHome(){
       `<button type="button" class="h-nav" data-hf="${k}" aria-current="${homeFilter === k}">${svg(ic, 20)}<span>${l}</span><b>${counts[k]}</b></button>`).join('') +
     `<h3>Carpetas</h3>` + allFolders().map(f => { const m = folderMeta(f); return `<button type="button" class="h-nav" data-hf="f:${esc(f)}" aria-current="${homeFilter === 'f:' + f}">${folderSvg(m.c, m.i, 'fmini')}<span>${esc(f)}</span><b>${lib.filter(e => e.folder === f).length}</b></button>`; }).join('') +
     `<button type="button" class="h-nav" data-newfolder="1">${svg('plus', 20)}<span>Nueva carpeta</span></button>` +
-    `<h3>Google Drive</h3><button type="button" class="h-nav" data-hf="drive" aria-current="${homeFilter === 'drive'}">${svg('cloud', 20)}<span>En Drive</span><b>${counts.drive}</b></button>` +
+    `<h3>Google Drive</h3>` + (prefs.fullDrive ? prefs.accounts.map(a => [['root', 'Mi unidad', 'cloud'], ['shared', 'Compartidos conmigo', 'share'], ['recent', 'Recientes', 'pages']].map(([id, l, ic]) => `<button type="button" class="h-nav" data-dbrowse="${esc(a.email)}|${id}|${l}" aria-current="${homeFilter === 'gdrive' && dnav && dnav.email === a.email && dnav.path[0].id === id}">${svg(ic, 20)}<span>${l}${prefs.accounts.length > 1 ? ' · ' + esc(a.email.split('@')[0]) : ''}</span></button>`).join('')).join('') : '') + `<button type="button" class="h-nav" data-hf="drive" aria-current="${homeFilter === 'drive'}">${svg('cloud', 20)}<span>En Drive</span><b>${counts.drive}</b></button>` +
     (pend ? `<button type="button" class="h-nav warn" data-sync="1" title="Subir ahora">${svg('share', 20)}<span>Sin subir</span><b>${pend}</b></button>` : '') +
     (prefs.accounts.length ? `<button type="button" class="h-nav" data-refresh="1">${svg('redo', 20)}<span>Actualizar lista</span></button>` : '') +
     prefs.accounts.map(a => `<button type="button" class="h-nav" data-acc="${esc(a.email)}" title="Abrir un PDF de ${esc(a.email)}"><span class="av">${initial(a)}</span><span>${esc(a.email)}</span></button>`).join('') +
     `<button type="button" class="h-nav" data-acc="">${svg('plus', 20)}<span>${prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive'}</span></button>`;
+  if (homeFilter === 'gdrive'){ renderDriveBrowser(); return; }
   const fsel = homeFilter.startsWith('f:') ? homeFilter.slice(2) : null;
   $('#hTitle').innerHTML = fsel ? `<button type="button" class="btn back-btn" data-hf-back="1" aria-label="Volver">${svg('left', 18)}</button>${folderSvg(folderMeta(fsel).c, folderMeta(fsel).i, 'fmini big')} ${esc(fsel)} <button type="button" class="btn" data-editfolder="${esc(fsel)}" style="height:32px;font-size:12.5px;margin-left:8px">${svg('edit', 16)}Editar</button>` : ({ all:'Inicio', notebook:'Cuadernos', pdf:'PDFs', image:'Imágenes', drive:'En Google Drive' }[homeFilter] || 'Todos tus archivos');
   const rootView = homeFilter === 'all' && !homeQuery;
@@ -1111,6 +1122,8 @@ $('#hSide').addEventListener('click', e => {
   if (a){ if (a.dataset.acc) openPicker(a.dataset.acc); else requestToken(null, (email, tk) => { if (email) showPicker(email, tk); }); return; }
   if (e.target.closest('[data-sync]')){ syncPendingTap(); return; }
   if (e.target.closest('[data-refresh]')){ refreshDriveTap(); return; }
+  const db = e.target.closest('[data-dbrowse]');
+  if (db){ const [em, id, nm] = db.dataset.dbrowse.split('|'); if (!tokenOk(em)) withToken(em, () => openDriveBrowser(em, id, nm)); else openDriveBrowser(em, id, nm); return; }
   if (e.target.closest('[data-newfolder]')){ openFolderEdit(null); return; }
   const b = e.target.closest('[data-hf]'); if (!b) return;
   homeFilter = b.dataset.hf; renderHome();
@@ -1334,7 +1347,8 @@ function loadGoogle(){
 /* accounts & tokens (one token per Google account, about 1 hour each) */
 const TOK_KEY = 'drawsky:tok';
 const tokens = store.get(TOK_KEY) || {};
-const tokenOk = email => { const t = email && tokens[email]; return t && t.exp > Date.now() + 60000 ? t.t : null; };
+const curScope = () => prefs.fullDrive ? 'https://www.googleapis.com/auth/drive' : G.scope;
+const tokenOk = email => { const t = email && tokens[email]; return t && t.exp > Date.now() + 60000 && (!prefs.fullDrive || t.sc === 'full') ? t.t : null; };
 function dropToken(email){ delete tokens[email]; store.set(TOK_KEY, tokens); }
 const account = email => prefs.accounts.find(a => a.email === email);
 const initial = a => esc(((a.name || a.email || '?').trim()[0] || '?').toUpperCase());
@@ -1350,16 +1364,16 @@ function requestToken(hint, done){
   let fin = false;
   const end = (...a) => { if (!fin){ fin = true; done(...a); } };
   const client = oa.initTokenClient({
-    client_id:G.clientId, scope:G.scope,
+    client_id:G.clientId, scope:curScope(),
     callback: async r => {
       if (!r || !r.access_token){ end(null); return; }
-      if (oa.hasGrantedAllScopes && !oa.hasGrantedAllScopes(r, G.scope)){ toast('Para usar Drive, marca la casilla de permiso de Google Drive al conectar.'); end(null); return; }
+      if (oa.hasGrantedAllScopes && !oa.hasGrantedAllScopes(r, curScope())){ toast('Para usar Drive, marca la casilla de permiso de Google Drive al conectar.'); end(null); return; }
       try {
         const res = await fetch(DRIVE + '/about?fields=user(displayName,emailAddress,photoLink)', { headers:{ Authorization:'Bearer ' + r.access_token } });
         if (!res.ok) throw new Error('about ' + res.status);
         const u = (await res.json()).user || {}, email = u.emailAddress;
         if (!email) throw new Error('sin correo');
-        tokens[email] = { t:r.access_token, exp:Date.now() + (+r.expires_in || 3600) * 1000 }; store.set(TOK_KEY, tokens);
+        tokens[email] = { t:r.access_token, exp:Date.now() + (+r.expires_in || 3600) * 1000, sc:prefs.fullDrive ? 'full' : 'file' }; store.set(TOK_KEY, tokens);
         let a = account(email);
         if (!a){ a = { email }; prefs.accounts.push(a); }
         a.name = u.displayName || email;
@@ -1998,7 +2012,7 @@ function renderDriveSettings(){
   el.innerHTML = prefs.accounts.length ? prefs.accounts.map(a => `<div class="acc"><span class="av">${initial(a)}</span><div><strong>${esc(a.name || a.email)}</strong><small>${esc(a.email)}</small></div><button type="button" class="btn" data-rm="${esc(a.email)}">Quitar</button></div>`).join('')
     : '<p class="hint" style="margin:0">Aún no conectaste ninguna cuenta. Puedes conectar varias (personal, de la universidad…).</p>';
   $('#accAdd').innerHTML = svg('plus', 16) + (prefs.accounts.length ? 'Agregar otra cuenta' : 'Conectar Google Drive');
-  $('#autoSync').checked = !!prefs.autoSync; $('#autoUpload').checked = !!prefs.autoUpload;
+  $('#autoSync').checked = !!prefs.autoSync; $('#autoUpload').checked = !!prefs.autoUpload; $('#fullDrive').checked = !!prefs.fullDrive;
   cacheInfo();
 }
 $('#accList').addEventListener('click', ev => {
@@ -2014,6 +2028,7 @@ $('#accList').addEventListener('click', ev => {
 });
 $('#accAdd').addEventListener('click', () => requestToken(null, email => { if (email) toast('Conectada: ' + email); }));
 $('#autoUpload').addEventListener('change', e => { prefs.autoUpload = e.target.checked; savePrefs(); });
+$('#fullDrive').addEventListener('change', e => enableFullDrive(e.target.checked));
 $('#autoSync').addEventListener('change', e => { prefs.autoSync = e.target.checked; savePrefs(); if (prefs.autoSync) docs.forEach(d => { if (d.dirty) scheduleSync(d, 2000); }); });
 $('#freeSpace').addEventListener('click', async () => {
   await pruneCache(true); cacheInfo();
@@ -4568,6 +4583,92 @@ $('#docName').addEventListener('click', () => {
   inp.addEventListener('keydown', ev => { if (ev.key === 'Enter'){ ev.preventDefault(); finish(true); } else if (ev.key === 'Escape'){ ev.preventDefault(); finish(false); } });
   inp.addEventListener('blur', () => finish(true));
 });
+
+/* ---------- browse the whole Google Drive inside Inicio (optional, needs the bigger permission) ---------- */
+let dnav = null; /* { email, path:[{ id, name }], items, loading, err } */
+const DFOLDER = 'application/vnd.google-apps.folder';
+function openDriveBrowser(email, rootId, rootName){
+  dnav = { email, path:[{ id:rootId, name:rootName }], items:null };
+  homeFilter = 'gdrive'; renderHome(); loadDriveFolder();
+}
+async function loadDriveFolder(){
+  const nav = dnav; if (!nav) return;
+  const cur = nav.path[nav.path.length - 1];
+  nav.items = null; nav.err = null;
+  if (homeOn && homeFilter === 'gdrive') renderHome();
+  if (!navigator.onLine){ nav.err = 'Sin internet no puedo mostrar tu Drive. Los archivos que ya abriste están en Todos.'; renderHome(); return; }
+  if (!tokenOk(nav.email)){ nav.err = 'auth'; renderHome(); return; }
+  const types = `(mimeType='${DFOLDER}' or mimeType='application/pdf' or mimeType='image/jpeg' or mimeType='image/png' or mimeType='image/webp')`;
+  const q = cur.id === 'shared' ? `sharedWithMe and trashed=false and ${types}` : cur.id === 'recent' ? `trashed=false and mimeType!='${DFOLDER}' and ${types}` : `'${cur.id}' in parents and trashed=false and ${types}`;
+  const order = cur.id === 'recent' ? 'viewedByMeTime desc' : 'folder,name_natural';
+  try {
+    let items = [], token = '';
+    do {
+      const r = await (await gfetch(nav.email, `${DRIVE}/files?q=${encodeURIComponent(q)}&orderBy=${encodeURIComponent(order)}&pageSize=200&fields=nextPageToken,files(id,name,mimeType,modifiedTime,thumbnailLink,iconLink)&includeItemsFromAllDrives=true&supportsAllDrives=true${token ? '&pageToken=' + token : ''}`)).json();
+      items = items.concat(r.files || []); token = r.nextPageToken || '';
+    } while (token && items.length < 600 && cur.id !== 'recent');
+    if (dnav !== nav) return;
+    nav.items = cur.id === 'recent' ? items.slice(0, 60) : items;
+  } catch(e){
+    console.warn(e);
+    if (dnav !== nav) return;
+    nav.err = e.auth ? 'auth' : e.status === 403 ? 'perm' : 'No pude leer esta carpeta de Drive. Inténtalo otra vez.';
+  }
+  if (homeOn && homeFilter === 'gdrive') renderHome();
+}
+function renderDriveBrowser(){
+  const nav = dnav;
+  if (!nav){ homeFilter = 'all'; renderHome(); return; }
+  $('#hTitle').innerHTML = `<span class="crumbs">${nav.path.map((p, i) => i < nav.path.length - 1 ? `<button type="button" class="crumb" data-crumb="${i}">${esc(p.name)}</button><span class="csep">›</span>` : `<span class="crumb cur">${esc(p.name)}</span>`).join('')}</span>`;
+  let h = '';
+  if (nav.err === 'auth') h = `<div class="h-empty">Google pide confirmar tu cuenta otra vez.<br><button type="button" class="btn primary" data-dauth="1" style="margin-top:12px">Conectar ${esc(nav.email)}</button></div>`;
+  else if (nav.err === 'perm') h = `<div class="h-empty">Falta el permiso para ver todo tu Drive.<br><button type="button" class="btn primary" data-dauth="1" style="margin-top:12px">Dar permiso</button></div>`;
+  else if (nav.err) h = `<div class="h-empty">${esc(nav.err)}</div>`;
+  else if (!nav.items) h = `<div class="h-empty"><span class="spin"></span> Cargando tu Drive…</div>`;
+  else {
+    let items = nav.items;
+    if (homeQuery) items = items.filter(f => (f.name || '').toLowerCase().includes(homeQuery));
+    const folders = items.filter(f => f.mimeType === DFOLDER), files = items.filter(f => f.mimeType !== DFOLDER);
+    if (folders.length) h += `<div class="h-sec">Carpetas</div><div class="h-folders">${folders.map(f => `<div class="fcard" role="button" tabindex="0" data-dfolder="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir carpeta ${esc(f.name)}">${folderSvg('#b8c4d6', 'fdoc')}<strong>${esc(f.name)}</strong></div>`).join('')}</div>`;
+    if (files.length) h += `<div class="h-sec">Archivos</div><div class="h-grid">${files.map(f => {
+      const img = /^image\//.test(f.mimeType), known = lib.find(e => e.drive && e.drive.id === f.id);
+      return `<div class="h-card" role="button" tabindex="0" data-dfile="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir ${esc(f.name)}">
+        <div class="cover">${known && known.thumb ? `<img src="${known.thumb}" alt="">` : f.thumbnailLink ? `<img src="${esc(f.thumbnailLink)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}${svg(img ? 'image' : 'pdf', 28)}</div>
+        <strong>${esc(stripExt(f.name))}</strong><small>${img ? 'Imagen' : 'PDF'} · ${relTime(Date.parse(f.modifiedTime))}${known ? ' · ' + svg('check', 12) : ''}</small></div>`;
+    }).join('')}</div>`;
+    if (!folders.length && !files.length) h = `<div class="h-empty">${homeQuery ? 'No hay nada con ese nombre aquí.' : 'No hay PDFs, imágenes ni carpetas aquí.'}</div>`;
+  }
+  $('#hList').innerHTML = h;
+}
+$('#hList').addEventListener('click', ev => {
+  if (homeFilter !== 'gdrive' || !dnav) return;
+  const fo = ev.target.closest('[data-dfolder]');
+  if (fo){ ev.stopImmediatePropagation(); dnav.path.push({ id:fo.dataset.dfolder, name:fo.dataset.name }); loadDriveFolder(); $('#hList').scrollTop = 0; return; }
+  const fi = ev.target.closest('[data-dfile]');
+  if (fi){ ev.stopImmediatePropagation(); openDriveFile(dnav.email, fi.dataset.dfile, fi.dataset.name); return; }
+  if (ev.target.closest('[data-dauth]')){ ev.stopImmediatePropagation(); const em = dnav.email; requestToken(em, got => { if (got) loadDriveFolder(); }); }
+}, true);
+$('#hTitle').addEventListener('click', e => {
+  const c = e.target.closest('[data-crumb]'); if (!c || !dnav) return;
+  dnav.path = dnav.path.slice(0, +c.dataset.crumb + 1); loadDriveFolder();
+});
+function enableFullDrive(on){
+  prefs.fullDrive = on; savePrefs();
+  if (!on && window.google && google.accounts && google.accounts.oauth2) Object.values(tokens).forEach(t => { try { google.accounts.oauth2.revoke(t.t, () => {}); } catch(_){} });
+  Object.keys(tokens).forEach(dropToken);
+  if (on){
+    const a = prefs.accounts[0];
+    requestToken(a ? a.email : null, got => {
+      if (got){ toast('Listo: tu Drive completo aparece en Inicio, en la columna izquierda.'); if (homeOn) renderHome(); }
+      else { prefs.fullDrive = false; savePrefs(); renderDriveSettings(); toast('No se dio el permiso. Todo sigue como antes.'); }
+    });
+  } else {
+    if (homeFilter === 'gdrive'){ homeFilter = 'all'; dnav = null; }
+    toast('Listo: DrawSky vuelve a ver solo los archivos que abres con ella.');
+    if (homeOn) renderHome();
+  }
+  renderDriveSettings();
+}
 
 /* ---------- settings sheet ---------- */
 const sheetWrap = $('#sheetWrap');

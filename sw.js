@@ -1,5 +1,5 @@
 /* DrawSky offline shell: the app opens without internet. Pages are fetched fresh when online (so updates arrive), with the cached copy as fallback. */
-const CACHE = 'drawsky-v16';
+const CACHE = 'drawsky-v17';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
