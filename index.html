@@ -375,6 +375,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .tsize input{width:150px;margin:0}
 .drawer-wrap.edit .drawer{width:100%;border-right:0}
 .thumbs{flex:1;overflow:auto;padding:16px;display:grid;grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));gap:18px 14px;align-content:start;touch-action:none}
+.drawer-wrap.listm .drawer{width:min(380px,92vw)}
+.thumbs.listv{display:block;touch-action:pan-y}
+.dr-list{display:flex;flex-direction:column;gap:6px}
+.dr-list .idx-tabs{margin:0 0 4px}
 .dr-mode{order:5;flex:1 1 100%;display:flex}
 .dr-mode button{flex:1}
 .dr-sec,.dr-empty,.dr-note{grid-column:1/-1}
@@ -589,7 +593,6 @@ input[type=range]{accent-color:var(--accent)}
     <button class="icon-btn" type="button" id="tplBtn" aria-label="Plantilla de hoja" title="Plantilla de hoja"></button>
     <button class="icon-btn" type="button" id="noteBtn" aria-label="Agregar nota" title="Agregar nota" aria-pressed="false"></button>
     <button class="icon-btn" type="button" id="markBtn" aria-label="Marcar esta página" title="Marcar esta página" aria-pressed="false"></button>
-    <button class="icon-btn" type="button" id="idxBtn" aria-label="Marcadores y notas" title="Marcadores y notas"></button>
     <button class="icon-btn" type="button" id="searchBtn" aria-label="Buscar en el PDF" title="Buscar en el PDF"></button>
     <div class="status" id="status">Listo para escribir con el S Pen</div>
     <div class="zoom">
@@ -621,7 +624,7 @@ input[type=range]{accent-color:var(--accent)}
 
 <div class="drawer-wrap" id="drawerWrap" hidden>
   <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle">
-    <div class="dr-h"><h2 id="drTitle">Páginas</h2><div class="seg dr-mode" id="drMode"><button type="button" data-dm="pages">Páginas</button><button type="button" data-dm="toc">Índice</button></div><label class="tsize" id="drSize"><span>Tamaño</span><input type="range" id="thumbW" min="70" max="260" step="10" aria-label="Tamaño de las miniaturas"></label><button class="btn" type="button" id="drEdit">Editar</button><button class="icon-btn" type="button" id="drClose" aria-label="Cerrar páginas"></button></div>
+    <div class="dr-h"><h2 id="drTitle">Páginas</h2><div class="seg dr-mode" id="drMode"><button type="button" data-dm="pages">Páginas</button><button type="button" data-dm="toc">Índice</button><button type="button" data-dm="notes">Notas</button></div><label class="tsize" id="drSize"><span>Tamaño</span><input type="range" id="thumbW" min="70" max="260" step="10" aria-label="Tamaño de las miniaturas"></label><button class="btn" type="button" id="drEdit">Editar</button><button class="icon-btn" type="button" id="drClose" aria-label="Cerrar páginas"></button></div>
     <div class="thumbs" id="thumbs"></div>
     <div class="dr-foot" id="drFoot" hidden></div>
   </aside>
@@ -698,7 +701,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (25)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (26)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -773,7 +776,7 @@ const svg = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" 
 $('#icDrive').innerHTML = svg('cloud', 20);
 $('#setBtn').innerHTML = svg('settings'); $('#sheetClose').innerHTML = svg('close'); $('#drClose').innerHTML = svg('close');
 $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); $('#zFit').innerHTML = svg('fit', 20);
-$('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#idxBtn').innerHTML = svg('list', 20); $('#searchBtn').innerHTML = svg('search', 20);
+$('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#searchBtn').innerHTML = svg('search', 20);
 $('#findPrev').innerHTML = svg('up', 18); $('#findNext').innerHTML = svg('down', 18); $('#findClose').innerHTML = svg('close', 18);
 $('#icM1').innerHTML = svg('folder', 22); $('#icM2').innerHTML = svg('book', 22);
 $('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
@@ -3527,15 +3530,18 @@ function renderDrawer(){
   const tw = clamp(+prefs.thumbW || 120, 70, 260); $('#thumbW').value = tw;
   thumbsEl.style.gridTemplateColumns = drawerEdit ? `repeat(auto-fill, ${tw}px)` : '';
   thumbsEl.style.justifyContent = drawerEdit ? 'center' : '';
-  const rowH = 0, tocMode = !drawerEdit && prefs.drMode === 'toc';
+  const rowH = 0, mode = drawerEdit ? 'pages' : ['toc', 'notes'].includes(prefs.drMode) ? prefs.drMode : 'pages', listMode = mode !== 'pages';
   $('#drMode').hidden = drawerEdit;
-  document.querySelectorAll('#drMode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dm === (tocMode ? 'toc' : 'pages'))));
+  $('#drEdit').hidden = listMode; $('#drTitle').textContent = drawerEdit ? 'Editar páginas' : mode === 'toc' ? 'Índice' : mode === 'notes' ? 'Notas' : 'Páginas';
+  drawerWrap.classList.toggle('listm', listMode);
+  document.querySelectorAll('#drMode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dm === mode)));
   const thumbHTML = p => `<button type="button" class="thumb${sel.has(p) ? ' sel' : ''}" data-i="${p.i}" aria-current="${p.i === doc.cur}" aria-label="Página ${p.i + 1}"${drawerEdit ? ` aria-pressed="${sel.has(p)}"` : ''}>
       <span class="tc" style="aspect-ratio:${r2(p.wPt)}/${r2(p.hPt)}${rowH ? `;width:min(100%,${Math.round(rowH * p.wPt / p.hPt)}px)` : ''}"><canvas></canvas>${drawerEdit ? `<i class="ck">${sel.has(p) ? svg('check', 14) : ''}</i>` : ''}</span>
       <span class="lbl2">${p.i + 1}${p.tpl && p.tpl.type !== 'none' ? ' · ' + TPL_NAMES[p.tpl.type] : ''}</span>
     </button>`;
-  thumbsEl.classList.toggle('tocv', tocMode);
-  thumbsEl.innerHTML = tocMode ? drawerTocHTML(thumbHTML) : doc.pages.map(thumbHTML).join('');
+  thumbsEl.classList.toggle('listv', listMode);
+  thumbsEl.innerHTML = listMode ? drawerListHTML(mode) : doc.pages.map(thumbHTML).join('');
+  if (listMode){ renderDrawerFoot(); const here = thumbsEl.querySelector('.toc-row.here'); if (here) here.scrollIntoView({ block:'center' }); return; }
   thumbObs = new IntersectionObserver(entries => {
     for (const en of entries){
       if (!en.isIntersecting) continue;
@@ -3547,36 +3553,10 @@ function renderDrawer(){
   thumbsEl.querySelectorAll('.thumb').forEach(b => thumbObs.observe(b));
   renderDrawerFoot();
 }
-/* pages grouped under the titles of my index (or the book's): a chapter shows its pages until the next title */
-function drawerTocHTML(thumbHTML){
-  const d = doc;
-  let secs = allBms(d).map(({ p, b, j }) => ({ id:'m' + (b.id || p.i + '_' + j), t:bmTitle(b, p), lv:b.lv || 1, c:b.c, page:p.i }));
-  let from = 'mine';
-  if (!secs.length && d.bookToc && d.bookToc.length){ secs = d.bookToc.filter(x => x.page >= 0).map(x => ({ id:'k' + x.id, t:x.t, lv:x.lv, page:x.page })); from = 'book'; }
-  if (!secs.length){
-    if (d.pdf && !d.bookToc) bookToc(d).then(t => { if (t.length && !drawerWrap.hidden && prefs.drMode === 'toc') renderDrawer(); });
-    return `<div class="dr-empty"><p>Aún no tienes títulos en tu índice.</p><p class="hint">Marca una página con el botón del marcador de abajo, ponle título y elige Capítulo, Tema o Subtema. Aquí verás tus páginas agrupadas por esos títulos.</p></div>`;
-  }
-  secs.sort((a, b) => a.page - b.page);
-  let h = from === 'book' ? `<p class="dr-note">Índice del libro. Tus propios marcadores aparecerán aquí cuando los crees.</p>` : '';
-  if (secs[0].page > 0) secs.unshift({ id:'start', t:'Inicio', lv:1, page:0, start:true });
-  let hideBelow = 0;
-  secs.forEach((x, i) => {
-    if (hideBelow && x.lv > hideBelow) return;
-    hideBelow = 0;
-    const next = secs.slice(i + 1).find(y => y.page > x.page) || null, same = secs[i + 1] && secs[i + 1].page === x.page;
-    const end = same ? x.page - 1 : next ? next.page - 1 : d.pages.length - 1;
-    const kids = secs[i + 1] && secs[i + 1].lv > x.lv, closed = tocClosed.has('dr' + x.id);
-    const n = Math.max(0, end - x.page + 1), hasPages = n > 0 || kids;
-    h += `<div class="dr-sec lv${x.lv}"><button type="button" class="dr-tw" data-drh="${esc(x.id)}" aria-expanded="${!closed}" aria-label="${closed ? 'Mostrar' : 'Ocultar'}">${hasPages ? svg(closed ? 'right' : 'down', 16) : ''}</button><button type="button" class="dr-go" data-drgo="${x.page}">${x.c ? `<i class="toc-c" style="background:${x.c}"></i>` : ''}<span>${esc(x.t)}</span><small>${n > 1 ? `p. ${x.page + 1}–${end + 1}` : `p. ${x.page + 1}`}</small></button></div>`;
-    if (closed){ hideBelow = x.lv; return; }
-    for (let k = x.page; k <= end; k++) h += thumbHTML(d.pages[k]);
-  });
-  return h;
-}
 $('#drMode').addEventListener('click', e => {
   const b = e.target.closest('[data-dm]'); if (!b) return;
   prefs.drMode = b.dataset.dm; savePrefs(); renderDrawer();
+  if (b.dataset.dm !== 'pages') return;
   const c = thumbsEl.querySelector('.thumb[aria-current="true"]'); if (c) c.scrollIntoView({ block:'center' });
 });
 function renderDrawerFoot(){
@@ -3661,11 +3641,11 @@ function endThumbDrag(drop){
   thumbsEl.querySelectorAll('.moving').forEach(b => b.classList.remove('moving'));
 }
 thumbsEl.addEventListener('pointerdown', e => {
-  if (tdrag || (e.pointerType === 'mouse' && e.button !== 0)) return;
-  const b = e.target.closest('.thumb'), hd = e.target.closest('[data-drh],[data-drgo]');
-  tdrag = { id:e.pointerId, type:e.pointerType, sx:e.clientX, sy:e.clientY, lx:e.clientX, ly:e.clientY, b, hd, mode:'pending', timer:0 };
+  if (tdrag || (e.pointerType === 'mouse' && e.button !== 0) || thumbsEl.classList.contains('listv')) return;
+  const b = e.target.closest('.thumb');
+  tdrag = { id:e.pointerId, type:e.pointerType, sx:e.clientX, sy:e.clientY, lx:e.clientX, ly:e.clientY, b, mode:'pending', timer:0 };
   try { thumbsEl.setPointerCapture(e.pointerId); } catch(_){}
-  if (b && e.pointerType === 'touch' && !thumbsEl.classList.contains('tocv')) tdrag.timer = setTimeout(() => { if (tdrag && tdrag.mode === 'pending') startThumbDrag(); }, 320);
+  if (b && e.pointerType === 'touch') tdrag.timer = setTimeout(() => { if (tdrag && tdrag.mode === 'pending') startThumbDrag(); }, 320);
 });
 thumbsEl.addEventListener('pointermove', e => {
   const t = tdrag; if (!t || e.pointerId !== t.id) return;
@@ -3673,7 +3653,7 @@ thumbsEl.addEventListener('pointermove', e => {
   if (t.mode === 'pending'){
     if (Math.hypot(e.clientX - t.sx, e.clientY - t.sy) < 8) return;
     clearTimeout(t.timer);
-    if (t.b && t.type !== 'touch' && !thumbsEl.classList.contains('tocv')){ startThumbDrag(); return; }
+    if (t.b && t.type !== 'touch'){ startThumbDrag(); return; }
     t.mode = 'scroll';
   }
   if (t.mode === 'scroll') thumbsEl.scrollTop -= dy;
@@ -3685,10 +3665,6 @@ thumbsEl.addEventListener('pointerup', e => {
   if (t.mode === 'drag') endThumbDrag(true);
   tdrag = null;
   if (t.mode === 'pending' && t.b) tapThumb(t.b);
-  else if (t.mode === 'pending' && t.hd){
-    if (t.hd.dataset.drh){ const k = 'dr' + t.hd.dataset.drh; if (tocClosed.has(k)) tocClosed.delete(k); else tocClosed.add(k); const st = thumbsEl.scrollTop; renderDrawer(); thumbsEl.scrollTop = st; }
-    else { closeDrawer(); scrollToPage(+t.hd.dataset.drgo); }
-  }
 });
 thumbsEl.addEventListener('pointercancel', e => {
   const t = tdrag; if (!t || e.pointerId !== t.id) return;
@@ -4626,7 +4602,7 @@ function bmAction(act, btn){
     bmChanged(p); toast(st.j != null ? 'Marcador guardado' : `Página ${p.i + 1} marcada: ${bmTitle(b, p)}`);
   }
   const back = st.fromIdx; closeDlg();
-  if (back) openIndex('toc');
+  if (back || !drawerWrap.hidden) openIndex();
 }
 function bmChanged(p){ renderMarks(p.doc); save(); }
 $('#markBtn').addEventListener('click', () => {
@@ -4679,33 +4655,38 @@ function tocRows(list, kind){
   });
   return h;
 }
-async function openIndex(tab){
+/* the index and the notes live in the pages panel: Páginas · Índice · Notas */
+function openIndex(tab){
   if (!doc || homeOn) return;
-  if (tab) idxTab = tab;
+  if (tab === 'notes') prefs.drMode = 'notes';
+  else { prefs.drMode = 'toc'; if (tab === 'book' || tab === 'toc') idxTab = tab; }
+  savePrefs();
+  if (drawerWrap.hidden){ drawerEdit = false; sel = new Set(); delArmed = false; drawerWrap.hidden = false; }
+  const st = thumbsEl.scrollTop, same = thumbsEl.classList.contains('listv');
+  renderDrawer();
+  if (same && tab == null) thumbsEl.scrollTop = st;
+}
+function drawerListHTML(mode){
   const d = doc;
+  if (mode === 'notes'){
+    const notes = []; let k = 0; for (const p of d.pages) for (const n of p.notes || []){ k++; notes.push({ p, n, k }); }
+    return `<div class="dr-list">` + (notes.length ? notes.map(({ p, n, k }) => `<button type="button" class="idx-row" data-do="idxNote" data-page="${p.i}" data-note="${n.id}"><span class="note-pin static">${k}</span><span class="idx-txt"><strong>Página ${p.i + 1}${n.imgs && n.imgs.length ? ` · ${n.imgs.length} ${n.imgs.length === 1 ? 'imagen' : 'imágenes'}` : ''}</strong>${n.quote ? `<em>“${esc(n.quote.slice(0, 160))}”</em>` : ''}<small>${esc((n.text || '').slice(0, 200)) || '<i>Sin texto</i>'}</small></span></button>`).join('')
+      : `<p class="hint">Aún no hay notas. Mantén presionado sobre la hoja, o selecciona texto con la herramienta de texto, y toca "Agregar nota".</p>`) + `</div>`;
+  }
   const mine = allBms(d).map(({ p, b, j }) => ({ id:b.id || (p.i + '_' + j), t:bmTitle(b, p), lv:b.lv || 1, c:b.c, page:p.i, j }));
-  const notes = []; let k = 0; for (const p of d.pages) for (const n of p.notes || []){ k++; notes.push({ p, n, k }); }
-  const book = d.pdf ? await bookToc(d) : [];
-  if (doc !== d) return;
+  if (d.pdf && !d.bookToc){ bookToc(d).then(() => { if (!drawerWrap.hidden && prefs.drMode === 'toc' && doc === d){ const st = thumbsEl.scrollTop; renderDrawer(); thumbsEl.scrollTop = st; } }); }
+  const book = d.bookToc || [];
   if (idxTab === 'book' && !book.length) idxTab = 'toc';
-  dlgState = { kind:'idx' };
-  dlg.setAttribute('aria-label', 'Índice, marcadores y notas');
-  let h = `<header class="sheet-h"><h2>Índice y notas</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
-    <div class="seg idx-tabs"><button type="button" data-do="idxTab" data-tab="toc" aria-pressed="${idxTab === 'toc'}">Mi índice (${mine.length})</button>${book.length ? `<button type="button" data-do="idxTab" data-tab="book" aria-pressed="${idxTab === 'book'}">Índice del libro</button>` : ''}<button type="button" data-do="idxTab" data-tab="notes" aria-pressed="${idxTab === 'notes'}">Notas (${notes.length})</button></div><div class="idx-list">`;
-  if (idxTab === 'toc'){
-    h += `<button type="button" class="btn idx-add" data-do="bmHere">${svg('bookmark', 18)}Marcar la página ${d.cur + 1}</button>`;
-    h += mine.length ? `<div class="toc">${tocRows(mine, 'my')}</div>`
-      : `<p class="hint">Aún no tienes marcadores. Marca una página con el botón de abajo, ponle título y elige si es Capítulo, Tema o Subtema.${book.length ? ' O copia el índice del libro desde su pestaña.' : ''}</p>`;
-  } else if (idxTab === 'book'){
+  let h = `<div class="dr-list">`;
+  if (book.length) h += `<div class="seg idx-tabs"><button type="button" data-do="idxTab" data-tab="toc" aria-pressed="${idxTab === 'toc'}">Mi índice (${mine.length})</button><button type="button" data-do="idxTab" data-tab="book" aria-pressed="${idxTab === 'book'}">Del libro</button></div>`;
+  if (idxTab === 'book'){
     h += `<button type="button" class="btn idx-add" data-do="bookCopy">${svg('copy', 18)}Copiar a mi índice</button><div class="toc">${tocRows(book, 'bk')}</div>`;
   } else {
-    h += notes.length ? notes.map(({ p, n, k }) => `<button type="button" class="idx-row" data-do="idxNote" data-page="${p.i}" data-note="${n.id}"><span class="note-pin static">${k}</span><span class="idx-txt"><strong>Página ${p.i + 1}${n.imgs && n.imgs.length ? ` · ${n.imgs.length} ${n.imgs.length === 1 ? 'imagen' : 'imágenes'}` : ''}</strong>${n.quote ? `<em>“${esc(n.quote.slice(0, 160))}”</em>` : ''}<small>${esc((n.text || '').slice(0, 200)) || '<i>Sin texto</i>'}</small></span></button>`).join('')
-      : `<p class="hint">Aún no hay notas. Mantén presionado sobre la hoja, o selecciona texto con la herramienta de texto, y toca "Agregar nota".</p>`;
+    h += `<button type="button" class="btn primary idx-add" data-do="bmHere">${svg('plus', 18)}Agregar título en la página ${d.cur + 1}</button>`;
+    h += mine.length ? `<div class="toc">${tocRows(mine, 'my')}</div>`
+      : `<p class="hint">Aún no tienes títulos. Ve a la página donde empieza un capítulo y toca "Agregar título": le pones nombre y eliges si es Capítulo, Tema o Subtema.${book.length ? ' O copia el índice del libro desde "Del libro".' : ''}</p>`;
   }
-  const sc = dlg.querySelector('.idx-list'), top = sc && dlgState && !dlgWrap.hidden ? sc.scrollTop : 0;
-  dlg.innerHTML = h + '</div>';
-  dlgWrap.hidden = false;
-  const ns = dlg.querySelector('.idx-list'); if (ns){ if (top) ns.scrollTop = top; else { const here = ns.querySelector('.toc-row.here'); if (here) here.scrollIntoView({ block:'center' }); } }
+  return h + `</div>`;
 }
 function indexAction(act, b){
   if (act === 'idxTab'){ openIndex(b.dataset.tab); return; }
@@ -4725,10 +4706,14 @@ function indexAction(act, b){
     openIndex('toc'); return;
   }
   const p = doc.pages[+b.dataset.page]; if (!p) return;
-  closeDlg(); scrollToPage(p.i);
+  closeDrawer(); scrollToPage(p.i);
   if (act === 'idxNote'){ const n = (p.notes || []).find(x => x.id === b.dataset.note); if (n) setTimeout(() => openNote(p, n), 150); }
 }
-$('#idxBtn').addEventListener('click', () => openIndex());
+thumbsEl.addEventListener('click', e => {
+  if (!thumbsEl.classList.contains('listv')) return;
+  const b = e.target.closest('[data-do]'); if (!b || b.disabled) return;
+  indexAction(b.dataset.do, b);
+});
 
 /* my index saved as the PDF's real outline (seen in any PDF reader); the book's own outline stays inside, under "Índice del libro" */
 function buildOutline(pdf, pages, bms){
