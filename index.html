@@ -82,11 +82,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .tab-main svg{flex:none;color:var(--muted)}
 .tab[aria-selected="true"] .tab-main svg{color:var(--accent)}
 .tab-x{border:0;background:transparent;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--muted);padding:0}
-.tab-add{flex:none;height:34px;padding:0 12px;border-radius:10px;border:1px dashed var(--muted);background:transparent;margin:0 0 5px 4px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.tab-add{flex:none;height:34px;padding:0 14px;border-radius:10px;border:0;background:var(--accent);margin:0 0 5px 6px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--accent-ink)}
 .menu{position:fixed;z-index:35;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:6px;display:flex;flex-direction:column;min-width:220px}
 .menu button{display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:11px 12px;border-radius:10px;text-align:left;font-weight:600;font-size:14px}
 .menu button:hover{background:var(--surface-2)}
-.nmenu{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:10px;width:min(520px,calc(100vw - 24px));box-sizing:border-box;border-radius:18px}
+.nmenu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px;width:min(520px,calc(100vw - 24px));box-sizing:border-box;border-radius:18px}
 .nmenu button{flex-direction:column;align-items:flex-start;gap:4px;padding:14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);min-height:104px}
 .nmenu button span{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);margin-bottom:4px}
 .nmenu button b{font-size:14.5px;font-weight:600}
@@ -358,7 +358,15 @@ input[type=range]{accent-color:var(--accent)}
 .dlg-foot{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;border-top:1px solid var(--line);margin-top:4px}
 
 /* home / library */
-.home{position:absolute;inset:0;z-index:12;background:var(--bg);display:grid;grid-template-columns:220px minmax(0,1fr)}
+.home{position:absolute;inset:0;z-index:12;background:var(--bg);display:grid;grid-template-columns:220px minmax(0,1fr);transition:grid-template-columns .2s}
+.home.smin{grid-template-columns:64px minmax(0,1fr)}
+.home.smin .h-side{padding:14px 8px}
+.home.smin .h-side h3{height:1px;margin:10px 6px;background:var(--line);font-size:0;overflow:hidden}
+.home.smin .h-nav{justify-content:center;padding:10px 0}
+.home.smin .h-nav>span:not(.av),.home.smin .h-nav b{display:none}
+.h-collapse{color:var(--muted);margin-bottom:2px}
+.home:not(.smin) .h-collapse{justify-content:flex-start}
+@media (max-width:520px){ .nmenu{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .h-side{border-right:1px solid var(--line);background:var(--surface);padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow:auto}
 .h-side h3{margin:14px 10px 6px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .h-side h3:first-child{margin-top:2px}
@@ -403,7 +411,7 @@ input[type=range]{accent-color:var(--accent)}
 .h-acts button.armed{background:var(--danger);color:#fff}
 .h-empty{padding:40px 16px;text-align:center;color:var(--muted)}
 @media (max-width:1100px){ .h-row{grid-template-columns:minmax(0,1fr) 120px 176px} .h-row .c-author,.h-row .c-pages{display:none} }
-@media (max-width:760px){ .home{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)} .h-side{flex-direction:row;border-right:0;border-bottom:1px solid var(--line);padding:8px 12px;overflow-x:auto} .h-side h3{display:none} .h-nav{flex:none} .h-row{grid-template-columns:minmax(0,1fr) 110px 176px} .h-row .c-author,.h-row .c-pages{display:none} }
+@media (max-width:760px){ .h-collapse{display:none!important} .home.smin .h-nav>span:not(.av){display:inline} .home.smin .h-nav b{display:inline} .home.smin .h-side{padding:8px 12px} .home.smin .h-nav{padding:10px} .home,.home.smin{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)} .h-side{flex-direction:row;border-right:0;border-bottom:1px solid var(--line);padding:8px 12px;overflow-x:auto} .h-side h3{display:none} .h-nav{flex:none} .h-row{grid-template-columns:minmax(0,1fr) 110px 176px} .h-row .c-author,.h-row .c-pages{display:none} }
 @media (max-width:520px){ .h-row{grid-template-columns:minmax(0,1fr) 176px} .h-row .c-date{display:none} }
 .app.home-on .bottom{display:none}
 .h-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;padding-top:4px}
@@ -443,11 +451,11 @@ input[type=range]{accent-color:var(--accent)}
       <span class="doc-meta" id="docMeta"></span>
     </div>
     <div class="actions">
-      <button class="btn primary" id="openBtn" type="button"><span id="icOpen"></span><span class="lbl">Abrir archivo</span></button>
       <button class="btn" id="driveBtn" type="button"><span id="icDrive"></span><span class="lbl" id="driveLbl">Drive</span><em id="driveSt" hidden></em></button>
       <button class="icon-btn" id="setBtn" type="button" aria-label="Ajustes"></button>
     </div>
-    <input type="file" id="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp" hidden>
+    <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
+    <input type="file" id="imgFile" accept="image/*" multiple hidden>
   </header>
 
   <nav class="tabs" id="tabs" aria-label="Archivos abiertos"></nav>
@@ -466,9 +474,6 @@ input[type=range]{accent-color:var(--accent)}
           <h2 id="hTitle">Todos tus archivos</h2>
           <input type="search" class="h-search" id="hSearch" placeholder="Buscar por nombre" aria-label="Buscar archivos">
           <div class="seg" id="hView"><button type="button" data-hv="list" aria-label="Ver como lista" title="Lista"></button><button type="button" data-hv="grid" aria-label="Ver como portadas" title="Portadas"></button></div>
-          <button class="btn" type="button" id="hDrive"><span id="icH3"></span>Abrir de Drive</button>
-          <button class="btn" type="button" id="hOpen"><span id="icH1"></span>Abrir de la tableta</button>
-          <button class="btn primary" type="button" id="hNew"><span id="icH2"></span>Nuevo</button>
         </div>
         <div class="h-list" id="hList"></div>
       </div>
@@ -494,11 +499,12 @@ input[type=range]{accent-color:var(--accent)}
 
 <div class="ecur" id="ecur" hidden></div>
 <div class="menu nmenu" id="addMenu" hidden>
-  <button type="button" data-m="nb"><span id="icM2"></span><b>Cuaderno</b><small>Hojas lisas, rayadas o cuadriculadas</small></button>
-  <button type="button" data-m="pdf"><span id="icM1"></span><b>Importar</b><small>PDF o imagen de este aparato</small></button>
-  <button type="button" data-m="drive"><span id="icM3"></span><b>Google Drive</b><small>Abrir un PDF o imagen</small></button>
-  <button type="button" data-m="cam"><span id="icM4"></span><b>Hacer foto</b><small>La foto queda lista para anotar</small></button>
+  <button type="button" data-m="nb"><span id="icM2"></span><b>Cuaderno en blanco</b><small>Hojas lisas, rayadas, cuadriculadas o Cornell</small></button>
   <button type="button" data-m="folder"><span id="icM5"></span><b>Carpeta</b><small>Con color e ícono</small></button>
+  <button type="button" data-m="drive"><span id="icM3"></span><b>Desde Google Drive</b><small>Abrir un PDF o imagen de tu Drive</small></button>
+  <button type="button" data-m="pdf"><span id="icM1"></span><b>Documento PDF</b><small>De Mis archivos de la tableta</small></button>
+  <button type="button" data-m="img"><span id="icM6"></span><b>Foto de la galería</b><small>Una o varias imágenes</small></button>
+  <button type="button" data-m="cam"><span id="icM4"></span><b>Tomar foto</b><small>La foto queda lista para anotar</small></button>
 </div>
 <input type="file" id="camFile" accept="image/*" capture="environment" hidden>
 
@@ -584,7 +590,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (17)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (18)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -608,6 +614,7 @@ const ecur = $('#ecur'), statusEl = $('#status');
 
 /* ---------- icons ---------- */
 const ICON = {
+  sidebar:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9.5 4v16M5.5 8.5h1.5M5.5 11.5h1.5"/>',
   hand:'<path d="M8 12.5V6a1.5 1.5 0 0 1 3 0v5.5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v6M17 9.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-5.1-2.9L5 14.2a1.5 1.5 0 0 1 2.5-1.6L8 13.5"/>',
   pen:'<path d="M4 20l1.2-4.2L15.5 5.5a2.1 2.1 0 0 1 3 3L8.2 18.8z"/><path d="M13.5 7.5l3 3"/>',
   hl:'<path d="M9.5 14.5L5 19h4.5l2-2"/><path d="M8.5 13.5l3 3 8-8.5a2.1 2.1 0 0 0-3-3z"/><path d="M14 20h6"/>',
@@ -655,13 +662,13 @@ const ICON = {
   covers:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M14 5.5A1.5 1.5 0 0 1 15.5 4H20v16h-4.5a1.5 1.5 0 0 1-1.5-1.5z"/>'
 };
 const svg = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
-$('#icOpen').innerHTML = svg('folder', 20); $('#icDrive').innerHTML = svg('cloud', 20);
+$('#icDrive').innerHTML = svg('cloud', 20);
 $('#setBtn').innerHTML = svg('settings'); $('#sheetClose').innerHTML = svg('close'); $('#drClose').innerHTML = svg('close');
 $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); $('#zFit').innerHTML = svg('fit', 20);
 $('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#idxBtn').innerHTML = svg('list', 20); $('#searchBtn').innerHTML = svg('search', 20);
 $('#findPrev').innerHTML = svg('up', 18); $('#findNext').innerHTML = svg('down', 18); $('#findClose').innerHTML = svg('close', 18);
 $('#icM1').innerHTML = svg('folder', 22); $('#icM2').innerHTML = svg('book', 22);
-$('#icH1').innerHTML = svg('folder', 20); $('#icH3').innerHTML = svg('cloud', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22); $('#icH2').innerHTML = svg('plus', 20);
+$('#icM6').innerHTML = svg('image', 22); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
 
 /* ---------- prefs ---------- */
@@ -891,11 +898,11 @@ function openAddMenu(anchor){
   addMenu.style.left = clamp(r.left, 8, innerWidth - addMenu.offsetWidth - 8) + 'px';
   addMenu.style.top = (r.bottom + 6) + 'px';
 }
-document.addEventListener('pointerdown', e => { if (!addMenu.hidden && !addMenu.contains(e.target) && !e.target.closest('#tabAdd') && !e.target.closest('#hNew')) addMenu.hidden = true; }, true);
+document.addEventListener('pointerdown', e => { if (!addMenu.hidden && !addMenu.contains(e.target) && !e.target.closest('#tabAdd')) addMenu.hidden = true; }, true);
 addMenu.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; addMenu.hidden = true;
   const m = b.dataset.m;
-  if (m === 'drive') openFromDrive(); else if (m === 'pdf') $('#file').click(); else if (m === 'cam') $('#camFile').click(); else if (m === 'folder') openFolderEdit(null); else openNewDialog('new');
+  if (m === 'drive') openFromDrive(); else if (m === 'pdf') $('#file').click(); else if (m === 'img') $('#imgFile').click(); else if (m === 'cam') $('#camFile').click(); else if (m === 'folder') openFolderEdit(null); else openNewDialog('new');
 });
 function persistTabs(){
   if (restoring) return;
@@ -1032,18 +1039,25 @@ function relTime(t){
   return new Date(t).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' });
 }
 function renderHome(){
-  const counts = { all:lib.length, notebook:lib.filter(e => e.kind === 'notebook' || e.kind === 'sample').length, pdf:lib.filter(e => e.kind === 'pdf').length, image:lib.filter(e => e.kind === 'image').length, drive:lib.filter(e => e.drive).length };
+  const counts = { all:lib.length, notebook:lib.filter(e => e.kind === 'notebook' || e.kind === 'sample').length, pdf:lib.filter(e => e.kind === 'pdf').length, image:lib.filter(e => e.kind === 'image').length, drive:0 };
   const pend = lib.filter(e => e.pending && e.drive).length;
-  $('#hSide').innerHTML = `<h3>Archivos</h3>` +
-    [['all', 'Todos', 'pages'], ['notebook', 'Cuadernos', 'book'], ['pdf', 'PDFs', 'pdf'], ['image', 'Imágenes', 'image']].map(([k, l, ic]) =>
-      `<button type="button" class="h-nav" data-hf="${k}" aria-current="${homeFilter === k}">${svg(ic, 20)}<span>${l}</span><b>${counts[k]}</b></button>`).join('') +
-    `<h3>Carpetas</h3>` + allFolders().map(f => { const m = folderMeta(f); return `<button type="button" class="h-nav" data-hf="f:${esc(f)}" aria-current="${homeFilter === 'f:' + f}">${folderSvg(m.c, m.i, 'fmini')}<span>${esc(f)}</span><b>${lib.filter(e => e.folder === f).length}</b></button>`; }).join('') +
-    `<button type="button" class="h-nav" data-newfolder="1">${svg('plus', 20)}<span>Nueva carpeta</span></button>` +
-    `<h3>Google Drive</h3>` + (prefs.fullDrive ? prefs.accounts.map(a => [['root', 'Mi unidad', 'cloud'], ['shared', 'Compartidos conmigo', 'share'], ['recent', 'Recientes', 'pages']].map(([id, l, ic]) => `<button type="button" class="h-nav" data-dbrowse="${esc(a.email)}|${id}|${l}" aria-current="${homeFilter === 'gdrive' && dnav && dnav.email === a.email && dnav.path[0].id === id}">${svg(ic, 20)}<span>${l}${prefs.accounts.length > 1 ? ' · ' + esc(a.email.split('@')[0]) : ''}</span></button>`).join('')).join('') : '') + `<button type="button" class="h-nav" data-hf="drive" aria-current="${homeFilter === 'drive'}">${svg('cloud', 20)}<span>En Drive</span><b>${counts.drive}</b></button>` +
-    (pend ? `<button type="button" class="h-nav warn" data-sync="1" title="Subir ahora">${svg('share', 20)}<span>Sin subir</span><b>${pend}</b></button>` : '') +
-    (prefs.accounts.length ? `<button type="button" class="h-nav" data-refresh="1">${svg('redo', 20)}<span>Actualizar lista</span></button>` : '') +
-    prefs.accounts.map(a => `<button type="button" class="h-nav" data-acc="${esc(a.email)}" title="Abrir un PDF de ${esc(a.email)}"><span class="av">${initial(a)}</span><span>${esc(a.email)}</span></button>`).join('') +
-    `<button type="button" class="h-nav" data-acc="">${svg('plus', 20)}<span>${prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive'}</span></button>`;
+  if (homeFilter === 'drive') homeFilter = 'all';
+  $('#home').classList.toggle('smin', !!prefs.homeSideMin);
+  $('#docMeta').textContent = `${lib.length} ${lib.length === 1 ? 'archivo' : 'archivos'}`;
+  const nav = (attrs, cur, ic, label, count, extra = '') => `<button type="button" class="h-nav${extra}" ${attrs} aria-current="${!!cur}" title="${esc(label)}">${ic}<span>${esc(label)}</span>${count != null ? `<b>${count}</b>` : ''}</button>`;
+  const gcur = id => a => homeFilter === 'gdrive' && dnav && dnav.email === a.email && dnav.path[0].id === id;
+  $('#hSide').innerHTML = `<button type="button" class="h-nav h-collapse" data-sidemin="1" title="${prefs.homeSideMin ? 'Mostrar la barra' : 'Contraer la barra'}" aria-label="${prefs.homeSideMin ? 'Mostrar la barra' : 'Contraer la barra'}">${svg('sidebar', 20)}<span>Contraer</span></button>` +
+    `<h3>En la app</h3>` +
+    [['all', 'Todos', 'pages'], ['notebook', 'Cuadernos', 'book'], ['pdf', 'PDFs', 'pdf'], ['image', 'Imágenes', 'image']].map(([k, l, ic]) => nav(`data-hf="${k}"`, homeFilter === k, svg(ic, 20), l, counts[k])).join('') +
+    `<h3>Carpetas</h3>` + allFolders().map(f => { const m = folderMeta(f); return nav(`data-hf="f:${esc(f)}"`, homeFilter === 'f:' + f, folderSvg(m.c, m.i, 'fmini'), f, lib.filter(e => e.folder === f).length); }).join('') +
+    nav('data-newfolder="1"', false, svg('plus', 20), 'Nueva carpeta') +
+    `<h3>Google Drive</h3>` +
+    (prefs.fullDrive ? prefs.accounts.map(a => [['root', 'Mi unidad', 'cloud'], ['shared', 'Compartidos conmigo', 'share'], ['recent', 'Recientes', 'pages']].map(([id, l, ic]) => nav(`data-dbrowse="${esc(a.email)}|${id}|${l}"`, gcur(id)(a), svg(ic, 20), l + (prefs.accounts.length > 1 ? ' · ' + a.email.split('@')[0] : ''))).join('')).join('')
+      : prefs.accounts.length ? nav('data-fulldrive="1"', false, svg('cloud', 20), 'Ver todo mi Drive') : '') +
+    (pend ? nav('data-sync="1"', false, svg('share', 20), 'Sin subir', pend, ' warn') : '') +
+    (prefs.accounts.length ? nav('data-refresh="1"', false, svg('redo', 20), 'Actualizar lista') : '') +
+    prefs.accounts.map(a => nav(`data-acc="${esc(a.email)}"`, false, `<span class="av">${initial(a)}</span>`, a.email)).join('') +
+    nav('data-acc=""', false, svg('plus', 20), prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive');
   if (homeFilter === 'gdrive'){ renderDriveBrowser(); return; }
   const fsel = homeFilter.startsWith('f:') ? homeFilter.slice(2) : null;
   $('#hTitle').innerHTML = fsel ? `<button type="button" class="btn back-btn" data-hf-back="1" aria-label="Volver">${svg('left', 18)}</button>${folderSvg(folderMeta(fsel).c, folderMeta(fsel).i, 'fmini big')} ${esc(fsel)} <button type="button" class="btn" data-editfolder="${esc(fsel)}" style="height:32px;font-size:12.5px;margin-left:8px">${svg('edit', 16)}Editar</button>` : ({ all:'Inicio', notebook:'Cuadernos', pdf:'PDFs', image:'Imágenes', drive:'En Google Drive' }[homeFilter] || 'Todos tus archivos');
@@ -1089,7 +1103,7 @@ function openEntry(e){
   if (e.kind === 'notebook'){ const nb = loadNotebook(e.key); if (nb) addDoc(nb); else toast('No encontré este cuaderno en la tableta.'); return; }
   if (e.kind === 'sample'){ addDoc(sampleDoc()); return; }
   toast(`Elige "${e.name}" en tu tableta para abrirlo con tus anotaciones.`);
-  $('#file').click();
+  $(e.kind === 'image' ? '#imgFile' : '#file').click();
 }
 function deleteEntry(e){
   libDelArmed = null;
@@ -1118,8 +1132,10 @@ function doRename(){
   closeDlg(); renderTabs(); if (homeOn) renderHome(); else updateDocMeta();
 }
 $('#hSide').addEventListener('click', e => {
+  if (e.target.closest('[data-sidemin]')){ prefs.homeSideMin = !prefs.homeSideMin; savePrefs(); renderHome(); return; }
+  if (e.target.closest('[data-fulldrive]')){ enableFullDrive(true); return; }
   const a = e.target.closest('[data-acc]');
-  if (a){ if (a.dataset.acc) openPicker(a.dataset.acc); else requestToken(null, (email, tk) => { if (email) showPicker(email, tk); }); return; }
+  if (a){ if (a.dataset.acc && prefs.fullDrive){ const em = a.dataset.acc; if (!tokenOk(em)) withToken(em, () => openDriveBrowser(em, 'root', 'Mi unidad')); else openDriveBrowser(em, 'root', 'Mi unidad'); return; } if (a.dataset.acc) openPicker(a.dataset.acc); else requestToken(null, (email, tk) => { if (email) showPicker(email, tk); }); return; }
   if (e.target.closest('[data-sync]')){ syncPendingTap(); return; }
   if (e.target.closest('[data-refresh]')){ refreshDriveTap(); return; }
   const db = e.target.closest('[data-dbrowse]');
@@ -1131,8 +1147,6 @@ $('#hSide').addEventListener('click', e => {
 $('#hTitle').addEventListener('click', e => { const b = e.target.closest('[data-editfolder]'); if (b){ openFolderEdit(b.dataset.editfolder); return; } if (e.target.closest('[data-hf-back]')){ homeFilter = 'all'; renderHome(); } });
 $('#hSearch').addEventListener('input', e => { homeQuery = e.target.value.trim().toLowerCase(); renderHome(); });
 $('#hView').addEventListener('click', e => { const b = e.target.closest('[data-hv]'); if (!b) return; prefs.homeView = b.dataset.hv; savePrefs(); renderHome(); });
-$('#hOpen').addEventListener('click', () => $('#file').click());
-$('#hNew').addEventListener('click', e => openAddMenu(e.currentTarget));
 $('#camFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openImageFile(new File([f], 'Foto ' + new Date().toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }).replace(/[/:]/g, '-') + (/png/.test(f.type) ? '.png' : '.jpg'), { type:f.type || 'image/jpeg' })); });
 $('#hList').addEventListener('click', ev => {
   const fc = ev.target.closest('.fcard');
@@ -1310,8 +1324,12 @@ async function openPdf(file){
     toast(err && err.name === 'PasswordException' ? 'Este PDF tiene contraseña. Ábrelo sin contraseña para anotarlo.' : 'No pude abrir este archivo. Revisa que sea un PDF válido.');
   } finally { loading(false); }
 }
-$('#openBtn').addEventListener('click', () => $('#file').click());
-$('#file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openPdf(f); });
+async function openPicked(input){
+  const fs = Array.from(input.files || []); input.value = '';
+  for (const f of fs.slice(0, 12)){ try { await openPdf(f); } catch(err){ console.warn(err); } }
+}
+$('#file').addEventListener('change', e => openPicked(e.target));
+$('#imgFile').addEventListener('change', e => openPicked(e.target));
 /* ---------- Google Drive ---------- */
 const G = { clientId:'484469934201-pri7mreqjttbktotiqbf3l41pudsbns6.apps.googleusercontent.com', apiKey:'AIzaSyDi58wfoTTwRyawyZ6sqfiXqrLi9ncK1ck', appId:'484469934201', scope:'https://www.googleapis.com/auth/drive.file' };
 const DRIVE = 'https://www.googleapis.com/drive/v3', UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
@@ -1729,7 +1747,8 @@ async function applyPacked(d, pk){
 const STATE = { saved:['Guardado', 'ok'], dirty:['Sin subir', 'warn'], saving:['Subiendo…', ''], offline:['Sin conexión', 'warn'], auth:['Toca para subir', 'warn'], error:['Reintentar', 'warn'], readonly:['Solo en la tableta', 'warn'] };
 function renderDriveBtn(){
   const lbl = $('#driveLbl'), st = $('#driveSt'), d = doc;
-  if (homeOn || !d){ lbl.textContent = 'Abrir de Drive'; st.hidden = true; return; }
+  $('#driveBtn').hidden = homeOn || !d;
+  if (homeOn || !d){ st.hidden = true; return; }
   if (!d.drive){ lbl.textContent = 'Subir a Drive'; if (d.kind === 'sample'){ st.hidden = true; return; } st.textContent = 'Solo en este aparato'; st.className = 'warn'; st.hidden = false; return; }
   lbl.textContent = 'Guardar en Drive';
   const s = STATE[d.readonly ? 'readonly' : d.dstate || 'saved'] || STATE.saved;
@@ -1896,6 +1915,7 @@ async function refreshDriveList(force){
         let e = lib.find(x => x.key === key);
         const fol = f.appProperties && f.appProperties.drawskyFolder, fm = f.appProperties && f.appProperties.drawskyFolderMeta;
         if (fol && fm && !prefs.folderMeta[fol]){ const [c, ic] = fm.split('|'); if (/^[0-9a-f]{6}$/i.test(c)){ prefs.folderMeta[fol] = { c:'#' + c, i:FOLDER_ICONS.includes(ic) ? ic : 'obook' }; if (!prefs.folders.includes(fol)) prefs.folders.push(fol); savePrefs(); changed = true; } }
+        if (!e && prefs.fullDrive && !(f.appProperties && (f.appProperties.drawskyOpened || f.appProperties.drawsky || fol))) continue;
         if (!e){ const ne = { key, created:t, opened:t, name:stripExt(f.name), kind:/^image\//.test(f.mimeType) ? 'image' : 'pdf', drive:{ email:a.email, id:f.id }, owner }; if (fol) ne.folder = fol; lib.push(ne); changed = true; continue; }
         if ((fol || undefined) !== e.folder){ if (fol) e.folder = fol; else delete e.folder; changed = true; }
         if (t > (e.opened || 0) + 5000){ e.opened = t; changed = true; }
@@ -1949,7 +1969,7 @@ async function openDriveFile(email, id, nameHint, quiet){
   try {
     let meta = null;
     if (navigator.onLine && tokenOk(email)){
-      try { meta = await driveMeta(email, id); }
+      try { meta = await driveMeta(email, id); markOpened(email, meta); }
       catch(err){
         if (err.status === 404 && !(e0 && e0.pending)){ toast('Ese archivo ya no está en Drive o es de otra cuenta.'); return; }
         if (!err.auth && err.status !== 404) console.warn(err);
@@ -2051,7 +2071,6 @@ $('#driveBtn').addEventListener('click', () => {
   if (d.kind === 'pdf' && !d.cleanBytes){ toast('Vuelve a abrir este PDF para subirlo.'); return; }
   chooseAccount('Subir a Google Drive', email => withToken(email, () => uploadNew(d, email)));
 });
-$('#hDrive').addEventListener('click', openFromDrive);
 window.addEventListener('online', () => {
   loadGoogle();
   docs.forEach(d => { if (d.drive && d.dirty && !d.syncing) driveState(d, tokenOk(d.drive.email) ? 'dirty' : 'auth'); });
@@ -4400,12 +4419,13 @@ function openFolderEdit(name){
 function renderFolderEdit(){
   const st = dlgState;
   dlg.setAttribute('aria-label', st.old ? 'Editar carpeta' : 'Nueva carpeta');
+  const dhint = st.drive ? `<p class="hint" style="margin:0 18px 10px">El color y el ícono se ven solo en DrawSky. Si cambias el nombre, también cambia en tu Drive.</p>` : '';
   dlg.innerHTML = `<header class="sheet-h"><h2>${st.old ? 'Editar carpeta' : 'Nueva carpeta'}</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
     <div class="fe-top">${folderSvg(st.c, st.i, 'fold big')}<label class="field" style="flex:1">Nombre<input type="text" id="feName" maxlength="40" value="${esc(st.name)}" placeholder="Por ejemplo: Cardiología"></label></div>
     <div class="group"><div class="lab">Color</div><div class="swatches">${FOLDER_COLORS.concat(PALETTES.cherii.colors.filter(c => !['#000000', '#f1ecea'].includes(c))).map(c => `<button type="button" class="sw" data-do="fcol" data-c="${c}" style="--c:${c}" aria-pressed="${st.c === c}" aria-label="Color ${c}"></button>`).join('')}
       <label class="sw any" title="Cualquier color" aria-label="Elegir cualquier color" style="--c:${st.c}">${svg('palette', 18)}<input type="color" id="feColor" value="${st.c}"></label></div>
-      <div class="lab" style="margin-top:14px">Ícono</div><div class="swatches">${FOLDER_ICONS.map(i => `<button type="button" class="ic" data-do="ficon" data-i="${i}" aria-pressed="${st.i === i}">${svg(i, 22)}</button>`).join('')}</div></div>
-    <div class="dlg-foot">${st.old ? `<button type="button" class="btn danger${st.delArmed ? ' armed' : ''}" data-do="fdel">${svg('trash', 18)}${st.delArmed ? 'Toca otra vez' : 'Eliminar'}</button><span style="flex:1"></span>` : ''}<button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="fsave">${st.old ? 'Guardar' : 'Crear carpeta'}</button></div>`;
+      <div class="lab" style="margin-top:14px">Ícono</div><div class="swatches">${FOLDER_ICONS.map(i => `<button type="button" class="ic" data-do="ficon" data-i="${i}" aria-pressed="${st.i === i}">${svg(i, 22)}</button>`).join('')}</div></div>${dhint}
+    <div class="dlg-foot">${st.old && !st.drive ? `<button type="button" class="btn danger${st.delArmed ? ' armed' : ''}" data-do="fdel">${svg('trash', 18)}${st.delArmed ? 'Toca otra vez' : 'Eliminar'}</button><span style="flex:1"></span>` : ''}<button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="fsave">${st.old ? 'Guardar' : 'Crear carpeta'}</button></div>`;
 }
 function folderEditAction(act, b){
   const st = dlgState;
@@ -4416,6 +4436,7 @@ function folderEditAction(act, b){
   if (act === 'fsave'){
     const name = (st.name || '').trim().slice(0, 40);
     if (!name){ toast('Escribe el nombre de la carpeta.'); return; }
+    if (st.drive){ saveDriveFolder(st, name); return; }
     if (name !== st.old && allFolders().includes(name)){ toast('Ya tienes una carpeta con ese nombre.'); return; }
     if (st.old && st.old !== name){
       prefs.folders = prefs.folders.filter(f => f !== st.old); delete prefs.folderMeta[st.old];
@@ -4629,7 +4650,7 @@ function renderDriveBrowser(){
     let items = nav.items;
     if (homeQuery) items = items.filter(f => (f.name || '').toLowerCase().includes(homeQuery));
     const folders = items.filter(f => f.mimeType === DFOLDER), files = items.filter(f => f.mimeType !== DFOLDER);
-    if (folders.length) h += `<div class="h-sec">Carpetas</div><div class="h-folders">${folders.map(f => `<div class="fcard" role="button" tabindex="0" data-dfolder="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir carpeta ${esc(f.name)}">${folderSvg('#b8c4d6', 'fdoc')}<strong>${esc(f.name)}</strong></div>`).join('')}</div>`;
+    if (folders.length) h += `<div class="h-sec">Carpetas</div><div class="h-folders">${folders.map(f => { const m = dfolderMeta(f.id); return `<div class="fcard" role="button" tabindex="0" data-dfolder="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir carpeta ${esc(f.name)}">${folderSvg(m.c, m.i)}<strong>${esc(f.name)}</strong><button type="button" class="fmore" data-dfedit="${esc(f.id)}" aria-label="Color e ícono de ${esc(f.name)}">${svg('dots', 18)}</button></div>`; }).join('')}</div>`;
     if (files.length) h += `<div class="h-sec">Archivos</div><div class="h-grid">${files.map(f => {
       const img = /^image\//.test(f.mimeType), known = lib.find(e => e.drive && e.drive.id === f.id);
       return `<div class="h-card" role="button" tabindex="0" data-dfile="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir ${esc(f.name)}">
@@ -4642,6 +4663,8 @@ function renderDriveBrowser(){
 }
 $('#hList').addEventListener('click', ev => {
   if (homeFilter !== 'gdrive' || !dnav) return;
+  const fe = ev.target.closest('[data-dfedit]');
+  if (fe){ ev.stopImmediatePropagation(); const c = fe.closest('[data-dfolder]'); openDriveFolderEdit(c.dataset.dfolder, c.dataset.name); return; }
   const fo = ev.target.closest('[data-dfolder]');
   if (fo){ ev.stopImmediatePropagation(); dnav.path.push({ id:fo.dataset.dfolder, name:fo.dataset.name }); loadDriveFolder(); $('#hList').scrollTop = 0; return; }
   const fi = ev.target.closest('[data-dfile]');
@@ -4652,6 +4675,53 @@ $('#hTitle').addEventListener('click', e => {
   const c = e.target.closest('[data-crumb]'); if (!c || !dnav) return;
   dnav.path = dnav.path.slice(0, +c.dataset.crumb + 1); loadDriveFolder();
 });
+/* colors and icons of real Drive folders: kept only in DrawSky */
+if (!prefs.dfolderMeta || typeof prefs.dfolderMeta !== 'object') prefs.dfolderMeta = {};
+const dfolderMeta = id => prefs.dfolderMeta[id] || { c:'#b8c4d6', i:'fdoc' };
+function openDriveFolderEdit(id, name){
+  const m = dfolderMeta(id);
+  dlgState = { kind:'fedit', drive:{ id, email:dnav && dnav.email }, old:name, name, c:m.c, i:m.i, delArmed:false };
+  renderFolderEdit(); dlgWrap.hidden = false;
+}
+function saveDriveFolder(st, name){
+  prefs.dfolderMeta[st.drive.id] = { c:st.c, i:st.i }; savePrefs();
+  if (name !== st.old && st.drive.email && navigator.onLine && tokenOk(st.drive.email)){
+    gfetch(st.drive.email, `${DRIVE}/files/${st.drive.id}?supportsAllDrives=true&fields=id`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ name }) })
+      .then(() => toast('Nombre cambiado también en tu Drive')).catch(e => { console.warn(e); toast('No pude cambiar el nombre en Drive.'); });
+    if (dnav){ (dnav.items || []).forEach(f => { if (f.id === st.drive.id) f.name = name; }); dnav.path.forEach(p => { if (p.id === st.drive.id) p.name = name; }); }
+  }
+  closeDlg(); renderHome();
+}
+/* long press on any folder card opens its color and icon editor */
+(() => {
+  let t = null, sx = 0, sy = 0, fired = false;
+  const list = $('#hList');
+  list.addEventListener('pointerdown', e => {
+    const c = e.target.closest('.fcard'); fired = false; clearTimeout(t);
+    if (!c || c.dataset.fnew || e.target.closest('.fmore')) return;
+    sx = e.clientX; sy = e.clientY;
+    t = setTimeout(() => {
+      fired = true;
+      if (navigator.vibrate) navigator.vibrate(15);
+      if (c.dataset.dfolder) openDriveFolderEdit(c.dataset.dfolder, c.dataset.name); else if (c.dataset.folder) openFolderEdit(c.dataset.folder);
+    }, 550);
+  });
+  list.addEventListener('pointermove', e => { if (t && Math.hypot(e.clientX - sx, e.clientY - sy) > 10){ clearTimeout(t); t = null; } });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(k => list.addEventListener(k, () => { clearTimeout(t); t = null; }));
+  window.addEventListener('click', e => { if (fired && list.contains(e.target)){ fired = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  list.addEventListener('contextmenu', e => { if (e.target.closest('.fcard')) e.preventDefault(); });
+})();
+/* with the full permission, Drive returns every PDF and image: keep Inicio to files used in DrawSky */
+function pruneDriveClutter(){
+  const before = lib.length;
+  lib = lib.filter(e => !e.drive || e.pages || e.thumb || e.folder || e.pending || docs.some(d => d.key === e.key) || store.get('drawsky:doc:' + e.key));
+  if (lib.length !== before){ libSave(); if (homeOn) renderHome(); }
+}
+if (prefs.fullDrive) setTimeout(pruneDriveClutter, 0);
+function markOpened(email, meta){
+  if (!meta || (meta.appProperties && meta.appProperties.drawskyOpened) || !tokenOk(email)) return;
+  gfetch(email, `${DRIVE}/files/${meta.id}?supportsAllDrives=true&fields=id`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ appProperties:{ drawskyOpened:'1' } }) }).catch(e => console.warn(e));
+}
 function enableFullDrive(on){
   prefs.fullDrive = on; savePrefs();
   if (!on && window.google && google.accounts && google.accounts.oauth2) Object.values(tokens).forEach(t => { try { google.accounts.oauth2.revoke(t.t, () => {}); } catch(_){} });
@@ -4659,7 +4729,7 @@ function enableFullDrive(on){
   if (on){
     const a = prefs.accounts[0];
     requestToken(a ? a.email : null, got => {
-      if (got){ toast('Listo: tu Drive completo aparece en Inicio, en la columna izquierda.'); if (homeOn) renderHome(); }
+      if (got){ pruneDriveClutter(); toast('Listo: tu Drive completo aparece en Inicio, en la columna izquierda.'); if (!homeOn) showHome(); openDriveBrowser(got, 'root', 'Mi unidad'); }
       else { prefs.fullDrive = false; savePrefs(); renderDriveSettings(); toast('No se dio el permiso. Todo sigue como antes.'); }
     });
   } else {
