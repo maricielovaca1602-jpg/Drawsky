@@ -110,6 +110,26 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .nimgs img{width:100%;height:100%;object-fit:cover;display:block}
 .nimgs .nx{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;padding:0}
 #noteBtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.findbar{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);width:min(520px,calc(100% - 24px));box-sizing:border-box}
+.findbar input{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);font:inherit;font-size:15px;outline:none;height:36px}
+.findbar #findCount{font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.findbar .icon-btn{width:36px;height:36px}
+.findbox{position:absolute;background:rgba(255,145,0,.38);outline:2px solid rgba(230,119,0,.85);border-radius:2px;pointer-events:none;z-index:2}
+.pmark{position:absolute;top:-4px;right:22px;width:22px;height:34px;background:#d63a4a;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);z-index:3;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+#markBtn[aria-pressed="true"]{background:#d63a4a;color:#fff;border-color:transparent}
+.tbox{position:absolute;z-index:4;min-width:120px;min-height:1.4em;padding:2px 4px;margin:-3px 0 0 -5px;border:1.5px dashed #1b7bd3;border-radius:6px;background:rgba(255,255,255,.85);font-family:Figtree,Helvetica,Arial,sans-serif;resize:none;overflow:hidden;white-space:pre;outline:none;-webkit-user-select:text;user-select:text;box-sizing:content-box}
+.lassobox{position:absolute;border:1.5px dashed #1b7bd3;background:rgba(27,123,211,.05);z-index:3;pointer-events:none;border-radius:4px}
+.lasso-h{position:absolute;right:-11px;bottom:-11px;width:20px;height:20px;border-radius:50%;background:#1b7bd3;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.lassomenu .lc{width:30px;height:30px;padding:0;border-radius:50%!important;background:var(--c)!important;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.lassomenu button:first-child{background:var(--c)}
+.idx-tabs{margin:2px 0 10px}
+.idx-list{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto}
+.idx-row{display:flex;align-items:flex-start;gap:12px;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;color:var(--fg)}
+.idx-row .ribbon{width:14px;height:20px;background:#d63a4a;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);flex:none;margin-top:1px}
+.idx-txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+.idx-txt em{color:var(--muted);font-size:13px}
+.idx-txt small{color:var(--fg);opacity:.85;font-size:13px;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.note-pin.static{position:static;transform:none;flex:none;display:inline-block;text-align:center}
 .selbox{position:absolute;background:rgba(27,123,211,.28);border-radius:2px;pointer-events:none;z-index:2}
 .selmenu{position:fixed;z-index:9;display:flex;gap:2px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
 .selmenu button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--fg);font-weight:600;font-size:13.5px}
@@ -291,7 +311,7 @@ input[type=range]{accent-color:var(--accent)}
 .h-top h2{margin:0;font:700 22px/1.2 var(--font-display);flex:1 1 100%}
 .h-search{flex:1;min-width:180px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:0 14px;font:500 15px var(--font-ui);-webkit-user-select:text;user-select:text;box-sizing:border-box}
 .h-list{flex:1;overflow:auto;padding:0 16px 24px}
-.h-row{display:grid;grid-template-columns:minmax(0,1fr) 80px 150px 70px 136px;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.h-row{display:grid;grid-template-columns:minmax(0,1fr) 80px 150px 70px 176px;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .h-head{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding-top:4px;padding-bottom:8px;position:sticky;top:0;background:var(--bg);z-index:1}
 .h-item{cursor:pointer;border-radius:12px}
 .h-item:hover,.h-item:focus-visible{background:var(--surface);outline:none}
@@ -302,12 +322,13 @@ input[type=range]{accent-color:var(--accent)}
 .h-name small{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .h-cell{font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .h-acts{display:flex;gap:4px;justify-content:flex-end}
-.h-acts button{width:42px;height:42px;border-radius:10px;border:1px solid transparent;background:transparent;display:grid;place-items:center;padding:0;color:var(--muted)}
+.h-acts button{width:40px;height:40px;border-radius:10px;border:1px solid transparent;background:transparent;display:grid;place-items:center;padding:0;color:var(--muted)}
 .h-acts button:hover{border-color:var(--line);background:var(--surface-2);color:var(--fg)}
 .h-acts button.armed{background:var(--danger);color:#fff}
 .h-empty{padding:40px 16px;text-align:center;color:var(--muted)}
-@media (max-width:760px){ .home{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)} .h-side{flex-direction:row;border-right:0;border-bottom:1px solid var(--line);padding:8px 12px;overflow-x:auto} .h-side h3{display:none} .h-nav{flex:none} .h-row{grid-template-columns:minmax(0,1fr) 110px 136px} .h-row .c-author,.h-row .c-pages{display:none} }
-@media (max-width:520px){ .h-row{grid-template-columns:minmax(0,1fr) 136px} .h-row .c-date{display:none} }
+@media (max-width:1100px){ .h-row{grid-template-columns:minmax(0,1fr) 120px 176px} .h-row .c-author,.h-row .c-pages{display:none} }
+@media (max-width:760px){ .home{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)} .h-side{flex-direction:row;border-right:0;border-bottom:1px solid var(--line);padding:8px 12px;overflow-x:auto} .h-side h3{display:none} .h-nav{flex:none} .h-row{grid-template-columns:minmax(0,1fr) 110px 176px} .h-row .c-author,.h-row .c-pages{display:none} }
+@media (max-width:520px){ .h-row{grid-template-columns:minmax(0,1fr) 176px} .h-row .c-date{display:none} }
 .app.home-on .bottom{display:none}
 .h-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;padding-top:4px}
 .h-card{display:flex;flex-direction:column;gap:6px;cursor:pointer;border-radius:14px;padding:10px;min-width:0}
@@ -357,6 +378,7 @@ input[type=range]{accent-color:var(--accent)}
 
   <main class="stage" id="stage">
     <div class="viewer" id="viewer"><div class="pages" id="pages"></div></div>
+    <div class="findbar" id="findBar" hidden><input type="search" id="findInput" placeholder="Buscar en el PDF" aria-label="Buscar en el PDF" enterkeyhint="search"><span id="findCount" role="status"></span><button type="button" class="icon-btn" id="findPrev" aria-label="Anterior"></button><button type="button" class="icon-btn" id="findNext" aria-label="Siguiente"></button><button type="button" class="icon-btn" id="findClose" aria-label="Cerrar búsqueda"></button></div>
     <div class="dz l" id="dzL" hidden><span>Suelta aquí: barra izquierda</span></div>
     <div class="dz r" id="dzR" hidden><span>Suelta aquí: barra derecha</span></div>
     <nav class="rail" id="rail" aria-label="Herramientas" hidden></nav>
@@ -381,6 +403,9 @@ input[type=range]{accent-color:var(--accent)}
     <button class="pagebtn" type="button" id="pagesBtn" aria-label="Ver y editar páginas"><span id="icPages"></span><strong id="pageNow">1</strong><span>/ <span id="pageTotal">2</span></span></button>
     <button class="icon-btn" type="button" id="tplBtn" aria-label="Plantilla de hoja" title="Plantilla de hoja"></button>
     <button class="icon-btn" type="button" id="noteBtn" aria-label="Agregar nota" title="Agregar nota" aria-pressed="false"></button>
+    <button class="icon-btn" type="button" id="markBtn" aria-label="Marcar esta página" title="Marcar esta página" aria-pressed="false"></button>
+    <button class="icon-btn" type="button" id="idxBtn" aria-label="Marcadores y notas" title="Marcadores y notas"></button>
+    <button class="icon-btn" type="button" id="searchBtn" aria-label="Buscar en el PDF" title="Buscar en el PDF"></button>
     <div class="status" id="status">Listo para escribir con el S Pen</div>
     <div class="zoom">
       <button type="button" id="zOut" aria-label="Alejar"></button>
@@ -476,7 +501,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (12)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (13)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -529,13 +554,19 @@ const ICON = {
   note:'<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5"/><path d="M8.5 9h7M8.5 12.5h4"/>',
   image:'<rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-8.5 8"/>',
   cursor:'<path d="M9 4.5c1.7 0 3 .8 3 2.2 0-1.4 1.3-2.2 3-2.2M9 19.5c1.7 0 3-.8 3-2.2 0 1.4 1.3 2.2 3 2.2M12 6.7v10.6M10 12h4"/>',
+  search:'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>',
+  bookmark:'<path d="M7 4h10v16l-5-4-5 4z"/>',
+  lasso:'<ellipse cx="12" cy="9.5" rx="8" ry="5" stroke-dasharray="2.6 2.4"/><path d="M8.5 14c-1.2 1.4-.6 3.4 1.4 3.9l-1.2 2.6"/>',
+  text:'<path d="M5 7V4.5h14V7M12 4.5v15M9 19.5h6"/>',
+  up:'<path d="M6 15l6-6 6 6"/>', down:'<path d="M6 9l6 6 6-6"/>',
   covers:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M14 5.5A1.5 1.5 0 0 1 15.5 4H20v16h-4.5a1.5 1.5 0 0 1-1.5-1.5z"/>'
 };
 const svg = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
 $('#icOpen').innerHTML = svg('folder', 20); $('#icDrive').innerHTML = svg('cloud', 20);
 $('#setBtn').innerHTML = svg('settings'); $('#sheetClose').innerHTML = svg('close'); $('#drClose').innerHTML = svg('close');
 $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); $('#zFit').innerHTML = svg('fit', 20);
-$('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20);
+$('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#idxBtn').innerHTML = svg('list', 20); $('#searchBtn').innerHTML = svg('search', 20);
+$('#findPrev').innerHTML = svg('up', 18); $('#findNext').innerHTML = svg('down', 18); $('#findClose').innerHTML = svg('close', 18);
 $('#icM1').innerHTML = svg('pdf', 20); $('#icM2').innerHTML = svg('book', 20);
 $('#icH1').innerHTML = svg('folder', 20); $('#icH3').innerHTML = svg('cloud', 20); $('#icM3').innerHTML = svg('cloud', 20); $('#icH2').innerHTML = svg('plus', 20);
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
@@ -546,15 +577,15 @@ const store = {
   set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } },
   del(k){ try { localStorage.removeItem(k); } catch(e){} }
 };
-const TOOL_INFO = { hand:{name:'Mover',icon:'hand'}, pen1:{name:'Bolígrafo 1',icon:'pen'}, pen2:{name:'Bolígrafo 2',icon:'pen'}, hl:{name:'Resaltador',icon:'hl'}, eraser:{name:'Borrador',icon:'eraser'}, select:{name:'Seleccionar texto',icon:'cursor'} };
-const SIZE_RANGE = { pen:{min:0.3,max:8,step:0.1,unit:'pt'}, hl:{min:3,max:30,step:0.5,unit:'pt'}, eraser:{min:6,max:80,step:1,unit:'px'} };
+const TOOL_INFO = { hand:{name:'Mover',icon:'hand'}, pen1:{name:'Bolígrafo 1',icon:'pen'}, pen2:{name:'Bolígrafo 2',icon:'pen'}, hl:{name:'Resaltador',icon:'hl'}, eraser:{name:'Borrador',icon:'eraser'}, select:{name:'Seleccionar texto',icon:'cursor'}, lasso:{name:'Lazo',icon:'lasso'}, text:{name:'Texto',icon:'text'} };
+const SIZE_RANGE = { pen:{min:0.3,max:8,step:0.1,unit:'pt'}, hl:{min:3,max:30,step:0.5,unit:'pt'}, eraser:{min:6,max:80,step:1,unit:'px'}, text:{min:8,max:40,step:1,unit:'pt'} };
 const DEF_FAV = {
   pen:['#1d2b53','#111111','#d63a4a','#1c7ed6','#2f9e44','#e67700','#9c36b5','#7a8594'],
   hl:['#ffd43b','#8ce99a','#74c0fc','#ffa8a8','#e599f7','#ffc078','#63e6be','#ced4da']
 };
 const MAX_FAV = 8;
-const kind = t => t === 'hl' ? 'hl' : t === 'eraser' ? 'eraser' : t === 'hand' ? 'hand' : t === 'select' ? 'select' : 'pen';
-const noOpts = t => kind(t) === 'hand' || kind(t) === 'select';
+const kind = t => t === 'hl' ? 'hl' : t === 'eraser' ? 'eraser' : t === 'hand' ? 'hand' : t === 'select' ? 'select' : t === 'lasso' ? 'lasso' : t === 'text' ? 'text' : 'pen';
+const noOpts = t => kind(t) === 'hand' || kind(t) === 'select' || kind(t) === 'lasso';
 const PEN_STYLES = { pluma:'Pluma', boligrafo:'Bolígrafo', lapiz:'Lápiz', estilografo:'Estilógrafo', rotulador:'Rotulador' };
 const constStyle = s => s.t === 'pen' && (s.st === 'estilografo' || s.st === 'rotulador');
 function toolName(t){
@@ -563,13 +594,14 @@ function toolName(t){
   return PEN_STYLES[st] + ' ' + (t === 'pen1' ? 1 : 2);
 }
 const DEF = { sens:0.7, snap:true, finger:false, theme:'system', tool:'pen1', dock:'float', fabPos:null, openNb:[], thumbCols:'1', editCols:'2x2', thumbW:120, presets:[], homeView:'list',
-  tools:{ pen1:{color:'#1d2b53',size:1.2}, pen2:{color:'#d63a4a',size:1.8}, hl:{color:'#ffd43b',size:12}, eraser:{size:24}, hand:{}, select:{} } };
+  tools:{ pen1:{color:'#1d2b53',size:1.2}, pen2:{color:'#d63a4a',size:1.8}, hl:{color:'#ffd43b',size:12}, eraser:{size:24}, hand:{}, select:{}, lasso:{}, text:{color:'#1d2b53',size:14} } };
 const saved = store.get('drawsky:prefs') || {};
 const prefs = Object.assign({}, DEF, saved, {
   tools: Object.assign({}, DEF.tools, saved.tools || {}),
   fav: { pen:(saved.fav && saved.fav.pen) || DEF_FAV.pen.slice(), hl:(saved.fav && saved.fav.hl) || DEF_FAV.hl.slice() }
 });
 if (!['float', 'left', 'right'].includes(prefs.dock)) prefs.dock = 'float';
+prefs.fav.text = prefs.fav.pen;
 if (!Array.isArray(prefs.openNb)) prefs.openNb = [];
 let tool = TOOL_INFO[prefs.tool] ? prefs.tool : 'pen1';
 const savePrefs = () => { prefs.tool = tool; store.set('drawsky:prefs', prefs); };
@@ -638,7 +670,7 @@ function makePage(d, spec){
   const sv = c => { const e = document.createElementNS(SVGNS, 'svg'); e.setAttribute('class', c); e.setAttribute('preserveAspectRatio', 'none'); el.appendChild(e); return e; };
   const p = { doc:d, src:spec.src, wPt:spec.w, hPt:spec.h, tpl:spec.tpl || null, strokes:spec.strokes || [], el,
     pdfC:mk('pdf'), hlS:sv('hl'), inkS:sv('ink'), inkOn:false, rendered:false, task:null, gen:0, cssW:0, cssH:0, pxScale:1, i:0 };
-  p.notes = Array.isArray(spec.notes) ? spec.notes : [];
+  p.notes = Array.isArray(spec.notes) ? spec.notes : []; p.mark = !!spec.mark;
   p.pcG = document.createElementNS(SVGNS, 'g'); p.pcG.setAttribute('filter', 'url(#dsGrain)');
   p.num = document.createElement('div'); p.num.className = 'pnum'; el.appendChild(p.num);
   return p;
@@ -707,7 +739,7 @@ function updateVisible(){
   }
   const mid = st + vh / 2; let cur = 0;
   for (const p of doc.pages){ if (p.el.offsetTop <= mid) cur = p.i; else break; }
-  doc.cur = cur;
+  if (doc.cur !== cur){ doc.cur = cur; updateMarkBtn(); }
   $('#pageNow').textContent = cur + 1;
 }
 viewer.addEventListener('scroll', () => { if (!visRaf) visRaf = requestAnimationFrame(() => { visRaf = 0; updateVisible(); }); }, { passive:true });
@@ -727,7 +759,7 @@ function mountDoc(){
   pagesEl.innerHTML = '';
   for (const p of doc.pages) pagesEl.appendChild(p.el);
   pagesEl.appendChild(addPageBtn); addPageBtn.hidden = doc.kind === 'image';
-  reindex(doc); renderAllNotes(doc);
+  reindex(doc); renderAllNotes(doc); renderMarks(doc);
 }
 
 /* ---------- tabs ---------- */
@@ -802,6 +834,7 @@ async function restoreSession(){
   renderTabs(); persistTabs();
 }
 function leaveDoc(){
+  if (find) closeFind(); clearLasso(); if (textEdit) commitText();
   if (!doc || homeOn) return;
   doc.sx = viewer.scrollLeft; doc.sy = viewer.scrollTop; doc.zoom = zoom;
   if (doc.drive && doc.dirty && prefs.autoSync) scheduleSync(doc, 400);
@@ -898,19 +931,23 @@ function renderHome(){
   $('#hSide').innerHTML = `<h3>Archivos</h3>` +
     [['all', 'Todos', 'pages'], ['notebook', 'Cuadernos', 'book'], ['pdf', 'PDFs', 'pdf'], ['image', 'Imágenes', 'image']].map(([k, l, ic]) =>
       `<button type="button" class="h-nav" data-hf="${k}" aria-current="${homeFilter === k}">${svg(ic, 20)}<span>${l}</span><b>${counts[k]}</b></button>`).join('') +
+    `<h3>Carpetas</h3>` + allFolders().map(f => `<button type="button" class="h-nav" data-hf="f:${esc(f)}" aria-current="${homeFilter === 'f:' + f}">${svg('folder', 20)}<span>${esc(f)}</span><b>${lib.filter(e => e.folder === f).length}</b></button>`).join('') +
+    `<button type="button" class="h-nav" data-newfolder="1">${svg('plus', 20)}<span>Nueva carpeta</span></button>` +
     `<h3>Google Drive</h3><button type="button" class="h-nav" data-hf="drive" aria-current="${homeFilter === 'drive'}">${svg('cloud', 20)}<span>En Drive</span><b>${counts.drive}</b></button>` +
     (pend ? `<button type="button" class="h-nav warn" data-sync="1" title="Subir ahora">${svg('share', 20)}<span>Sin subir</span><b>${pend}</b></button>` : '') +
     (prefs.accounts.length ? `<button type="button" class="h-nav" data-refresh="1">${svg('redo', 20)}<span>Actualizar lista</span></button>` : '') +
     prefs.accounts.map(a => `<button type="button" class="h-nav" data-acc="${esc(a.email)}" title="Abrir un PDF de ${esc(a.email)}"><span class="av">${initial(a)}</span><span>${esc(a.email)}</span></button>`).join('') +
     `<button type="button" class="h-nav" data-acc="">${svg('plus', 20)}<span>${prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive'}</span></button>`;
-  $('#hTitle').textContent = { all:'Todos tus archivos', notebook:'Cuadernos', pdf:'PDFs', image:'Imágenes', drive:'En Google Drive' }[homeFilter];
-  let list = lib.filter(e => homeFilter === 'all' || (homeFilter === 'drive' ? !!e.drive : homeFilter === 'notebook' ? (e.kind === 'notebook' || e.kind === 'sample') : e.kind === homeFilter));
+  const fsel = homeFilter.startsWith('f:') ? homeFilter.slice(2) : null;
+  $('#hTitle').innerHTML = fsel ? `${svg('folder', 22)} ${esc(fsel)} <button type="button" class="btn" data-delfolder="${esc(fsel)}" style="height:32px;font-size:12.5px;margin-left:8px">Eliminar carpeta</button>` : ({ all:'Todos tus archivos', notebook:'Cuadernos', pdf:'PDFs', image:'Imágenes', drive:'En Google Drive' }[homeFilter] || 'Todos tus archivos');
+  let list = lib.filter(e => homeFilter === 'all' || (fsel ? e.folder === fsel : homeFilter === 'drive' ? !!e.drive : homeFilter === 'notebook' ? (e.kind === 'notebook' || e.kind === 'sample') : e.kind === homeFilter));
   if (homeQuery) list = list.filter(e => (e.name || '').toLowerCase().includes(homeQuery));
   list.sort((a, b) => (b.opened || 0) - (a.opened || 0));
   document.querySelectorAll('#hView button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.hv === prefs.homeView)));
   const grid = prefs.homeView === 'grid';
   const acts = (e, armed) => `<span class="h-acts">
         <button type="button" data-ha="share" aria-label="${e.drive ? 'Ver en Google Drive' : 'Subir a Google Drive'}" title="${e.drive ? 'Ver en Google Drive' : 'Subir a Google Drive'}">${svg('share', 20)}</button>
+        <button type="button" data-ha="folder" aria-label="Mover a carpeta" title="Mover a carpeta">${svg('folder', 20)}</button>
         <button type="button" data-ha="ren" aria-label="Cambiar nombre" title="Cambiar nombre">${svg('edit', 20)}</button>
         <button type="button" data-ha="del" class="${armed ? 'armed' : ''}" aria-label="${armed ? 'Toca otra vez para eliminar' : 'Eliminar'}" title="${armed ? 'Toca otra vez para eliminar' : 'Eliminar'}">${svg('trash', 20)}</button>
       </span>`;
@@ -974,9 +1011,15 @@ $('#hSide').addEventListener('click', e => {
   if (a){ if (a.dataset.acc) openPicker(a.dataset.acc); else requestToken(null, (email, tk) => { if (email) showPicker(email, tk); }); return; }
   if (e.target.closest('[data-sync]')){ syncPendingTap(); return; }
   if (e.target.closest('[data-refresh]')){ refreshDriveTap(); return; }
+  if (e.target.closest('[data-newfolder]')){
+    dlgState = { kind:'nf' }; dlg.setAttribute('aria-label', 'Nueva carpeta');
+    dlg.innerHTML = `<header class="sheet-h"><h2>Nueva carpeta</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header><div class="group" style="border-top:0"><div class="fields" style="margin-top:0"><label class="field">Nombre<input type="text" id="fFolder" maxlength="40" placeholder="Por ejemplo: Cardiología"></label></div><p class="hint">Luego mueve archivos con el botón de carpeta de cada fila.</p></div><div class="dlg-foot"><button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="mkFolder">Crear</button></div>`;
+    dlgWrap.hidden = false; setTimeout(() => $('#fFolder').focus(), 50); return;
+  }
   const b = e.target.closest('[data-hf]'); if (!b) return;
   homeFilter = b.dataset.hf; renderHome();
 });
+$('#hTitle').addEventListener('click', e => { const b = e.target.closest('[data-delfolder]'); if (b) deleteFolder(b.dataset.delfolder); });
 $('#hSearch').addEventListener('input', e => { homeQuery = e.target.value.trim().toLowerCase(); renderHome(); });
 $('#hView').addEventListener('click', e => { const b = e.target.closest('[data-hv]'); if (!b) return; prefs.homeView = b.dataset.hv; savePrefs(); renderHome(); });
 $('#hOpen').addEventListener('click', () => $('#file').click());
@@ -994,6 +1037,7 @@ $('#hList').addEventListener('click', ev => {
     else { toast(`Abre "${e.name}" y toca "Subir a Drive".`); $('#file').click(); }
   }
   else if (k === 'ren') openRenameDialog(e);
+  else if (k === 'folder') openFolderDialog(e);
   else if (k === 'del'){
     if (libDelArmed !== e.key){ libDelArmed = e.key; renderHome(); toast(e.drive ? (e.pending ? 'Toca otra vez: tiene cambios sin subir a Drive que se perderán.' : 'Toca otra vez para quitarlo de DrawSky (no se borra de tu Drive).') : e.kind === 'pdf' ? 'Toca otra vez: se borran tus anotaciones de este PDF en la tableta.' : 'Toca otra vez para eliminarlo de la tableta.'); return; }
     deleteEntry(e);
@@ -1003,7 +1047,7 @@ $('#hList').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target
 
 /* ---------- saving (this tablet only, until phase 2) ---------- */
 function serialize(d){
-  return { v:2, name:d.name, kind:d.kind, pages:d.pages.map(p => ({ src:p.src, w:r2(p.wPt), h:r2(p.hPt), tpl:p.tpl, strokes:p.strokes, notes:p.notes && p.notes.length ? p.notes : undefined })) };
+  return { v:2, name:d.name, kind:d.kind, pages:d.pages.map(p => ({ src:p.src, w:r2(p.wPt), h:r2(p.hPt), tpl:p.tpl, strokes:p.strokes, notes:p.notes && p.notes.length ? p.notes : undefined, mark:p.mark || undefined })) };
 }
 function save(){
   if (!doc) return;
@@ -1356,8 +1400,17 @@ function cmdsPdf(cmds){
   }
   return o;
 }
+let packFont = null;
+function pdfSafe(f, str){ return [...String(str)].map(ch => { try { f.encodeText(ch); return ch; } catch(_){ return '?'; } }).join(''); }
+function textPdf(s){
+  if (!packFont) return '';
+  let o = `q ${rgb(s.color)} rg BT /DSkyR ${nf(s.size)} Tf\n`;
+  String(s.text).split('\n').forEach((l, i) => { if (l) o += `1 0 0 -1 ${nf(s.pts[0][0])} ${nf(s.pts[0][1] + s.size * 0.95 + i * s.size * TEXT_LH)} Tm ${packFont.encodeText(pdfSafe(packFont, l)).toString()} Tj\n`; });
+  return o + 'ET Q\n';
+}
 function strokePdf(s){
   if (!s.pts || !s.pts.length) return '';
+  if (s.t === 'text') return textPdf(s);
   const g = strokeGeom(s), c = rgb(s.color), path = cmdsPdf(g.cmds);
   let o = g.mode === 'fill' ? `${c} rg\n${path}f\n` : `${c} RG ${nf(Math.max(0.2, g.w))} w ${g.cap === 'square' ? 2 : 1} J\n${path}S\n`;
   if (g.alpha != null) o = `q /DSkyA${Math.round(g.alpha * 100)} gs\n${o}Q\n`;
@@ -1423,7 +1476,7 @@ function baseRefs(node, ctx){
 async function packDoc(d){
   await needPdfLib();
   const { PDFDocument, PDFName, PDFDict } = PDFLib;
-  const snap = d.pages.map(p => ({ p, src:Object.assign({}, p.src), wPt:p.wPt, hPt:p.hPt, tpl:p.tpl ? Object.assign({}, p.tpl) : null, strokes:p.strokes.slice(),
+  const snap = d.pages.map(p => ({ p, src:Object.assign({}, p.src), wPt:p.wPt, hPt:p.hPt, tpl:p.tpl ? Object.assign({}, p.tpl) : null, strokes:p.strokes.slice(), mark:!!p.mark,
     notes:(p.notes || []).map(n => Object.assign({}, n, { imgs:(n.imgs || []).slice() })) }));
   const ver = d.ver || 0;
   const notesData = [];
@@ -1445,20 +1498,25 @@ async function packDoc(d){
   let num = 0, bold = null, regular = null;
   const allNotes = [];
   snap.forEach((s, i) => s.notes.forEach((n, j) => { num++; allNotes.push({ num, page:i + 1, n, x:n.x, y:n.y, imgs:(notesData[i] && notesData[i][j] && notesData[i][j].imgData) || [], pi:i }); }));
-  if (allNotes.length){ bold = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold); regular = await pdf.embedFont(PDFLib.StandardFonts.Helvetica); }
+  const hasText = snap.some(s => s.strokes.some(t => t.t === 'text'));
+  if (allNotes.length || hasText){ bold = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold); regular = await pdf.embedFont(PDFLib.StandardFonts.Helvetica); }
+  packFont = regular;
   const meta = snap.map((s, i) => {
     const pg = pages[i], node = pg.node, base = baseRefs(node, ctx), marks = allNotes.filter(m => m.pi === i);
-    const o = { src:{ kind:'pdf', index:i }, w:r2(s.wPt), h:r2(s.hPt), tpl:s.tpl, strokes:s.strokes, notes:notesData[i], base:base.map(r => [r.objectNumber, r.generationNumber]), ink:[] };
+    const o = { src:{ kind:'pdf', index:i }, w:r2(s.wPt), h:r2(s.hPt), tpl:s.tpl, strokes:s.strokes, notes:notesData[i], mark:s.mark || undefined, base:base.map(r => [r.objectNumber, r.generationNumber]), ink:[] };
     if (!s.strokes.length && !marks.length && !(s.tpl && s.tpl.type !== 'none')) return o;
     node.normalize();
     const res = node.Resources(), old = res.lookupMaybe(PDFName.of('ExtGState'), PDFDict);
-    if (marks.length){
+    const pageText = s.strokes.some(t => t.t === 'text');
+    if (marks.length || pageText){
       const of = res.lookupMaybe(PDFName.of('Font'), PDFDict), fd = of ? of.clone(ctx) : ctx.obj({});
-      fd.set(PDFName.of('DSkyF'), bold.ref); res.set(PDFName.of('Font'), fd);
+      if (marks.length) fd.set(PDFName.of('DSkyF'), bold.ref);
+      if (pageText) fd.set(PDFName.of('DSkyR'), regular.ref);
+      res.set(PDFName.of('Font'), fd);
     }
     const gs = old ? old.clone(ctx) : ctx.obj({});
     const gsd = Object.assign({}, GS);
-    for (const st of s.strokes){ const g = strokeGeom(st); if (g.alpha != null){ const a = Math.round(g.alpha * 100); gsd['DSkyA' + a] = { Type:'ExtGState', CA:a / 100, ca:a / 100 }; } }
+    for (const st of s.strokes){ if (st.t === 'text') continue; const g = strokeGeom(st); if (g.alpha != null){ const a = Math.round(g.alpha * 100); gsd['DSkyA' + a] = { Type:'ExtGState', CA:a / 100, ca:a / 100 }; } }
     for (const k in gsd) gs.set(PDFName.of(k), ctx.obj(gsd[k]));
     res.set(PDFName.of('ExtGState'), gs);
     const b = pg.getCropBox(), rot = ((pg.getRotation().angle % 360) + 360) % 360;
@@ -1468,11 +1526,12 @@ async function packDoc(d){
     return o;
   });
   const data = { v:1, app:'DrawSky', name:d.name, kind:d.kind, pages:meta };
-  if (allNotes.length){
-    const made = await addNotesPages(pdf, allNotes, bold, regular);
-    data.notesPages = made.pages;
-    data.extra = [bold.ref, regular.ref].concat(made.refs).map(r => [r.objectNumber, r.generationNumber]);
+  if (bold){
+    let refs = [bold.ref, regular.ref];
+    if (allNotes.length){ const made = await addNotesPages(pdf, allNotes, bold, regular); data.notesPages = made.pages; refs = refs.concat(made.refs); }
+    data.extra = refs.map(r => [r.objectNumber, r.generationNumber]);
   }
+  packFont = null;
   pdf.catalog.set(PDFName.of('DrawSky'), ctx.register(ctx.flateStream(enc.encode(JSON.stringify(data)))));
   const bytes = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
   data.pages.forEach(sp => { delete sp.base; delete sp.ink; });
@@ -1517,6 +1576,7 @@ async function unpack(buf){
     for (const pg of pages){
       const res = pg.node.Resources(), fd = res && res.lookupMaybe(PDFName.of('Font'), PDFLib.PDFDict);
       if (fd && fd.get(PDFName.of('DSkyF'))) fd.delete(PDFName.of('DSkyF'));
+      if (fd && fd.get(PDFName.of('DSkyR'))) fd.delete(PDFName.of('DSkyR'));
     }
     pdf.catalog.delete(K); ctx.delete(jr);
     const clean = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
@@ -1707,13 +1767,15 @@ async function refreshDriveList(force){
     if (!tokenOk(a.email)) continue;
     try {
       const q = encodeURIComponent("trashed=false and (mimeType='application/pdf' or mimeType='image/jpeg' or mimeType='image/png' or mimeType='image/webp')");
-      const r = await (await gfetch(a.email, `${DRIVE}/files?q=${q}&pageSize=300&fields=files(id,name,mimeType,modifiedTime,viewedByMeTime,owners(displayName,emailAddress))&includeItemsFromAllDrives=true&supportsAllDrives=true`)).json();
+      const r = await (await gfetch(a.email, `${DRIVE}/files?q=${q}&pageSize=300&fields=files(id,name,mimeType,modifiedTime,viewedByMeTime,appProperties,owners(displayName,emailAddress))&includeItemsFromAllDrives=true&supportsAllDrives=true`)).json();
       for (const f of r.files || []){
         if (hidden.has(f.id)) continue;
         const key = 'gd:' + f.id, t = Math.max(Date.parse(f.modifiedTime) || 0, Date.parse(f.viewedByMeTime) || 0) || Date.now();
         const o = f.owners && f.owners[0], owner = !o || o.emailAddress === a.email ? 'Tú' : o.displayName;
         let e = lib.find(x => x.key === key);
-        if (!e){ lib.push({ key, created:t, opened:t, name:stripExt(f.name), kind:/^image\//.test(f.mimeType) ? 'image' : 'pdf', drive:{ email:a.email, id:f.id }, owner }); changed = true; continue; }
+        const fol = f.appProperties && f.appProperties.drawskyFolder;
+        if (!e){ const ne = { key, created:t, opened:t, name:stripExt(f.name), kind:/^image\//.test(f.mimeType) ? 'image' : 'pdf', drive:{ email:a.email, id:f.id }, owner }; if (fol) ne.folder = fol; lib.push(ne); changed = true; continue; }
+        if ((fol || undefined) !== e.folder){ if (fol) e.folder = fol; else delete e.folder; changed = true; }
         if (t > (e.opened || 0) + 5000){ e.opened = t; changed = true; }
         const nm = stripExt(f.name); if (nm !== e.name && !docs.some(d => d.key === key)){ e.name = nm; changed = true; }
       }
@@ -1977,6 +2039,7 @@ function strokeGeom(s, live){
 /* canvas painting (live stroke, thumbnails); ctx units: page points × sc */
 function drawStroke(ctx, s, sc, live){
   if (!s.pts.length) return;
+  if (s.t === 'text'){ drawTextCanvas(ctx, s, sc); return; }
   const g = strokeGeom(s, live), path = g.p2 || (g.p2 = new Path2D(g.d));
   ctx.save(); ctx.scale(sc, sc);
   if (g.alpha != null) ctx.globalAlpha *= g.alpha;
@@ -1986,6 +2049,7 @@ function drawStroke(ctx, s, sc, live){
 }
 /* vector element for the page */
 function strokeEl(s){
+  if (s.t === 'text'){ let el = elCache.get(s); if (!el){ el = textEl(s); elCache.set(s, el); } return el; }
   const g = strokeGeom(s);
   let el = elCache.get(s);
   if (el && el._g === g) return el;
@@ -2004,7 +2068,7 @@ function inkLayer(s, p){ return s.t === 'hl' ? p.hlS : s.st === 'lapiz' ? p.pcG 
 function drawInk(p){
   if (!p.inkOn) return;
   const hl = [], pc = [], pen = [];
-  for (const s of p.strokes) (s.t === 'hl' ? hl : s.st === 'lapiz' ? pc : pen).push(strokeEl(s));
+  for (const s of p.strokes){ if (s === p.editingText) continue; (s.t === 'hl' ? hl : s.st === 'lapiz' ? pc : pen).push(strokeEl(s)); }
   p.hlS.replaceChildren(...hl); p.pcG.replaceChildren(...pc); p.inkS.replaceChildren(p.pcG, ...pen);
 }
 function inkViewBox(p){ const vb = `0 0 ${p.wPt} ${p.hPt}`; p.hlS.setAttribute('viewBox', vb); p.inkS.setAttribute('viewBox', vb); }
@@ -2184,6 +2248,7 @@ function segDist2(px, py, ax, ay, bx, by){
 }
 function hitStroke(s, x, y, r){
   const b = bbox(s), pad = r + b[4] / 2;
+  if (s.t === 'text') return x >= b[0] - r && x <= b[2] + r && y >= b[1] - r && y <= b[3] + r;
   if (x < b[0] - pad || x > b[2] + pad || y < b[1] - pad || y > b[3] + pad) return false;
   const P = s.pts;
   if (P.length === 1){ const dx = P[0][0] - x, dy = P[0][1] - y; return dx * dx + dy * dy <= pad * pad; }
@@ -2224,6 +2289,7 @@ function eraseSplit(p, pts, r){
   let changed = false; const next = [];
   for (const s of p.strokes){
     if (!pts.some(q => hitStroke(s, q[0], q[1], r))){ next.push(s); continue; }
+    if (s.t === 'text'){ changed = true; continue; }
     const runs = []; let cur = [];
     for (const q of densify(s, Math.max(0.4, r * 0.35))){
       if (pts.some(e => (q[0] - e[0]) ** 2 + (q[1] - e[1]) ** 2 <= r * r)){ if (cur.length) runs.push(cur); cur = []; }
@@ -2251,6 +2317,7 @@ function endErase(){
 
 /* ---------- undo / redo ---------- */
 function undo(){
+  clearLasso();
   if (!doc) return; const h = doc.undo.pop(); if (!h) return; const p = h.page;
   if (h.k === 'snap') p.strokes = h.before.slice();
   else if (h.k === 'add'){ const j = p.strokes.lastIndexOf(h.s); if (j >= 0) p.strokes.splice(j, 1); }
@@ -2258,6 +2325,7 @@ function undo(){
   doc.redo.push(h); drawInk(p); renderRail(); save();
 }
 function redo(){
+  clearLasso();
   if (!doc) return; const h = doc.redo.pop(); if (!h) return; const p = h.page;
   if (h.k === 'snap') p.strokes = h.after.slice();
   else if (h.k === 'add') p.strokes.push(h.s);
@@ -2311,7 +2379,7 @@ function isPalm(e){ return performance.now() - lastPenT < 700 || (e.width > 48 &
 function onTouchDown(e){
   if (isPalm(e)) return;
   stopInertia();
-  touches.set(e.pointerId, { x:e.clientX, y:e.clientY, sx:e.clientX, sy:e.clientY });
+  touches.set(e.pointerId, { x:e.clientX, y:e.clientY, sx:e.clientX, sy:e.clientY, t0:performance.now() });
   try { viewer.setPointerCapture(e.pointerId); } catch(_){}
   vel = { x:0, y:0, t:performance.now() };
   clearTimeout(touchLP);
@@ -2334,6 +2402,11 @@ function onTouchMove(e){
   else if (pinch) updatePinch();
 }
 function onTouchUp(e){
+  const tt = touches.get(e.pointerId);
+  if (tool === 'text' && tt && touches.size === 1 && Math.hypot(tt.x - tt.sx, tt.y - tt.sy) < 10 && performance.now() - tt.t0 < 450 && doc){
+    const el = document.elementFromPoint(e.clientX, e.clientY), pe = el && el.closest('.page');
+    if (pe){ const p = doc.pages[+pe.dataset.i], r = pe.getBoundingClientRect(), k = p.wPt / r.width; setTimeout(() => openTextAt(p, (e.clientX - r.left) * k, (e.clientY - r.top) * k), 0); }
+  }
   touches.delete(e.pointerId); clearTimeout(touchLP);
   if (pinch && touches.size < 2){ endPinch(); vel.t = 0; }
   else if (touches.size === 0) startInertia();
@@ -2349,7 +2422,10 @@ function showEraserCursor(e, on){
 viewer.addEventListener('pointerdown', e => {
   if (!doc) return;
   if (e.target.closest && e.target.closest('button')) return;
+  if (e.target.closest && e.target.closest('.tbox')) return;
   hideNoteChip(); if (textSel || !selMenu.hidden) clearSel();
+  if (textEdit){ e.preventDefault(); commitText(); if (tool === 'text') return; }
+  if (lsel && tool !== 'lasso') clearLasso();
   if (placingNote){
     const pe = e.target.closest && e.target.closest('.page');
     if (pe){
@@ -2377,6 +2453,12 @@ viewer.addEventListener('pointerdown', e => {
   if (!p.rendered || !p.inkOn) renderPage(p);
   const rect = pageEl.getBoundingClientRect();
   if (t === 'select'){ beginSelect(e, p, rect); return; }
+  if (t === 'text'){ const k = p.wPt / rect.width; openTextAt(p, (e.clientX - rect.left) * k, (e.clientY - rect.top) * k); return; }
+  if (t === 'lasso'){
+    const k = p.wPt / rect.width;
+    active = { id:e.pointerId, mode:'lasso', p, rect, k, sx:e.clientX, sy:e.clientY, maxMove:0, t0:performance.now() };
+    lassoBegin(active, (e.clientX - rect.left) * k, (e.clientY - rect.top) * k); return;
+  }
   active = { id:e.pointerId, mode:t === 'eraser' ? 'erase' : 'draw', p, rect, k:p.wPt / rect.width, tool:t, removed:[], fromTouch:e.pointerType === 'touch',
     t0:performance.now(), sx:e.clientX, sy:e.clientY, maxMove:0, ptype:e.pointerType, before:p.strokes.slice() };
   if (active.mode === 'erase'){ eraseAt(e); showEraserCursor(e, true); }
@@ -2405,6 +2487,7 @@ viewer.addEventListener('pointermove', e => {
   }
   if (!active || e.pointerId !== active.id) return;
   if (active.mode === 'hold') return;
+  if (active.mode === 'lasso' || active.mode === 'lmove' || active.mode === 'lscale'){ const a = active; lassoMove(a, (e.clientX - a.rect.left) * a.k, (e.clientY - a.rect.top) * a.k); return; }
   if (active.mode === 'select'){ active.maxMove = Math.max(active.maxMove, Math.hypot(e.clientX - active.sx, e.clientY - active.sy)); moveSelect(active, e.clientX, e.clientY); return; }
   if (active.mode === 'pan'){
     viewer.scrollLeft -= e.clientX - active.x; viewer.scrollTop -= e.clientY - active.y;
@@ -2430,6 +2513,7 @@ function endPointer(e){
   if (active.lp) clearTimeout(active.lp);
   if (active.mode === 'hold'){ active = null; return; }
   if (active.mode === 'select'){ const a = active; active = null; endSelect(a); return; }
+  if (active.mode === 'lasso' || active.mode === 'lmove' || active.mode === 'lscale'){ const a = active; active = null; lassoEnd(a); return; }
   const a = active, tap = prefs.dblTap && a.ptype === 'pen' && a.mode !== 'pan' && performance.now() - a.t0 < 220 && (a.maxMove || 0) < 6;
   let made = null;
   if (a.mode === 'draw') made = endStroke();
@@ -2599,9 +2683,9 @@ window.addEventListener('pointerup', e => endDrag(e, false));
 window.addEventListener('pointercancel', e => endDrag(e, true));
 
 /* ---------- tools: rail ---------- */
-function setTool(t){ clearSel(); tool = t; savePrefs(); renderRail(); if (!wheelWrap.hidden) renderWheelView(); if (t !== 'eraser') ecur.hidden = true; }
+function setTool(t){ clearSel(); clearLasso(); if (textEdit) commitText(); tool = t; savePrefs(); renderRail(); if (!wheelWrap.hidden) renderWheelView(); if (t !== 'eraser') ecur.hidden = true; }
 function renderRail(){
-  const items = ['hand', 'select', 'pen1', 'pen2', 'hl', 'eraser'];
+  const items = ['hand', 'select', 'lasso', 'text', 'pen1', 'pen2', 'hl', 'eraser'];
   const u = doc ? doc.undo.length : 0, r = doc ? doc.redo.length : 0;
   rail.innerHTML = `<button type="button" class="grip" data-grip aria-label="Arrastra para mover la barra o volverla ruedita" title="Arrastra para mover">${svg('grip', 20)}</button>` +
     items.map(t => {
@@ -2652,7 +2736,7 @@ const lum = hex => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >>
 const sameColor = (a, b) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
 
 function viewMain(){
-  const items = ['hand', 'select', 'pen1', 'pen2', 'hl', 'eraser', 'favs', 'undo', 'redo'], stepA = 360 / items.length;
+  const items = ['hand', 'select', 'lasso', 'text', 'pen1', 'pen2', 'hl', 'eraser', 'favs', 'undo', 'redo'], stepA = 360 / items.length;
   const names = { favs:'Bolígrafos favoritos', undo:'Deshacer', redo:'Rehacer' };
   let h = `<svg viewBox="0 0 200 200" class="wsvg" aria-hidden="true"><circle cx="100" cy="100" r="99" class="w-band"/><circle cx="100" cy="100" r="84" class="w-disc"/></svg>`;
   items.forEach((k, i) => {
@@ -2669,7 +2753,7 @@ function presetIndex(){
   return prefs.presets.findIndex(p => p.style === (c.style || 'pluma') && sameColor(p.color, c.color) && Math.abs(p.size - c.size) < 0.05);
 }
 function viewTool(){
-  const kd = kind(tool), cfg = prefs.tools[tool], hasColor = kd === 'pen' || kd === 'hl';
+  const kd = kind(tool), cfg = prefs.tools[tool], hasColor = kd === 'pen' || kd === 'hl' || kd === 'text';
   let s = `<svg viewBox="0 0 200 200" class="wsvg"><circle cx="100" cy="100" r="99" class="w-band"/>`;
   if (hasColor){
     const favs = prefs.fav[kd].slice(0, MAX_FAV), n = favs.length + 1, step = 360 / n;
@@ -2699,7 +2783,7 @@ function viewTool(){
   }
   h += `<button type="button" class="wc" data-view="main" aria-label="Volver a herramientas">${svg('back', 24)}</button>`;
   wheel.innerHTML = h;
-  const sub = kd === 'pen' ? `${PEN_STYLES[cfg.style || 'pluma']} · toca un color o + para cualquiera` : kd === 'hl' ? 'Toca un color o + para cualquiera'
+  const sub = kd === 'pen' ? `${PEN_STYLES[cfg.style || 'pluma']} · toca un color o + para cualquiera` : kd === 'text' ? 'Toca la hoja donde quieres escribir con el teclado' : kd === 'hl' ? 'Toca un color o + para cualquiera'
     : (cfg.mode === 'partial' ? 'Parcial: borra solo lo que tocas, por ejemplo una letra' : 'Trazo: borra el trazo completo que tocas');
   const al = Math.round((cfg.alpha != null ? cfg.alpha : 0.45) * 100);
   wcap.innerHTML = `<div class="cap-txt"><strong>${toolName(tool)}</strong><span>${sub}</span></div>` +
@@ -2875,7 +2959,7 @@ wheelWrap.addEventListener('click', e => {
   else if (d.emode){ prefs.tools.eraser.mode = d.emode; savePrefs(); renderWheelView(); }
   else if (d.tool){
     tool = d.tool; savePrefs(); renderRail(); ecur.hidden = true;
-    if (noOpts(tool)){ closeWheel(); if (tool === 'select') toast('Desliza el lápiz sobre el texto del PDF para seleccionarlo'); return; }
+    if (noOpts(tool)){ closeWheel(); if (tool === 'select') toast('Desliza el lápiz sobre el texto del PDF para seleccionarlo'); if (tool === 'lasso') toast('Encierra con el lápiz los trazos que quieres mover, cambiar o borrar'); return; }
     wheelView = 'tool'; renderWheelView();
   }
   else if (d.view){ wheelView = d.view; renderWheelView(); }
@@ -3294,6 +3378,9 @@ dlg.addEventListener('click', e => {
   else if (d === 'insert') insertPages();
   else if (d === 'rename') doRename();
   else if (d === 'noteDone' || d === 'noteDel' || d === 'nImgDel') noteAction(d, b);
+  else if (d === 'idxTab' || d === 'idxGo' || d === 'idxNote') indexAction(d, b);
+  else if (d === 'setFolder' || d === 'newFolder') folderAction(d, b);
+  else if (d === 'mkFolder'){ const v = ($('#fFolder').value || '').trim(); if (!v){ toast('Escribe el nombre de la carpeta.'); return; } if (!prefs.folders.includes(v)){ prefs.folders.push(v); savePrefs(); } closeDlg(); homeFilter = 'f:' + v; renderHome(); }
   else if (d === 'acc'){ const cb = st.cb, em = b.dataset.email; closeDlg(); cb(em); }
   else if (d === 'accNew'){ const cb = st.cb; closeDlg(); requestToken(null, em => { if (em) cb(em); }); }
   else if (d === 'minus' || d === 'plus'){ st.count = clamp(st.count + (d === 'plus' ? 1 : -1), 1, 50); $('#fCount').textContent = st.count; }
@@ -3734,6 +3821,338 @@ async function openDriveImage(email, id, ctx){
   if (pending) scheduleSync(d, 1500);
 }
 
+/* ---------- text boxes (typed with the keyboard) ---------- */
+const TEXT_LH = 1.25, TEXT_FONT = 'Figtree, Helvetica, Arial, sans-serif';
+const measureCtx = document.createElement('canvas').getContext('2d');
+function textBox(text, size){
+  measureCtx.font = `${size}px ${TEXT_FONT}`;
+  const lines = String(text).split('\n');
+  return { w:Math.max(size, ...lines.map(l => measureCtx.measureText(l).width)), h:lines.length * size * TEXT_LH, lines };
+}
+function makeText(x, y, text, size, color){
+  const b = textBox(text, size);
+  return { t:'text', color, size:r2(size), text, pts:[[r2(x), r2(y), 0], [r2(x + b.w), r2(y + b.h), 0]] };
+}
+function textEl(s){
+  const el = document.createElementNS(SVGNS, 'text'), x = s.pts[0][0], y = s.pts[0][1];
+  el.setAttribute('fill', s.color); el.setAttribute('font-size', s.size); el.setAttribute('font-family', TEXT_FONT);
+  el.setAttribute('style', 'white-space:pre');
+  String(s.text).split('\n').forEach((l, i) => {
+    const t = document.createElementNS(SVGNS, 'tspan');
+    t.setAttribute('x', x); t.setAttribute('y', y + s.size * 0.95 + i * s.size * TEXT_LH); t.textContent = l || ' ';
+    el.appendChild(t);
+  });
+  return el;
+}
+function drawTextCanvas(ctx, s, sc){
+  ctx.save(); ctx.fillStyle = s.color; ctx.font = `${s.size * sc}px ${TEXT_FONT}`; ctx.textBaseline = 'alphabetic';
+  String(s.text).split('\n').forEach((l, i) => ctx.fillText(l, s.pts[0][0] * sc, (s.pts[0][1] + s.size * 0.95 + i * s.size * TEXT_LH) * sc));
+  ctx.restore();
+}
+let textEdit = null;
+function textAt(p, x, y){ for (let i = p.strokes.length - 1; i >= 0; i--){ const s = p.strokes[i]; if (s.t === 'text' && x >= s.pts[0][0] - 4 && x <= s.pts[1][0] + 4 && y >= s.pts[0][1] - 4 && y <= s.pts[1][1] + 4) return s; } return null; }
+function openTextAt(p, x, y){
+  if (textEdit){ commitText(); return; }
+  const old = textAt(p, x, y), cfg = prefs.tools.text;
+  const size = old ? old.size : cfg.size, color = old ? old.color : cfg.color;
+  const X = old ? old.pts[0][0] : x, Y = old ? old.pts[0][1] : y - size * 0.6;
+  const ta = document.createElement('textarea');
+  ta.className = 'tbox'; ta.value = old ? old.text : ''; ta.setAttribute('aria-label', 'Escribe tu texto');
+  const k = p.cssW / p.wPt;
+  Object.assign(ta.style, { left:X / p.wPt * 100 + '%', top:Y / p.hPt * 100 + '%', fontSize:size * k + 'px', color, lineHeight:String(TEXT_LH) });
+  p.el.appendChild(ta);
+  textEdit = { p, old, ta, X, Y, size, color };
+  if (old){ p.editingText = old; drawInk(p); }
+  const fit = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; ta.style.width = 'auto'; ta.style.width = Math.max(120, ta.scrollWidth + 8) + 'px'; };
+  ta.addEventListener('input', fit); fit();
+  ta.addEventListener('blur', () => setTimeout(() => { if (textEdit && textEdit.ta === ta) commitText(); }, 0));
+  ta.addEventListener('keydown', e => { if (e.key === 'Escape'){ e.preventDefault(); ta.blur(); } });
+  setTimeout(() => ta.focus(), 30);
+}
+function commitText(){
+  const t = textEdit; if (!t) return; textEdit = null;
+  const { p, old, ta } = t, val = ta.value.replace(/\s+$/, '');
+  ta.remove(); p.editingText = null;
+  const before = p.strokes.slice();
+  if (old){
+    const i = p.strokes.indexOf(old);
+    if (i >= 0){ if (val) p.strokes[i] = makeText(t.X, t.Y, val, t.size, t.color); else p.strokes.splice(i, 1); }
+    if (val !== old.text){ p.doc.undo.push({ k:'snap', page:p, before, after:p.strokes.slice() }); p.doc.redo.length = 0; }
+  } else if (val){
+    const s = makeText(t.X, t.Y, val, t.size, t.color);
+    p.strokes.push(s); p.doc.undo.push({ k:'add', page:p, s }); p.doc.redo.length = 0;
+  }
+  drawInk(p); renderRail();
+  if (p.doc === doc) save();
+}
+
+/* ---------- lasso: select strokes to move, resize, recolor, copy or delete ---------- */
+let lsel = null;
+const lassoMenu = document.createElement('div');
+lassoMenu.className = 'selmenu lassomenu'; lassoMenu.hidden = true; document.body.appendChild(lassoMenu);
+function inPoly(x, y, poly){
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++){
+    const a = poly[i], b = poly[j];
+    if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1] || 1e-9) + a[0]) c = !c;
+  }
+  return c;
+}
+function selBox(p, idx){
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const i of idx){ const s = p.strokes[i]; if (!s) continue; const b = bbox(s), m = s.t === 'text' ? 0 : b[4] / 2; x0 = Math.min(x0, b[0] - m); y0 = Math.min(y0, b[1] - m); x1 = Math.max(x1, b[2] + m); y1 = Math.max(y1, b[3] + m); }
+  return [x0 - 4, y0 - 4, x1 + 4, y1 + 4];
+}
+function clearLasso(){ lsel = null; document.querySelectorAll('.lassobox').forEach(e => e.remove()); lassoMenu.hidden = true; }
+function drawLassoBox(){
+  document.querySelectorAll('.lassobox').forEach(e => e.remove());
+  if (!lsel) return;
+  const { p, box } = lsel, d = document.createElement('div');
+  d.className = 'lassobox';
+  Object.assign(d.style, { left:box[0] / p.wPt * 100 + '%', top:box[1] / p.hPt * 100 + '%', width:(box[2] - box[0]) / p.wPt * 100 + '%', height:(box[3] - box[1]) / p.hPt * 100 + '%' });
+  d.innerHTML = '<span class="lasso-h" aria-hidden="true"></span>';
+  p.el.appendChild(d);
+}
+function showLassoMenu(){
+  if (!lsel) return;
+  const { p, box } = lsel, r = p.el.getBoundingClientRect(), k = r.width / p.wPt;
+  const cols = prefs.fav.pen.slice(0, 6);
+  lassoMenu.innerHTML = cols.map(c => `<button type="button" class="lc" data-lc="${c}" aria-label="Cambiar a este color" style="--c:${c}"></button>`).join('') +
+    `<button type="button" data-l="dup">${svg('copy', 16)}Duplicar</button><button type="button" data-l="del">${svg('trash', 16)}Eliminar</button>`;
+  lassoMenu.hidden = false;
+  const top = r.top + box[1] * k - lassoMenu.offsetHeight - 10;
+  lassoMenu.style.left = clamp(r.left + (box[0] + box[2]) / 2 * k - lassoMenu.offsetWidth / 2, 8, innerWidth - lassoMenu.offsetWidth - 8) + 'px';
+  lassoMenu.style.top = (top > 60 ? top : Math.min(innerHeight - lassoMenu.offsetHeight - 70, r.top + box[3] * k + 10)) + 'px';
+}
+function xfStroke(s, f, k){
+  const n = Object.assign({}, s, { pts:s.pts.map(q => { const [x, y] = f(q[0], q[1]); return [r2(x), r2(y), r2(q[2] * k)]; }) });
+  if (k !== 1 && (s.t === 'hl' || s.t === 'text' || constStyle(s) || s.poly)) n.size = r2(s.size * k);
+  if (s.t === 'text'){ const b = textBox(s.text, n.size); n.pts[1] = [r2(n.pts[0][0] + b.w), r2(n.pts[0][1] + b.h), 0]; }
+  return n;
+}
+function lassoBegin(a, x, y){
+  const s = lsel && lsel.p === a.p ? lsel : null;
+  if (s){
+    const b = s.box, hs = 14 * a.k;
+    if (Math.abs(x - b[2]) < hs && Math.abs(y - b[3]) < hs){ a.mode = 'lscale'; }
+    else if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) a.mode = 'lmove';
+  }
+  if (a.mode === 'lmove' || a.mode === 'lscale'){
+    lassoMenu.hidden = true;
+    a.before = a.p.strokes.slice(); a.orig = lsel.idx.map(i => a.p.strokes[i]); a.box0 = lsel.box.slice(); a.x0 = x; a.y0 = y;
+    return;
+  }
+  clearLasso();
+  a.mode = 'lasso'; a.poly = [[x, y]];
+  sizeWet(); clearWet(); wetC.classList.remove('as-hl');
+}
+function lassoMove(a, x, y){
+  if (a.mode === 'lasso'){
+    const l = a.poly[a.poly.length - 1]; if (Math.hypot(x - l[0], y - l[1]) < 1.5 * a.k) return;
+    a.poly.push([x, y]);
+    clearWet();
+    const vr = viewer.getBoundingClientRect(), d = wetC.width / Math.max(1, viewer.clientWidth), sc = d / a.k;
+    wetCtx.setTransform(sc, 0, 0, sc, (a.rect.left - vr.left) * d, (a.rect.top - vr.top) * d);
+    wetCtx.beginPath(); a.poly.forEach((q, i) => i ? wetCtx.lineTo(q[0], q[1]) : wetCtx.moveTo(q[0], q[1]));
+    wetCtx.setLineDash([5 * a.k, 4 * a.k]); wetCtx.lineWidth = 1.4 * a.k; wetCtx.strokeStyle = '#1b7bd3'; wetCtx.stroke();
+    wetCtx.fillStyle = 'rgba(27,123,211,.06)'; wetCtx.fill(); wetCtx.setLineDash([]);
+    return;
+  }
+  const b = a.box0, p = a.p;
+  let f, k = 1;
+  if (a.mode === 'lmove'){ const dx = x - a.x0, dy = y - a.y0; f = (px, py) => [px + dx, py + dy]; }
+  else { k = clamp(Math.max((x - b[0]) / Math.max(4, b[2] - b[0]), (y - b[1]) / Math.max(4, b[3] - b[1])), 0.15, 8); f = (px, py) => [b[0] + (px - b[0]) * k, b[1] + (py - b[1]) * k]; }
+  lsel.idx.forEach((i, j) => { p.strokes[i] = xfStroke(a.orig[j], f, k); });
+  lsel.box = a.mode === 'lmove' ? [b[0] + x - a.x0, b[1] + y - a.y0, b[2] + x - a.x0, b[3] + y - a.y0] : [b[0], b[1], b[0] + (b[2] - b[0]) * k, b[1] + (b[3] - b[1]) * k];
+  if (!a.raf) a.raf = requestAnimationFrame(() => { a.raf = 0; drawInk(p); drawLassoBox(); });
+}
+function lassoEnd(a){
+  if (a.raf){ cancelAnimationFrame(a.raf); a.raf = 0; }
+  if (a.mode === 'lasso'){
+    clearWet();
+    const poly = a.poly, p = a.p; if (poly.length < 3) return;
+    const idx = [];
+    p.strokes.forEach((s, i) => {
+      if (s.t === 'text'){ const c = [(s.pts[0][0] + s.pts[1][0]) / 2, (s.pts[0][1] + s.pts[1][1]) / 2]; if (inPoly(c[0], c[1], poly)) idx.push(i); return; }
+      let n = 0; for (const q of s.pts) if (inPoly(q[0], q[1], poly)) n++;
+      if (n && n >= s.pts.length * 0.5) idx.push(i);
+    });
+    if (!idx.length){ toast('No encerraste ningún trazo.'); return; }
+    lsel = { p, idx, box:selBox(p, idx) }; drawLassoBox(); showLassoMenu();
+    return;
+  }
+  drawInk(a.p); lsel.box = selBox(a.p, lsel.idx); drawLassoBox(); showLassoMenu();
+  if (a.p.strokes.some((s, i) => s !== a.before[i])){ a.p.doc.undo.push({ k:'snap', page:a.p, before:a.before, after:a.p.strokes.slice() }); a.p.doc.redo.length = 0; renderRail(); save(); }
+}
+lassoMenu.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || !lsel) return;
+  const p = lsel.p, before = p.strokes.slice();
+  if (b.dataset.lc){ lsel.idx.forEach(i => { p.strokes[i] = Object.assign({}, p.strokes[i], { color:b.dataset.lc }); }); }
+  else if (b.dataset.l === 'del'){ const set = new Set(lsel.idx); p.strokes = p.strokes.filter((s, i) => !set.has(i)); }
+  else if (b.dataset.l === 'dup'){
+    const off = 14, n0 = p.strokes.length;
+    lsel.idx.forEach(i => p.strokes.push(xfStroke(p.strokes[i], (x, y) => [x + off, y + off], 1)));
+    lsel.idx = lsel.idx.map((_, j) => n0 + j);
+  }
+  p.doc.undo.push({ k:'snap', page:p, before, after:p.strokes.slice() }); p.doc.redo.length = 0;
+  drawInk(p); renderRail(); save();
+  if (b.dataset.l === 'del'){ clearLasso(); toast('Eliminado'); return; }
+  lsel.box = selBox(p, lsel.idx); drawLassoBox(); showLassoMenu();
+});
+
+/* ---------- search inside the PDF ---------- */
+const normTxt = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+let find = null;
+function openFind(){
+  if (!doc || homeOn) return;
+  $('#findBar').hidden = false; const i = $('#findInput'); i.focus(); i.select();
+}
+function closeFind(){ $('#findBar').hidden = true; find = null; drawFind(); $('#findCount').textContent = ''; }
+async function runFind(q){
+  const d = doc; q = normTxt(q.trim());
+  const token = {}; find = { d, q, res:[], cur:-1, token };
+  drawFind();
+  if (!q){ $('#findCount').textContent = ''; return; }
+  $('#findCount').textContent = 'Buscando…';
+  for (const p of d.pages){
+    if (find.token !== token) return;
+    if (p.src.kind !== 'pdf') continue;
+    let words; try { words = await pageWords(p); } catch(e){ continue; }
+    let S = '', starts = [];
+    words.forEach(w => { starts.push(S.length); S += normTxt(w.t) + ' '; });
+    for (let at = S.indexOf(q); at >= 0; at = S.indexOf(q, at + 1)){
+      let a = 0; while (a + 1 < starts.length && starts[a + 1] <= at) a++;
+      let b = a; while (b + 1 < starts.length && starts[b + 1] < at + q.length) b++;
+      find.res.push({ p, words:words.slice(a, b + 1) });
+    }
+    if (find.res.length && find.cur < 0){ find.cur = 0; showFind(); }
+    $('#findCount').textContent = find.res.length ? `${find.cur + 1} de ${find.res.length}…` : 'Buscando…';
+  }
+  if (find.token !== token) return;
+  $('#findCount').textContent = find.res.length ? `${find.cur + 1} de ${find.res.length}` : (d.pages.some(p => p.src.kind === 'pdf') ? 'Sin resultados' : 'Este archivo no tiene texto');
+}
+function drawFind(){
+  document.querySelectorAll('.findbox').forEach(e => e.remove());
+  if (!find || find.cur < 0 || !find.res[find.cur] || find.d !== doc) return;
+  const { p, words } = find.res[find.cur];
+  for (const l of selLines(words)){
+    const b = document.createElement('div'); b.className = 'findbox';
+    Object.assign(b.style, { left:l.x0 / p.wPt * 100 + '%', top:l.y0 / p.hPt * 100 + '%', width:(l.x1 - l.x0) / p.wPt * 100 + '%', height:(l.y1 - l.y0) / p.hPt * 100 + '%' });
+    p.el.appendChild(b);
+  }
+}
+function showFind(){
+  const r = find.res[find.cur]; if (!r) return;
+  const p = r.p, w = r.words[0];
+  viewer.scrollTop = Math.max(0, p.el.offsetTop + w.y0 / p.hPt * p.cssH - viewer.clientHeight / 3);
+  const xl = p.el.offsetLeft + w.x0 / p.wPt * p.cssW;
+  if (xl < viewer.scrollLeft || xl > viewer.scrollLeft + viewer.clientWidth - 40) viewer.scrollLeft = Math.max(0, xl - 40);
+  updateVisible(); drawFind();
+  $('#findCount').textContent = `${find.cur + 1} de ${find.res.length}`;
+}
+function stepFind(dir){
+  if (!find || !find.res.length) return;
+  find.cur = (find.cur + dir + find.res.length) % find.res.length; showFind();
+}
+let findT = 0;
+$('#findInput').addEventListener('input', e => { clearTimeout(findT); const v = e.target.value; findT = setTimeout(() => runFind(v), 350); });
+$('#findInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter'){ e.preventDefault(); if (find && find.q === normTxt(e.target.value.trim()) && find.res.length) stepFind(e.shiftKey ? -1 : 1); else runFind(e.target.value); }
+  else if (e.key === 'Escape') closeFind();
+});
+$('#findPrev').addEventListener('click', () => stepFind(-1));
+$('#findNext').addEventListener('click', () => stepFind(1));
+$('#findClose').addEventListener('click', closeFind);
+$('#searchBtn').addEventListener('click', () => $('#findBar').hidden ? openFind() : closeFind());
+
+/* ---------- bookmarks and the list of bookmarks + notes ---------- */
+function renderMarks(d){
+  for (const p of d.pages){
+    let m = p.el.querySelector('.pmark');
+    if (p.mark && !m){ m = document.createElement('div'); m.className = 'pmark'; m.setAttribute('aria-hidden', 'true'); p.el.appendChild(m); }
+    else if (!p.mark && m) m.remove();
+  }
+  updateMarkBtn();
+}
+function updateMarkBtn(){
+  const p = doc && !homeOn && doc.pages[doc.cur];
+  $('#markBtn').setAttribute('aria-pressed', String(!!(p && p.mark)));
+}
+$('#markBtn').addEventListener('click', () => {
+  if (!doc || homeOn) return;
+  const p = doc.pages[doc.cur]; if (!p) return;
+  p.mark = !p.mark; renderMarks(doc); save();
+  toast(p.mark ? `Página ${p.i + 1} marcada` : `Marcador quitado de la página ${p.i + 1}`);
+});
+let idxTab = 'notes';
+function openIndex(tab){
+  if (!doc || homeOn) return;
+  if (tab) idxTab = tab;
+  const marks = doc.pages.filter(p => p.mark), notes = [];
+  let k = 0; for (const p of doc.pages) for (const n of p.notes || []){ k++; notes.push({ p, n, k }); }
+  dlgState = { kind:'idx' };
+  dlg.setAttribute('aria-label', 'Marcadores y notas');
+  let h = `<header class="sheet-h"><h2>Marcadores y notas</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="seg idx-tabs"><button type="button" data-do="idxTab" data-tab="notes" aria-pressed="${idxTab === 'notes'}">Notas (${notes.length})</button><button type="button" data-do="idxTab" data-tab="marks" aria-pressed="${idxTab === 'marks'}">Marcadores (${marks.length})</button></div><div class="idx-list">`;
+  if (idxTab === 'marks'){
+    h += marks.length ? marks.map(p => `<button type="button" class="idx-row" data-do="idxGo" data-page="${p.i}"><span class="ribbon"></span><span><strong>Página ${p.i + 1}</strong></span></button>`).join('')
+      : `<p class="hint">Aún no hay marcadores. Toca el botón del marcador abajo para marcar la página que estás viendo.</p>`;
+  } else {
+    h += notes.length ? notes.map(({ p, n, k }) => `<button type="button" class="idx-row" data-do="idxNote" data-page="${p.i}" data-note="${n.id}"><span class="note-pin static">${k}</span><span class="idx-txt"><strong>Página ${p.i + 1}${n.imgs && n.imgs.length ? ` · ${n.imgs.length} ${n.imgs.length === 1 ? 'imagen' : 'imágenes'}` : ''}</strong>${n.quote ? `<em>“${esc(n.quote.slice(0, 160))}”</em>` : ''}<small>${esc((n.text || '').slice(0, 200)) || '<i>Sin texto</i>'}</small></span></button>`).join('')
+      : `<p class="hint">Aún no hay notas. Mantén presionado sobre la hoja, o selecciona texto con la herramienta de texto, y toca "Agregar nota".</p>`;
+  }
+  dlg.innerHTML = h + '</div>';
+  dlgWrap.hidden = false;
+}
+function indexAction(act, b){
+  if (act === 'idxTab'){ openIndex(b.dataset.tab); return; }
+  const p = doc.pages[+b.dataset.page]; if (!p) return;
+  closeDlg(); scrollToPage(p.i);
+  if (act === 'idxNote'){ const n = (p.notes || []).find(x => x.id === b.dataset.note); if (n) setTimeout(() => openNote(p, n), 150); }
+}
+$('#idxBtn').addEventListener('click', () => openIndex());
+
+/* ---------- folders in Inicio (kept in Drive too, so every device sees them) ---------- */
+if (!Array.isArray(prefs.folders)) prefs.folders = [];
+const allFolders = () => [...new Set(prefs.folders.concat(lib.map(e => e.folder).filter(Boolean)))].sort((a, b) => a.localeCompare(b, 'es'));
+function openFolderDialog(e){
+  dlgState = { kind:'folder', key:e.key, name:'' };
+  dlg.setAttribute('aria-label', 'Mover a carpeta');
+  const fs = allFolders();
+  dlg.innerHTML = `<header class="sheet-h"><h2>Mover a carpeta</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="group" style="border-top:0"><div class="lab">${esc(e.name)}</div><div class="chips">
+      <button type="button" class="cb" data-do="setFolder" data-folder="" aria-pressed="${!e.folder}">Sin carpeta</button>
+      ${fs.map(f => `<button type="button" class="cb" data-do="setFolder" data-folder="${esc(f)}" aria-pressed="${e.folder === f}">${svg('folder', 16)}${esc(f)}</button>`).join('')}
+    </div><div class="fields"><label class="field">Carpeta nueva<input type="text" id="fFolder" maxlength="40" placeholder="Por ejemplo: Cardiología"></label></div></div>
+    <div class="dlg-foot"><button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="newFolder">Crear y mover</button></div>`;
+  dlgWrap.hidden = false;
+}
+function setEntryFolder(key, folder){
+  const e = lib.find(x => x.key === key); if (!e) return;
+  folder = (folder || '').trim().slice(0, 40);
+  if (folder) e.folder = folder; else delete e.folder;
+  if (folder && !prefs.folders.includes(folder)){ prefs.folders.push(folder); savePrefs(); }
+  libSave(); renderHome();
+  if (e.drive && navigator.onLine && tokenOk(e.drive.email)){
+    gfetch(e.drive.email, `${DRIVE}/files/${e.drive.id}?supportsAllDrives=true&fields=id`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ appProperties:{ drawskyFolder:folder || null } }) }).catch(err => console.warn(err));
+  }
+  toast(folder ? `Movido a "${folder}"` : 'Quitado de la carpeta');
+}
+function folderAction(act, b){
+  const st = dlgState;
+  if (act === 'setFolder'){ closeDlg(); setEntryFolder(st.key, b.dataset.folder); return; }
+  if (act === 'newFolder'){
+    const v = ($('#fFolder').value || '').trim();
+    if (!v){ toast('Escribe el nombre de la carpeta.'); return; }
+    closeDlg(); setEntryFolder(st.key, v);
+  }
+}
+function deleteFolder(name){
+  prefs.folders = prefs.folders.filter(f => f !== name); savePrefs();
+  lib.filter(e => e.folder === name).forEach(e => setEntryFolder(e.key, ''));
+  homeFilter = 'all'; renderHome(); toast(`Carpeta "${name}" eliminada. Sus archivos siguen en Todos.`);
+}
+
 /* ---------- settings sheet ---------- */
 const sheetWrap = $('#sheetWrap');
 function syncSheet(){
@@ -3764,7 +4183,8 @@ $('#dockSeg').addEventListener('click', e => {
 /* ---------- keyboard (laptop) ---------- */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape'){ closeWheel(); closeSheet(); closeDrawer(); closeDlg(); addMenu.hidden = true; return; }
-  if (e.target.tagName === 'INPUT') return;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && doc && !homeOn){ e.preventDefault(); openFind(); return; }
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){ e.preventDefault(); redo(); return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
