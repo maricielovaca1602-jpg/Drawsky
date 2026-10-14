@@ -154,6 +154,26 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .lassomenu .lc{width:30px;height:30px;padding:0;border-radius:50%!important;background:var(--c)!important;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
 .lassomenu button:first-child{background:var(--c)}
 .idx-tabs{margin:2px 0 10px}
+.toc{display:flex;flex-direction:column;gap:1px}
+.toc-row{display:flex;align-items:center;gap:2px;border-radius:12px}
+.toc-row.lv2{padding-left:20px}
+.toc-row.lv3{padding-left:40px}
+.toc-row.here{background:color-mix(in srgb,var(--accent) 13%,transparent)}
+.toc-tw{width:28px;height:28px;flex:none;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;padding:0;border-radius:8px}
+.toc-go{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--fg);padding:10px 6px;text-align:left;font:inherit;cursor:pointer}
+.toc-go:disabled{opacity:.5}
+.toc-go span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv1 .toc-go span{font-weight:700;font-size:15px}
+.lv2 .toc-go span{font-weight:600;font-size:14px}
+.lv3 .toc-go span{font-weight:500;font-size:13.5px}
+.toc-go small{color:var(--muted);font-size:12px;flex:none;font-variant-numeric:tabular-nums}
+.toc-c{width:4px;height:18px;border-radius:2px;flex:none}
+.lv1 .toc-c{width:6px;height:22px}
+.toc-more{width:34px;height:34px;flex:none;border:0;background:transparent;color:var(--muted);border-radius:8px;display:grid;place-items:center;padding:0}
+.toc-more:hover,.toc-tw:hover{background:var(--surface-2)}
+.idx-add{align-self:flex-start;margin-bottom:6px;flex:none}
+.bm-cols{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.lvdots{font-size:7px;letter-spacing:1px;color:var(--muted)}
 .idx-list{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto}
 .idx-row{display:flex;align-items:flex-start;gap:12px;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;color:var(--fg)}
 .idx-row .ribbon{width:14px;height:20px;background:#d63a4a;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);flex:none;margin-top:1px}
@@ -658,7 +678,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (19)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (20)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -850,7 +870,8 @@ function makePage(d, spec){
   const sv = c => { const e = document.createElementNS(SVGNS, 'svg'); e.setAttribute('class', c); e.setAttribute('preserveAspectRatio', 'none'); el.appendChild(e); return e; };
   const p = { doc:d, src:spec.src, wPt:spec.w, hPt:spec.h, tpl:spec.tpl || null, strokes:spec.strokes || [], el,
     pdfC:mk('pdf'), hlS:sv('hl'), inkS:sv('ink'), inkOn:false, rendered:false, task:null, gen:0, cssW:0, cssH:0, pxScale:1, i:0 };
-  p.notes = Array.isArray(spec.notes) ? spec.notes : []; p.mark = !!spec.mark;
+  p.notes = Array.isArray(spec.notes) ? spec.notes : [];
+  p.bm = Array.isArray(spec.bm) ? spec.bm : spec.mark ? [{ id:newId(), t:'', lv:1 }] : []; p.mark = p.bm.length > 0;
   p.pcG = document.createElementNS(SVGNS, 'g'); p.pcG.setAttribute('filter', 'url(#dsGrain)');
   p.num = document.createElement('div'); p.num.className = 'pnum'; el.appendChild(p.num);
   return p;
@@ -1249,7 +1270,7 @@ $('#hList').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target
 
 /* ---------- saving (this tablet only, until phase 2) ---------- */
 function serialize(d){
-  return { v:2, name:d.name, kind:d.kind, pages:d.pages.map(p => ({ src:p.src, w:r2(p.wPt), h:r2(p.hPt), tpl:p.tpl, strokes:p.strokes, notes:p.notes && p.notes.length ? p.notes : undefined, mark:p.mark || undefined })) };
+  return { v:2, name:d.name, kind:d.kind, pages:d.pages.map(p => ({ src:p.src, w:r2(p.wPt), h:r2(p.hPt), tpl:p.tpl, strokes:p.strokes, notes:p.notes && p.notes.length ? p.notes : undefined, mark:p.bm && p.bm.length ? true : undefined, bm:p.bm && p.bm.length ? p.bm : undefined })) };
 }
 function save(){
   if (!doc) return;
@@ -1687,7 +1708,7 @@ function baseRefs(node, ctx){
 async function packDoc(d){
   await needPdfLib();
   const { PDFDocument, PDFName, PDFDict } = PDFLib;
-  const snap = d.pages.map(p => ({ p, src:Object.assign({}, p.src), wPt:p.wPt, hPt:p.hPt, tpl:p.tpl ? Object.assign({}, p.tpl) : null, strokes:p.strokes.slice(), mark:!!p.mark,
+  const snap = d.pages.map(p => ({ p, src:Object.assign({}, p.src), wPt:p.wPt, hPt:p.hPt, tpl:p.tpl ? Object.assign({}, p.tpl) : null, strokes:p.strokes.slice(), mark:!!(p.bm && p.bm.length), bm:(p.bm || []).map(b => Object.assign({}, b)),
     notes:(p.notes || []).map(n => Object.assign({}, n, { imgs:(n.imgs || []).slice() })) }));
   const ver = d.ver || 0;
   const notesData = [];
@@ -1714,7 +1735,7 @@ async function packDoc(d){
   packFont = regular;
   const meta = snap.map((s, i) => {
     const pg = pages[i], node = pg.node, base = baseRefs(node, ctx), marks = allNotes.filter(m => m.pi === i);
-    const o = { src:{ kind:'pdf', index:i }, w:r2(s.wPt), h:r2(s.hPt), tpl:s.tpl, strokes:s.strokes, notes:notesData[i], mark:s.mark || undefined, base:base.map(r => [r.objectNumber, r.generationNumber]), ink:[] };
+    const o = { src:{ kind:'pdf', index:i }, w:r2(s.wPt), h:r2(s.hPt), tpl:s.tpl, strokes:s.strokes, notes:notesData[i], mark:s.mark || undefined, bm:s.bm.length ? s.bm : undefined, base:base.map(r => [r.objectNumber, r.generationNumber]), ink:[] };
     if (!s.strokes.length && !marks.length && !(s.tpl && s.tpl.type !== 'none')) return o;
     node.normalize();
     const res = node.Resources(), old = res.lookupMaybe(PDFName.of('ExtGState'), PDFDict);
@@ -1737,16 +1758,19 @@ async function packDoc(d){
     return o;
   });
   const data = { v:1, app:'DrawSky', name:d.name, kind:d.kind, pages:meta };
+  let xrefs = [];
   if (bold){
-    let refs = [bold.ref, regular.ref];
-    if (allNotes.length){ const made = await addNotesPages(pdf, allNotes, bold, regular); data.notesPages = made.pages; refs = refs.concat(made.refs); }
-    data.extra = refs.map(r => [r.objectNumber, r.generationNumber]);
+    xrefs = [bold.ref, regular.ref];
+    if (allNotes.length){ const made = await addNotesPages(pdf, allNotes, bold, regular); data.notesPages = made.pages; xrefs = xrefs.concat(made.refs); }
   }
+  const bms = []; snap.forEach((s, i) => s.bm.forEach(b => bms.push(Object.assign({}, b, { t:bmTitle(b, { i }), pi:i }))));
+  if (bms.length){ try { const ol = buildOutline(pdf, pages, bms); xrefs = xrefs.concat(ol.refs); data.outline = { orig:ol.orig }; } catch(e){ console.warn('índice no guardado en el PDF', e); } }
+  if (xrefs.length) data.extra = xrefs.map(r => [r.objectNumber, r.generationNumber]);
   packFont = null;
   pdf.catalog.set(PDFName.of('DrawSky'), ctx.register(ctx.flateStream(enc.encode(JSON.stringify(data)))));
   const bytes = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
   data.pages.forEach(sp => { delete sp.base; delete sp.ink; });
-  delete data.notesPages; delete data.extra;
+  delete data.notesPages; delete data.extra; delete data.outline;
   return { bytes, clean, rebuilt:!inPlace, snap, ver, data, n:snap.length };
 }
 /* removes DrawSky ink from a saved PDF: returns the clean PDF plus the editable strokes */
@@ -1783,6 +1807,7 @@ async function unpack(buf){
       if (base.length) pg.node.set(C, ctx.obj(base)); else pg.node.delete(C);
     }
     for (let i = all.length - 1; i >= pages.length; i--) pdf.removePage(i);
+    if (data.outline){ if (data.outline.orig) pdf.catalog.set(PDFName.of('Outlines'), PDFRef.of(data.outline.orig[0], data.outline.orig[1])); else pdf.catalog.delete(PDFName.of('Outlines')); }
     for (const r of data.extra || []) ctx.delete(PDFRef.of(r[0], r[1]));
     for (const pg of pages){
       const res = pg.node.Resources(), fd = res && res.lookupMaybe(PDFName.of('Font'), PDFLib.PDFDict);
@@ -1792,7 +1817,7 @@ async function unpack(buf){
     pdf.catalog.delete(K); ctx.delete(jr);
     const clean = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
     data.pages.forEach((sp, i) => { sp.src = { kind:'pdf', index:i }; delete sp.base; delete sp.ink; });
-    delete data.notesPages; delete data.extra;
+    delete data.notesPages; delete data.extra; delete data.outline;
     return { clean, data };
   } catch(e){ console.warn('Trazos de DrawSky no utilizables', e); return { clean:u8, data:null, broken:true }; }
 }
@@ -1955,7 +1980,7 @@ async function syncPending(){
       if (!c || !s || !Array.isArray(s.pages)) continue;
       const d = { bg:true, key:e.key, name:e.name, kind:e.kind, drive:{ email:e.drive.email, id:e.drive.id, rev:c.rev, sidecar:c.sidecar }, cleanBytes:c.bytes, srcCount:c.n,
         imgMime:c.mime, fileName:c.fileName, sidecarLinked:!!c.sidecar,
-        pages:s.pages.map(sp => ({ src:sp.src, wPt:sp.w, hPt:sp.h, tpl:sp.tpl, strokes:sp.strokes || [], notes:sp.notes || [] })), undo:[], redo:[], ver:0, dirty:true };
+        pages:s.pages.map(sp => ({ src:sp.src, wPt:sp.w, hPt:sp.h, tpl:sp.tpl, strokes:sp.strokes || [], notes:sp.notes || [], bm:sp.bm || (sp.mark ? [{ t:'', lv:1 }] : []), mark:!!sp.mark })), undo:[], redo:[], ver:0, dirty:true };
       await syncDoc(d);
     }
   } finally { syncingAll = false; }
@@ -3067,11 +3092,10 @@ function viewTool(){
   }
   h += `<button type="button" class="wc" data-view="main" aria-label="Volver a herramientas">${svg('back', 24)}</button>`;
   wheel.innerHTML = h;
-  const sub = kd === 'pen' ? `${PEN_STYLES[cfg.style || 'pluma']} · toca un color o + para cualquiera` : kd === 'text' ? 'Toca la hoja donde quieres escribir con el teclado' : kd === 'hl' ? 'Toca un color o + para cualquiera'
+  const sub = kd === 'pen' ? `${PEN_STYLES[cfg.style || 'pluma']} · toca un color de tus favoritos` : kd === 'text' ? 'Toca la hoja donde quieres escribir con el teclado' : kd === 'hl' ? 'Toca un color de tus favoritos'
     : (cfg.mode === 'partial' ? 'Parcial: borra solo lo que tocas, por ejemplo una letra' : 'Trazo: borra el trazo completo que tocas');
   const al = Math.round((cfg.alpha != null ? cfg.alpha : 0.45) * 100);
-  wcap.innerHTML = `<div class="cap-txt"><strong>${toolName(tool)}</strong><span>${sub}</span></div>` + (kd === 'pen' ? `<button type="button" class="btn" data-view="penset" style="height:36px;flex:none">${svg('settings', 18)}Ajustes</button>` : '') +
-    (kd === 'hl' ? `<label class="alpha">Intensidad<input type="range" id="hlAlpha" min="15" max="100" step="5" value="${al}" aria-label="Intensidad del resaltador"><b id="hlAlphaOut">${al}%</b></label>` : '');
+  wcap.innerHTML = `<div class="cap-txt"><strong>${toolName(tool)}</strong><span>${sub}</span></div><button type="button" class="btn primary" data-view="more" style="height:38px;flex:none">${svg('settings', 18)}Más ajustes</button>`;
 }
 wcap.addEventListener('input', e => {
   if (e.target.id !== 'hlAlpha') return;
@@ -3275,6 +3299,7 @@ wheelWrap.addEventListener('click', e => {
     if (noOpts(tool)){ closeWheel(); if (tool === 'select') toast('Desliza el lápiz sobre el texto del PDF para seleccionarlo'); if (tool === 'lasso') toast('Encierra con el lápiz los trazos que quieres mover, cambiar o borrar'); return; }
     wheelView = 'tool'; renderWheelView();
   }
+  else if (d.view === 'color' || d.view === 'penset' || d.view === 'more'){ closeWheel(); openToolPanel(null); }
   else if (d.view){ wheelView = d.view; renderWheelView(); }
   else if (d.color){ applyColor(d.color); renderWheelView(); }
   else if (d.preset != null) applyPreset(+d.preset);
@@ -3423,6 +3448,7 @@ function renderDrawerFoot(){
 function openDrawer(){ drawerEdit = false; sel = new Set(); delArmed = false; drawerWrap.hidden = false; renderDrawer(); const c = thumbsEl.querySelector('[aria-current="true"]'); if (c) c.scrollIntoView({ block:'center' }); }
 function closeDrawer(){ drawerWrap.hidden = true; if (thumbObs) thumbObs.disconnect(); }
 function pagesChanged(){
+  if (doc) doc.bookToc = null;
   mountDoc(); layout(); updateDocMeta(); renderRail(); save();
   if (!drawerWrap.hidden) renderDrawer();
 }
@@ -3691,7 +3717,8 @@ dlg.addEventListener('click', e => {
   else if (d === 'insert') insertPages();
   else if (d === 'rename') doRename();
   else if (d === 'noteDone' || d === 'noteDel' || d === 'nImgDel') noteAction(d, b);
-  else if (d === 'idxTab' || d === 'idxGo' || d === 'idxNote') indexAction(d, b);
+  else if (['idxTab', 'idxGo', 'idxNote', 'tocTw', 'bmHere', 'bmEdit', 'bookCopy'].includes(d)) indexAction(d, b);
+  else if (['bmLv', 'bmCol', 'bmDel', 'bmSave', 'bmAnother'].includes(d)) bmAction(d, b);
   else if (d === 'setFolder' || d === 'newFolder') folderAction(d, b);
   else if (['fcol', 'ficon', 'fdel', 'fsave'].includes(d)) folderEditAction(d, b);
   else if (d === 'mkFolder'){ const v = ($('#fFolder').value || '').trim(); if (!v){ toast('Escribe el nombre de la carpeta.'); return; } if (!prefs.folders.includes(v)){ prefs.folders.push(v); savePrefs(); } closeDlg(); homeFilter = 'f:' + v; renderHome(); }
@@ -4379,52 +4406,218 @@ $('#findNext').addEventListener('click', () => stepFind(1));
 $('#findClose').addEventListener('click', closeFind);
 $('#searchBtn').addEventListener('click', () => $('#findBar').hidden ? openFind() : closeFind());
 
-/* ---------- bookmarks and the list of bookmarks + notes ---------- */
+/* ---------- bookmarks with titles (3 levels) = my own index; plus the book's own index and the notes ---------- */
+const BM_LV = { 1:'Capítulo', 2:'Tema', 3:'Subtema' };
+const BM_COLORS = ['#d63a4a', '#ee7ea0', '#ffaf6e', '#e9b33f', '#7dbcb0', '#7d8be0', '#9a81b0', '#8e715b'];
+const bmTitle = (b, p) => (b.t || '').trim() || `Página ${p.i + 1}`;
+function allBms(d){ const out = []; d.pages.forEach(p => (p.bm || []).forEach((b, j) => out.push({ p, b, j }))); return out; }
 function renderMarks(d){
   for (const p of d.pages){
+    p.mark = !!(p.bm && p.bm.length);
     let m = p.el.querySelector('.pmark');
     if (p.mark && !m){ m = document.createElement('div'); m.className = 'pmark'; m.setAttribute('aria-hidden', 'true'); p.el.appendChild(m); }
-    else if (!p.mark && m) m.remove();
+    else if (!p.mark && m){ m.remove(); m = null; }
+    if (m) m.style.background = p.bm[0].c || '#d63a4a';
   }
   updateMarkBtn();
 }
 function updateMarkBtn(){
   const p = doc && !homeOn && doc.pages[doc.cur];
-  $('#markBtn').setAttribute('aria-pressed', String(!!(p && p.mark)));
+  $('#markBtn').setAttribute('aria-pressed', String(!!(p && p.bm && p.bm.length)));
 }
+/* the biggest line of text near the top of the page is usually its heading */
+async function suggestTitle(p){
+  try {
+    const ws = await pageWords(p); if (!ws.length) return '';
+    const lines = selLines(ws).filter(l => l.y0 < p.hPt * 0.6 && l.t.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '').length >= 3);
+    if (!lines.length) return '';
+    const big = Math.max(...lines.map(l => l.y1 - l.y0));
+    const l = lines.find(x => x.y1 - x.y0 >= big * 0.92);
+    return l.t.replace(/\s+/g, ' ').trim().slice(0, 70);
+  } catch(e){ return ''; }
+}
+async function openBmDialog(p, j, fromIdx){
+  const b = j != null ? p.bm[j] : null;
+  const prevLv = (() => { const all = allBms(p.doc).filter(x => x.p.i <= p.i); return all.length ? all[all.length - 1].b.lv : 1; })();
+  dlgState = { kind:'bm', page:p.i, j, fromIdx:!!fromIdx, t:b ? b.t : '', lv:b ? b.lv : prevLv, c:b ? (b.c || BM_COLORS[0]) : BM_COLORS[0], delArmed:false };
+  renderBmDialog(); dlgWrap.hidden = false;
+  if (!b){
+    const st = dlgState, s = await suggestTitle(p);
+    if (dlgState === st && s && !st.t){ st.t = s; const i = $('#bmT'); if (i && !i.value){ i.value = s; i.select(); } }
+  }
+  setTimeout(() => { const i = $('#bmT'); if (i){ i.focus(); i.select(); } }, 60);
+}
+function renderBmDialog(){
+  const st = dlgState, p = doc.pages[st.page], editing = st.j != null;
+  dlg.setAttribute('aria-label', editing ? 'Editar marcador' : 'Nuevo marcador');
+  dlg.innerHTML = `<header class="sheet-h"><h2>${editing ? 'Editar marcador' : 'Marcar página ' + (st.page + 1)}</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="group" style="border-top:0;padding-top:0"><div class="fields" style="margin-top:0"><label class="field">Título<input type="text" id="bmT" maxlength="80" value="${esc(st.t)}" placeholder="Por ejemplo: Vías biliares" enterkeyhint="done"></label></div>
+      <div class="lab" style="margin-top:14px">Nivel</div>
+      <div class="chips">${[1, 2, 3].map(v => `<button type="button" class="cb bm-lv" data-do="bmLv" data-v="${v}" aria-pressed="${st.lv === v}"><span class="lvdots">${'●'.repeat(v)}</span>${BM_LV[v]}</button>`).join('')}</div>
+      <p class="hint">Capítulo › Tema › Subtema. Cada uno queda dentro del anterior en tu índice.</p>
+      <div class="lab" style="margin-top:14px">Color</div>
+      <div class="bm-cols">${BM_COLORS.map(c => `<button type="button" class="cdot" data-do="bmCol" data-c="${c}" style="--c:${c}" aria-pressed="${sameColor(c, st.c)}" aria-label="Color ${c}"></button>`).join('')}</div></div>
+    <div class="dlg-foot">${editing ? `<button type="button" class="btn danger${st.delArmed ? ' armed' : ''}" data-do="bmDel">${svg('trash', 18)}${st.delArmed ? 'Toca otra vez' : 'Quitar'}</button>${p.bm.length < 6 ? `<button type="button" class="btn" data-do="bmAnother">${svg('plus', 18)}Otro aquí</button>` : ''}<span style="flex:1"></span>` : ''}<button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="bmSave">Guardar</button></div>`;
+}
+function bmAction(act, btn){
+  const st = dlgState, p = doc.pages[st.page]; if (!p) return;
+  const ti = $('#bmT'); if (ti) st.t = ti.value;
+  if (act === 'bmLv'){ st.lv = +btn.dataset.v; renderBmDialog(); return; }
+  if (act === 'bmCol'){ st.c = btn.dataset.c; renderBmDialog(); return; }
+  if (act === 'bmAnother'){ const from = st.fromIdx; openBmDialog(p, null, from); return; }
+  if (act === 'bmDel'){
+    if (!st.delArmed){ st.delArmed = true; renderBmDialog(); return; }
+    p.bm.splice(st.j, 1); bmChanged(p); toast('Marcador quitado');
+  } else if (act === 'bmSave'){
+    const b = { t:(st.t || '').trim().slice(0, 80), lv:st.lv, c:st.c };
+    if (st.j != null) Object.assign(p.bm[st.j], b); else { if (!p.bm) p.bm = []; p.bm.push(Object.assign({ id:newId() }, b)); }
+    bmChanged(p); toast(st.j != null ? 'Marcador guardado' : `Página ${p.i + 1} marcada: ${bmTitle(b, p)}`);
+  }
+  const back = st.fromIdx; closeDlg();
+  if (back) openIndex('toc');
+}
+function bmChanged(p){ renderMarks(p.doc); save(); }
 $('#markBtn').addEventListener('click', () => {
   if (!doc || homeOn) return;
   const p = doc.pages[doc.cur]; if (!p) return;
-  p.mark = !p.mark; renderMarks(doc); save();
-  toast(p.mark ? `Página ${p.i + 1} marcada` : `Marcador quitado de la página ${p.i + 1}`);
+  if (!p.bm) p.bm = [];
+  openBmDialog(p, p.bm.length ? 0 : null);
 });
-let idxTab = 'notes';
-function openIndex(tab){
+
+/* the index panel: my index (tree) · the book's index · notes */
+let idxTab = 'toc';
+const tocClosed = new Set();
+async function bookToc(d){
+  if (d.bookToc) return d.bookToc;
+  const out = [];
+  try {
+    const ol = d.pdf ? await d.pdf.getOutline() : null;
+    const walk = async (items, lv) => {
+      for (const it of items || []){
+        if (out.length > 1500) return;
+        let pi = null;
+        try {
+          let dest = it.dest;
+          if (typeof dest === 'string') dest = await d.pdf.getDestination(dest);
+          if (Array.isArray(dest) && dest[0] != null) pi = typeof dest[0] === 'object' ? await d.pdf.getPageIndex(dest[0]) : (Number.isInteger(dest[0]) ? dest[0] : null);
+        } catch(e){}
+        const k = pi == null ? -1 : d.pages.findIndex(p => p.src.kind === 'pdf' && p.src.index === pi);
+        out.push({ t:(it.title || '').replace(/\s+/g, ' ').trim() || 'Sin título', lv:Math.min(lv, 3), page:k, id:'b' + out.length });
+        await walk(it.items, lv + 1);
+      }
+    };
+    await walk(ol, 1);
+  } catch(e){ console.warn(e); }
+  d.bookToc = out;
+  return out;
+}
+function tocRows(list, kind){
+  /* list: [{ id, t, lv, page, c? }] in reading order; hides rows under a closed parent */
+  let h = '', hideBelow = 0;
+  const curPage = doc.cur, here = (() => { let k = -1; list.forEach((x, i) => { if (x.page >= 0 && x.page <= curPage) k = i; }); return k; })();
+  list.forEach((x, i) => {
+    if (hideBelow && x.lv > hideBelow) return;
+    hideBelow = 0;
+    const kids = list[i + 1] && list[i + 1].lv > x.lv, closed = kids && tocClosed.has(kind + x.id);
+    if (closed) hideBelow = x.lv;
+    h += `<div class="toc-row lv${x.lv}${i === here ? ' here' : ''}">
+      ${kids ? `<button type="button" class="toc-tw" data-do="tocTw" data-k="${kind + x.id}" aria-expanded="${!closed}" aria-label="${closed ? 'Mostrar' : 'Ocultar'} lo que está dentro">${svg(closed ? 'right' : 'down', 16)}</button>` : '<span class="toc-tw"></span>'}
+      <button type="button" class="toc-go" data-do="idxGo" data-page="${x.page}" ${x.page < 0 ? 'disabled' : ''}>${kind === 'my' ? `<i class="toc-c" style="background:${x.c || '#d63a4a'}"></i>` : ''}<span>${esc(x.t)}</span><small>${x.page >= 0 ? 'p. ' + (x.page + 1) : ''}</small></button>
+      ${kind === 'my' ? `<button type="button" class="toc-more" data-do="bmEdit" data-page="${x.page}" data-j="${x.j}" aria-label="Editar ${esc(x.t)}">${svg('edit', 16)}</button>` : ''}</div>`;
+  });
+  return h;
+}
+async function openIndex(tab){
   if (!doc || homeOn) return;
   if (tab) idxTab = tab;
-  const marks = doc.pages.filter(p => p.mark), notes = [];
-  let k = 0; for (const p of doc.pages) for (const n of p.notes || []){ k++; notes.push({ p, n, k }); }
+  const d = doc;
+  const mine = allBms(d).map(({ p, b, j }) => ({ id:b.id || (p.i + '_' + j), t:bmTitle(b, p), lv:b.lv || 1, c:b.c, page:p.i, j }));
+  const notes = []; let k = 0; for (const p of d.pages) for (const n of p.notes || []){ k++; notes.push({ p, n, k }); }
+  const book = d.pdf ? await bookToc(d) : [];
+  if (doc !== d) return;
+  if (idxTab === 'book' && !book.length) idxTab = 'toc';
   dlgState = { kind:'idx' };
-  dlg.setAttribute('aria-label', 'Marcadores y notas');
-  let h = `<header class="sheet-h"><h2>Marcadores y notas</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
-    <div class="seg idx-tabs"><button type="button" data-do="idxTab" data-tab="notes" aria-pressed="${idxTab === 'notes'}">Notas (${notes.length})</button><button type="button" data-do="idxTab" data-tab="marks" aria-pressed="${idxTab === 'marks'}">Marcadores (${marks.length})</button></div><div class="idx-list">`;
-  if (idxTab === 'marks'){
-    h += marks.length ? marks.map(p => `<button type="button" class="idx-row" data-do="idxGo" data-page="${p.i}"><span class="ribbon"></span><span><strong>Página ${p.i + 1}</strong></span></button>`).join('')
-      : `<p class="hint">Aún no hay marcadores. Toca el botón del marcador abajo para marcar la página que estás viendo.</p>`;
+  dlg.setAttribute('aria-label', 'Índice, marcadores y notas');
+  let h = `<header class="sheet-h"><h2>Índice y notas</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="seg idx-tabs"><button type="button" data-do="idxTab" data-tab="toc" aria-pressed="${idxTab === 'toc'}">Mi índice (${mine.length})</button>${book.length ? `<button type="button" data-do="idxTab" data-tab="book" aria-pressed="${idxTab === 'book'}">Índice del libro</button>` : ''}<button type="button" data-do="idxTab" data-tab="notes" aria-pressed="${idxTab === 'notes'}">Notas (${notes.length})</button></div><div class="idx-list">`;
+  if (idxTab === 'toc'){
+    h += `<button type="button" class="btn idx-add" data-do="bmHere">${svg('bookmark', 18)}Marcar la página ${d.cur + 1}</button>`;
+    h += mine.length ? `<div class="toc">${tocRows(mine, 'my')}</div>`
+      : `<p class="hint">Aún no tienes marcadores. Marca una página con el botón de abajo, ponle título y elige si es Capítulo, Tema o Subtema.${book.length ? ' O copia el índice del libro desde su pestaña.' : ''}</p>`;
+  } else if (idxTab === 'book'){
+    h += `<button type="button" class="btn idx-add" data-do="bookCopy">${svg('copy', 18)}Copiar a mi índice</button><div class="toc">${tocRows(book, 'bk')}</div>`;
   } else {
     h += notes.length ? notes.map(({ p, n, k }) => `<button type="button" class="idx-row" data-do="idxNote" data-page="${p.i}" data-note="${n.id}"><span class="note-pin static">${k}</span><span class="idx-txt"><strong>Página ${p.i + 1}${n.imgs && n.imgs.length ? ` · ${n.imgs.length} ${n.imgs.length === 1 ? 'imagen' : 'imágenes'}` : ''}</strong>${n.quote ? `<em>“${esc(n.quote.slice(0, 160))}”</em>` : ''}<small>${esc((n.text || '').slice(0, 200)) || '<i>Sin texto</i>'}</small></span></button>`).join('')
       : `<p class="hint">Aún no hay notas. Mantén presionado sobre la hoja, o selecciona texto con la herramienta de texto, y toca "Agregar nota".</p>`;
   }
+  const sc = dlg.querySelector('.idx-list'), top = sc && dlgState && !dlgWrap.hidden ? sc.scrollTop : 0;
   dlg.innerHTML = h + '</div>';
   dlgWrap.hidden = false;
+  const ns = dlg.querySelector('.idx-list'); if (ns){ if (top) ns.scrollTop = top; else { const here = ns.querySelector('.toc-row.here'); if (here) here.scrollIntoView({ block:'center' }); } }
 }
 function indexAction(act, b){
   if (act === 'idxTab'){ openIndex(b.dataset.tab); return; }
+  if (act === 'tocTw'){ const k = b.dataset.k; if (tocClosed.has(k)) tocClosed.delete(k); else tocClosed.add(k); openIndex(); return; }
+  if (act === 'bmHere'){ const p = doc.pages[doc.cur]; if (!p.bm) p.bm = []; openBmDialog(p, null, true); return; }
+  if (act === 'bmEdit'){ const p = doc.pages[+b.dataset.page]; if (p) openBmDialog(p, +b.dataset.j, true); return; }
+  if (act === 'bookCopy'){
+    const list = doc.bookToc || []; let n = 0;
+    for (const x of list){
+      const p = doc.pages[x.page]; if (!p) continue;
+      if (!p.bm) p.bm = [];
+      if (p.bm.some(y => y.t === x.t)) continue;
+      p.bm.push({ id:newId(), t:x.t.slice(0, 80), lv:x.lv, c:BM_COLORS[(x.lv - 1) % BM_COLORS.length] }); n++;
+    }
+    if (n){ renderMarks(doc); save(); }
+    toast(n ? `${n} ${n === 1 ? 'título copiado' : 'títulos copiados'} a tu índice` : 'Ya estaban en tu índice');
+    openIndex('toc'); return;
+  }
   const p = doc.pages[+b.dataset.page]; if (!p) return;
   closeDlg(); scrollToPage(p.i);
   if (act === 'idxNote'){ const n = (p.notes || []).find(x => x.id === b.dataset.note); if (n) setTimeout(() => openNote(p, n), 150); }
 }
 $('#idxBtn').addEventListener('click', () => openIndex());
+
+/* my index saved as the PDF's real outline (seen in any PDF reader); the book's own outline stays inside, under "Índice del libro" */
+function buildOutline(pdf, pages, bms){
+  const { PDFName, PDFHexString, PDFRef, PDFDict } = PDFLib, ctx = pdf.context, ON = PDFName.of('Outlines');
+  let orig = pdf.catalog.get(ON);
+  let origRoot = orig ? ctx.lookup(orig) : null;
+  if (orig && !(orig instanceof PDFRef)){ orig = ctx.register(orig); }
+  if (!(origRoot instanceof PDFDict) || !origRoot.get(PDFName.of('First'))) origRoot = null;
+  const top = [], stack = [];
+  for (const b of bms){
+    const node = { t:b.t, lv:b.lv || 1, c:b.c, pi:b.pi, kids:[] };
+    while (stack.length && stack[stack.length - 1].lv >= node.lv) stack.pop();
+    (stack.length ? stack[stack.length - 1].kids : top).push(node); stack.push(node);
+  }
+  if (origRoot) top.push({ t:'Índice del libro', book:true, kids:[] });
+  const refs = [], rootRef = ctx.nextRef(); refs.push(rootRef);
+  const rgb = c => { const n = parseInt((c || '#d63a4a').slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255].map(v => +v.toFixed(3)); };
+  const count = list => list.reduce((s, x) => s + 1 + count(x.kids), 0);
+  const make = (list, parent) => {
+    list.forEach(x => { x.ref = ctx.nextRef(); refs.push(x.ref); });
+    list.forEach((x, i) => {
+      const o = { Title:PDFHexString.fromText(x.t), Parent:parent };
+      if (i > 0) o.Prev = list[i - 1].ref;
+      if (i < list.length - 1) o.Next = list[i + 1].ref;
+      if (x.book){
+        o.First = origRoot.get(PDFName.of('First')); o.Last = origRoot.get(PDFName.of('Last'));
+        const oc = origRoot.lookup(PDFName.of('Count')); o.Count = -Math.max(1, Math.abs(oc ? oc.asNumber() : 1));
+      } else {
+        o.Dest = [pages[x.pi].ref, PDFName.of('Fit')];
+        o.C = rgb(x.c);
+        if (x.kids.length){ make(x.kids, x.ref); o.First = x.kids[0].ref; o.Last = x.kids[x.kids.length - 1].ref; o.Count = count(x.kids); }
+      }
+      ctx.assign(x.ref, ctx.obj(o));
+    });
+  };
+  make(top, rootRef);
+  ctx.assign(rootRef, ctx.obj({ Type:'Outlines', First:top[0].ref, Last:top[top.length - 1].ref, Count:count(top.filter(x => !x.book)) + (origRoot ? 1 : 0) }));
+  pdf.catalog.set(ON, rootRef);
+  return { refs, orig:orig instanceof PDFRef ? [orig.objectNumber, orig.generationNumber] : null };
+}
+
 
 /* ---------- folders in Inicio (kept in Drive too, so every device sees them) ---------- */
 if (!Array.isArray(prefs.folders)) prefs.folders = [];
@@ -4856,7 +5049,14 @@ function renderToolPanel(){
   tpanel.innerHTML = h;
 }
 function placeToolPanel(){
-  const rr = rail.getBoundingClientRect(), pw = tpanel.offsetWidth, ph = tpanel.offsetHeight;
+  const pw = tpanel.offsetWidth, ph = tpanel.offsetHeight;
+  if (rail.hidden){
+    const fr = fab.getBoundingClientRect(), cx = fr.left + fr.width / 2;
+    tpanel.style.left = clamp(cx - pw / 2, 8, innerWidth - pw - 8) + 'px';
+    tpanel.style.top = clamp(fr.top - ph - 14 > 70 ? fr.top - ph - 14 : fr.bottom + 14, 70, innerHeight - ph - 12) + 'px';
+    return;
+  }
+  const rr = rail.getBoundingClientRect();
   const ar = tpanelAnchor ? tpanelAnchor.getBoundingClientRect() : rr;
   const left = rail.classList.contains('left') ? rr.right + 10 : rr.left - pw - 10;
   tpanel.style.left = clamp(left, 8, innerWidth - pw - 8) + 'px';
