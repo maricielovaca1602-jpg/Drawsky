@@ -619,7 +619,7 @@ input[type=range]{accent-color:var(--accent)}
       <p class="hint">Más alto: el trazo se engrosa más cuando presionas fuerte. En 0 el grosor es siempre igual.</p>
     </div>
     <div class="row">
-      <div><div class="lab">Figuras perfectas al detenerte</div><p class="hint">Al terminar un círculo, triángulo, cuadrado, rectángulo o línea, deja el lápiz quieto medio segundo y la figura se corrige.</p></div>
+      <div><div class="lab">Figuras perfectas al detenerte</div><p class="hint">Al terminar una línea, círculo, óvalo, triángulo, cuadrado, rectángulo, rombo, pentágono o hexágono, deja el lápiz quieto medio segundo sin levantarlo y la figura se corrige.</p></div>
       <input type="checkbox" class="switch" id="snap" aria-label="Figuras perfectas al detenerte">
     </div>
     <div class="row">
@@ -679,7 +679,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (22)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (23)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -2300,6 +2300,8 @@ function outlineCmds(P0, s, look){
   if (n - a >= 2) outlineRun(S.slice(a), R.slice(a), out);
   return out;
 }
+/* straight sides for recognized shapes (lines, triangles, squares, polygons) */
+const lineCmds = (P, closed) => { const c = P.map((q, i) => [i ? 'L' : 'M', q[0], q[1]]); if (closed) c.push(['Z']); return c; };
 const cmdsToD = cmds => cmds.map(c => c[0] + c.slice(1).map(v => Math.round(v * 100) / 100).join(' ')).join('');
 function strokeGeom(s, live){
   const P = s.pts, st = s.st || 'pluma';
@@ -2311,10 +2313,10 @@ function strokeGeom(s, live){
   else if (s.dash && s.dash !== 'solid' && s.t === 'pen'){
     const w = s.poly ? P[0][2] : P.reduce((m, q) => m + q[2], 0) / P.length;
     g.mode = 'stroke'; g.w = Math.max(0.3, w); g.cap = 'round';
-    g.cmds = centerCmds(s.closed ? P.concat([P[0]]) : P); if (s.closed) g.cmds.push(['Z']);
+    g.cmds = s.poly ? lineCmds(P, s.closed) : centerCmds(P);
     g.dash = s.dash === 'dot' ? [0.01, g.w * 2.4] : [Math.max(2, g.w * 3.4), Math.max(1.6, g.w * 2.6)];
   }
-  else if (s.poly){ g.mode = 'stroke'; g.w = s.t === 'hl' ? s.size : P[0][2]; g.cmds = centerCmds(s.closed ? P.concat([P[0]]) : P); if (s.closed) g.cmds.push(['Z']); g.cap = 'round'; }
+  else if (s.poly){ g.mode = 'stroke'; g.w = s.t === 'hl' ? s.size : P[0][2]; g.cmds = lineCmds(P, s.closed); g.cap = 'round'; }
   else if (look.fill){ g.mode = 'fill'; g.cmds = outlineCmds(P, s, look); }
   else { g.mode = 'stroke'; g.w = s.t === 'hl' ? s.size : st === 'rotulador' ? s.size * (s.mk ? 1 : 1.6) : s.size; g.cmds = centerCmds(P); }
   g.d = cmdsToD(g.cmds);
@@ -2465,9 +2467,20 @@ function closedCorners(P, eps, minLen){
   }
   return v;
 }
+/* mean distance from the drawn points to a closed polygon */
+function polyErr(P, v){
+  let sum = 0;
+  for (const q of P){
+    let m = 1e18;
+    for (let i = 0; i < v.length; i++){ const a = v[i], b = v[(i + 1) % v.length], d = segDist2(q[0], q[1], a[0], a[1], b[0], b[1]); if (d < m) m = d; }
+    sum += Math.sqrt(m);
+  }
+  return sum / P.length;
+}
 function snapShape(){
   const a = active; if (!a || a.mode !== 'draw' || a.shape) return;
-  const s = a.stroke, P = s.pts; if (P.length < 4) return;
+  const s = a.stroke, P = s.pts.slice(); if (P.length < 4) return;
+  if (a.rx != null){ const l0 = P[P.length - 1]; if (Math.hypot(a.rx - l0[0], a.ry - l0[1]) > 0.5) P.push([a.rx, a.ry, l0[2]]); }
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, len = 0, wsum = 0;
   P.forEach((q, i) => {
     if (q[0] < x0) x0 = q[0]; if (q[0] > x1) x1 = q[0]; if (q[1] < y0) y0 = q[1]; if (q[1] > y1) y1 = q[1];
@@ -2476,43 +2489,71 @@ function snapShape(){
   const w = x1 - x0, h = y1 - y0, size = Math.max(w, h), W = wsum / P.length;
   if (size < 6) return;
   const f = P[0], l = P[P.length - 1], gap = Math.hypot(l[0] - f[0], l[1] - f[1]);
-  const closed = gap < 0.3 * size && len > 2 * size && Math.min(w, h) > 0.2 * size;
+  const closed = gap < 0.32 * size && len > 1.9 * size && Math.min(w, h) > 0.15 * size;
   let out = null, kindName = null;
   if (closed){
-    const v = closedCorners(P, 0.08 * size, 0.14 * size);
-    if (v.length === 3){
-      out = v.map(q => [q[0], q[1], W]); kindName = 'triangle';
-    } else if (v.length === 4){
-      const axis = v.every((q, i) => {
-        const n = v[(i + 1) % 4], ang = Math.abs(Math.atan2(n[1] - q[1], n[0] - q[0]) * 180 / Math.PI) % 90;
-        return ang < 14 || ang > 76;
-      });
-      if (axis){
-        let rx0 = Math.min(...v.map(q => q[0])), rx1 = Math.max(...v.map(q => q[0]));
-        let ry0 = Math.min(...v.map(q => q[1])), ry1 = Math.max(...v.map(q => q[1]));
-        const rw = rx1 - rx0, rh = ry1 - ry0;
-        if (Math.min(rw, rh) / Math.max(rw, rh) > 0.86){
-          const sd = (rw + rh) / 2, mx = (rx0 + rx1) / 2, my = (ry0 + ry1) / 2;
-          rx0 = mx - sd / 2; rx1 = mx + sd / 2; ry0 = my - sd / 2; ry1 = my + sd / 2;
+    /* try simpler and simpler outlines; keep the one with fewest corners that still follows the drawing */
+    const cands = [];
+    for (const k of [0.04, 0.06, 0.08, 0.1, 0.13, 0.16, 0.2]){
+      const v = closedCorners(P, k * size, 0.12 * size);
+      if (v.length >= 3 && v.length <= 6 && !cands.some(c => c.v.length === v.length)) cands.push({ v, e:polyErr(P, v) / size });
+    }
+    cands.sort((A, B) => A.v.length - B.v.length);
+    const okPoly = cands.find(c => c.e < 0.035) || cands.slice().sort((A, B) => A.e - B.e)[0];
+    /* how well an ellipse fits */
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    let rx = w / 2, ry = h / 2, ee = 0;
+    for (const q of P){ const dx = (q[0] - cx) / rx, dy = (q[1] - cy) / ry, r = Math.hypot(dx, dy); ee += Math.abs(r - 1) * Math.hypot(rx * dx / (r || 1), ry * dy / (r || 1)); }
+    ee = ee / P.length / size;
+    const n = okPoly ? okPoly.v.length : 0;
+    const polyWins = okPoly && (n <= 4 ? okPoly.e < ee * 0.9 || okPoly.e < 0.03 : okPoly.e < ee * 0.6);
+    if (polyWins){
+      let v = okPoly.v;
+      if (n === 4){
+        const axis = v.every((q, i) => { const nx = v[(i + 1) % 4], ang = Math.abs(Math.atan2(nx[1] - q[1], nx[0] - q[0]) * 180 / Math.PI) % 90; return ang < 15 || ang > 75; });
+        const diag = v.every((q, i) => { const nx = v[(i + 1) % 4], ang = Math.abs(Math.atan2(nx[1] - q[1], nx[0] - q[0]) * 180 / Math.PI) % 90; return ang > 25 && ang < 65; });
+        if (axis){
+          let rx0 = Math.min(...v.map(q => q[0])), rx1 = Math.max(...v.map(q => q[0])), ry0 = Math.min(...v.map(q => q[1])), ry1 = Math.max(...v.map(q => q[1]));
+          const rw = rx1 - rx0, rh = ry1 - ry0;
+          if (Math.min(rw, rh) / Math.max(rw, rh) > 0.86){ const sd = (rw + rh) / 2, mx = (rx0 + rx1) / 2, my = (ry0 + ry1) / 2; rx0 = mx - sd / 2; rx1 = mx + sd / 2; ry0 = my - sd / 2; ry1 = my + sd / 2; }
+          v = [[rx0, ry0], [rx1, ry0], [rx1, ry1], [rx0, ry1]]; kindName = 'rect';
+        } else if (diag){
+          /* rhombus with corners up, right, down and left */
+          const bx0 = Math.min(...v.map(q => q[0])), bx1 = Math.max(...v.map(q => q[0])), by0 = Math.min(...v.map(q => q[1])), by1 = Math.max(...v.map(q => q[1]));
+          const mx = (bx0 + bx1) / 2, my = (by0 + by1) / 2;
+          v = [[mx, by0], [bx1, my], [mx, by1], [bx0, my]]; kindName = 'rhomb';
+        } else kindName = 'quad';
+      } else if (n >= 5){
+        /* nearly even sides: make it a regular pentagon / hexagon */
+        const sides = v.map((q, i) => Math.hypot(v[(i + 1) % n][0] - q[0], v[(i + 1) % n][1] - q[1])), ms = sides.reduce((x, y) => x + y, 0) / n;
+        const cv = Math.sqrt(sides.reduce((x, y) => x + (y - ms) ** 2, 0) / n) / ms;
+        if (cv < 0.28){
+          let gx = 0, gy = 0; v.forEach(q => { gx += q[0]; gy += q[1]; }); gx /= n; gy /= n;
+          const R = v.reduce((m, q) => m + Math.hypot(q[0] - gx, q[1] - gy), 0) / n, a0 = Math.atan2(v[0][1] - gy, v[0][0] - gx);
+          /* keep the user's rotation but snap it so a flat side or a point faces up when close */
+          const step = Math.PI * 2 / n, up = -Math.PI / 2;
+          let rot = a0; const rel = ((a0 - up) % step + step) % step;
+          if (rel < 0.18 || step - rel < 0.18) rot = up + Math.round((a0 - up) / step) * step;
+          else if (Math.abs(rel - step / 2) < 0.18) rot = up + step / 2 + Math.round((a0 - up - step / 2) / step) * step;
+          v = Array.from({ length:n }, (_, i) => [gx + R * Math.cos(rot + i * step), gy + R * Math.sin(rot + i * step)]);
         }
-        out = [[rx0, ry0, W], [rx1, ry0, W], [rx1, ry1, W], [rx0, ry1, W]];
-      } else out = v.map(q => [q[0], q[1], W]);
-      kindName = 'quad';
-    } else if (v.length >= 5 && Math.min(w, h) > 0.35 * size){
-      const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-      let rx = w / 2, ry = h / 2;
+        kindName = 'poly';
+      } else kindName = 'triangle';
+      out = v.map(q => [q[0], q[1], W]);
+    } else if (ee < 0.08 && Math.min(w, h) > 0.3 * size){
       if (Math.min(rx, ry) / Math.max(rx, ry) > 0.82){ const r = (rx + ry) / 2; rx = r; ry = r; }
-      const start = Math.atan2(f[1] - cy, f[0] - cx), n = 72, pts = [];
-      for (let i = 0; i <= n; i++){ const t = start + i / n * Math.PI * 2; pts.push([cx + rx * Math.cos(t), cy + ry * Math.sin(t), W]); }
+      const start = Math.atan2(f[1] - cy, f[0] - cx), m = 72, pts = [];
+      for (let i = 0; i <= m; i++){ const t = start + i / m * Math.PI * 2; pts.push([cx + rx * Math.cos(t), cy + ry * Math.sin(t), W]); }
       s.pts = pts; a.shape = 'circle';
     }
     if (out){ s.pts = out; s.poly = true; s.closed = true; a.shape = kindName; }
   } else {
     if (gap < 8) return;
-    const dx = l[0] - f[0], dy = l[1] - f[1];
+    /* a straight line: ignore the little hooks at both ends */
+    const dx = l[0] - f[0], dy = l[1] - f[1], k0 = Math.floor(P.length * 0.1), k1 = Math.ceil(P.length * 0.9);
     let md = 0;
-    for (const q of P){ const d = Math.abs(dy * (q[0] - f[0]) - dx * (q[1] - f[1])) / gap; if (d > md) md = d; }
-    if (md > Math.max(0.1 * gap, 3)) return;
+    for (let i = k0; i < k1; i++){ const q = P[i], d = Math.abs(dy * (q[0] - f[0]) - dx * (q[1] - f[1])) / gap; if (d > md) md = d; }
+    if (md > Math.max(0.065 * gap, 4) || len > gap * 1.3) return;
     s.pts = [[f[0], f[1], W], [l[0], l[1], W]]; s.poly = true; a.shape = 'line';
   }
   if (!a.shape) return;
