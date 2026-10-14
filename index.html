@@ -121,6 +121,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .pages{display:flex;flex-direction:column;align-items:center;gap:22px;padding:20px 16px 150px;width:max-content;min-width:100%;box-sizing:border-box;transform-origin:0 0}
 .page{position:relative;background:#fff;flex:none;isolation:isolate;box-shadow:0 1px 2px rgba(0,0,0,.2),0 10px 26px rgba(10,22,44,.2)}
 .page canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.page canvas.pdf-det{pointer-events:none}
 .page svg.hl,.page svg.ink{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;overflow:hidden}
 .page svg.hl,.wet.as-hl{mix-blend-mode:multiply}
 .alpha{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600}
@@ -678,7 +679,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (20)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (21)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -883,11 +884,47 @@ function sizePage(p){
   const w = Math.round(baseWidth() * zoom * (p.wPt / ref)), h = Math.round(w * p.hPt / p.wPt);
   p.cssW = w; p.cssH = h; p.el.style.width = w + 'px'; p.el.style.height = h + 'px';
 }
-function layout(){ if (!doc) return; for (const p of doc.pages){ sizePage(p); p.rendered = false; } updateVisible(); }
+function layout(){ if (!doc) return; for (const p of doc.pages){ dropDetail(p); sizePage(p); p.rendered = false; } updateVisible(); }
+/* very close zoom: the whole page can't be drawn sharp (too many pixels), so the visible part is drawn again at full sharpness on top */
+function dropDetail(p){ p.dgen = (p.dgen || 0) + 1; if (p.detC){ p.detC.width = 0; p.detC.remove(); p.detC = null; } }
+let detT = 0;
+function scheduleDetail(){ clearTimeout(detT); detT = setTimeout(updateDetail, 140); }
+function updateDetail(){
+  if (!doc || homeOn) return;
+  const D = DPR(), vr = viewer.getBoundingClientRect();
+  for (const p of doc.pages){
+    if (!p.rendered || p.cssW * p.cssH * D * D <= MAX_PX * 1.02){ if (p.detC) dropDetail(p); continue; }
+    const r = p.el.getBoundingClientRect();
+    const x0 = Math.max(0, vr.left - r.left), y0 = Math.max(0, vr.top - r.top), x1 = Math.min(r.width, vr.right - r.left), y1 = Math.min(r.height, vr.bottom - r.top);
+    if (x1 - x0 < 4 || y1 - y0 < 4){ if (p.detC) dropDetail(p); continue; }
+    const k = p.cssW / r.width, rx = Math.floor(x0 * k), ry = Math.floor(y0 * k), rw = Math.ceil((x1 - x0) * k) + 1, rh = Math.ceil((y1 - y0) * k) + 1;
+    if (p.detC && p.detR && rx >= p.detR[0] && ry >= p.detR[1] && rx + rw <= p.detR[0] + p.detR[2] && ry + rh <= p.detR[1] + p.detR[3]) continue;
+    renderDetail(p, rx, ry, rw, rh, D);
+  }
+}
+async function renderDetail(p, rx, ry, rw, rh, D){
+  const gen = p.dgen = (p.dgen || 0) + 1;
+  const pad = 0.25, ex = Math.max(0, rx - rw * pad), ey = Math.max(0, ry - rh * pad);
+  const ew = Math.min(p.cssW - ex, rw * (1 + 2 * pad)), eh = Math.min(p.cssH - ey, rh * (1 + 2 * pad));
+  let d = D; if (ew * eh * d * d > 9e6) d = Math.sqrt(9e6 / (ew * eh));
+  const c = document.createElement('canvas'); c.className = 'pdf-det';
+  c.width = Math.round(ew * d); c.height = Math.round(eh * d);
+  Object.assign(c.style, { inset:'auto', left:ex + 'px', top:ey + 'px', width:ew + 'px', height:eh + 'px' });
+  const ctx = c.getContext('2d', { alpha:false });
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.dsOff = [-ex * d, -ey * d];
+  try { await renderBase(p, ctx, p.cssW * d / p.wPt, () => gen === p.dgen, false); }
+  catch(err){ if (!err || err.name !== 'RenderingCancelledException') console.warn(err); return; }
+  if (gen !== p.dgen || !p.rendered) { c.width = 0; return; }
+  if (p.detC){ p.detC.width = 0; p.detC.remove(); }
+  p.el.insertBefore(c, p.pdfC.nextSibling); p.detC = c; p.detR = [ex, ey, ew, eh];
+}
 
 /* draws the page background: PDF page, sample sheet or blank paper, then its template */
 async function renderBase(p, ctx, sc, valid, main){
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const off = ctx.dsOff;
+  if (off && p.src.kind !== 'pdf') ctx.translate(off[0], off[1]);
   const s = p.src;
   if (s.kind === 'pdf'){
     const page = await p.doc.pdf.getPage(s.index + 1);
@@ -898,12 +935,13 @@ async function renderBase(p, ctx, sc, valid, main){
         p.wPt = v1.width; p.hPt = v1.height; sizePage(p); renderPage(p); return;
       }
     }
-    const task = page.render({ canvasContext:ctx, viewport:page.getViewport({ scale:sc }) });
+    const task = page.render(Object.assign({ canvasContext:ctx, viewport:page.getViewport({ scale:sc }) }, off ? { transform:[1, 0, 0, 1, off[0], off[1]] } : {}));
     if (main) p.task = task;
     await task.promise;
     if (main) p.task = null;
+    if (off) ctx.translate(off[0], off[1]);
   } else if (s.kind === 'sample') drawSample(s.index, ctx, sc);
-  else if (s.kind === 'img'){ if (p.doc.img) ctx.drawImage(p.doc.img, 0, 0, ctx.canvas.width, ctx.canvas.height); }
+  else if (s.kind === 'img'){ if (p.doc.img) ctx.drawImage(p.doc.img, 0, 0, off ? p.wPt * sc : ctx.canvas.width, off ? p.hPt * sc : ctx.canvas.height); }
   if (!valid()) return;
   drawTemplate(ctx, p, sc);
 }
@@ -923,7 +961,7 @@ async function renderPage(p){
   p.el.replaceChild(nc, p.pdfC); p.pdfC.width = 0; p.pdfC.height = 0; p.pdfC = nc;
 }
 function releasePage(p){
-  p.gen++; p.rendered = false;
+  p.gen++; p.rendered = false; dropDetail(p);
   if (p.task){ try { p.task.cancel(); } catch(_){} p.task = null; }
   p.pdfC.width = 0; p.pdfC.height = 0;
   if (p.inkOn){ p.inkOn = false; p.hlS.replaceChildren(); p.pcG.replaceChildren(); p.inkS.replaceChildren(); }
@@ -942,6 +980,7 @@ function updateVisible(){
   for (const p of doc.pages){ if (p.el.offsetTop <= mid) cur = p.i; else break; }
   if (doc.cur !== cur){ doc.cur = cur; updateMarkBtn(); }
   $('#pageNow').textContent = cur + 1;
+  if (zoom > 1.5) scheduleDetail();
 }
 viewer.addEventListener('scroll', () => { if (!visRaf) visRaf = requestAnimationFrame(() => { visRaf = 0; updateVisible(); }); }, { passive:true });
 function scrollToPage(i){
@@ -2641,7 +2680,7 @@ function startPinch(){
 function updatePinch(){
   const [a, b] = [...touches.values()];
   let r = Math.hypot(a.x - b.x, a.y - b.y) / pinch.d0;
-  r = Math.max(0.5 / zoom, Math.min(4 / zoom, r)); pinch.r = r;
+  r = Math.max(0.5 / zoom, Math.min(12.5 / zoom, r)); pinch.r = r;
   pagesEl.style.transform = `scale(${r})`;
 }
 function endPinch(){
@@ -2880,7 +2919,7 @@ window.addEventListener('pointermove', e => {
 /* ---------- zoom ---------- */
 function setZoom(z, anchor){
   if (!doc) return;
-  z = Math.max(0.5, Math.min(4, z));
+  z = Math.max(0.5, Math.min(12.5, z));
   anchor = anchor || { ox:viewer.clientWidth / 2, oy:viewer.clientHeight / 2, cx:viewer.scrollLeft + viewer.clientWidth / 2, cy:viewer.scrollTop + viewer.clientHeight / 2 };
   const f = z / zoom; zoom = z; layout();
   viewer.scrollLeft = anchor.cx * f - anchor.ox; viewer.scrollTop = anchor.cy * f - anchor.oy;
