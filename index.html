@@ -68,7 +68,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .btn em.warn{background:color-mix(in srgb,#e8a33d 22%,transparent);color:#e8a33d}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface-2);padding:0;flex:none}
 .doc-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:980px){ .word{display:none} #openBtn .lbl{display:none} #openBtn{padding:0 11px} }
+@media (max-width:980px){ .word{display:none} }
+@media (max-width:700px){ #newBtn .lbl{display:none} #newBtn{padding:0 11px} }
 @media (max-width:760px){ #driveBtn em{display:none} }
 @media (max-width:620px){ .btn .lbl,.doc-meta,.btn em{display:none} .btn{padding:0 11px} .word{display:none} }
 
@@ -212,6 +213,51 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .sq.fav{background:var(--surface-2);color:var(--fg)}
 .wpal{display:flex;flex-wrap:wrap;gap:5px;width:100%;max-width:330px;margin-top:6px}
 .wpal .sq{width:24px;min-width:24px;height:24px;border-radius:7px}
+.cp{display:flex;flex-direction:column;gap:10px;background:var(--surface-2);border-radius:18px;padding:10px;margin-top:8px}
+.cp .ptabs{margin:-2px -2px 0}
+.cp .ptabs button[aria-pressed="true"]{background:var(--surface)}
+.cp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:9px 6px;justify-items:center;align-items:center;max-height:236px;overflow:auto;padding:4px 2px}
+.cdot{width:30px;height:30px;border-radius:50%;border:0;padding:0;background:var(--c);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 14%,transparent);position:relative;display:grid;place-items:center;cursor:pointer;transition:transform .12s}
+.cdot:active{transform:scale(.9)}
+.cdot[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface-2),0 0 0 4px var(--fg)}
+.cdot[data-exact]{width:36px;height:36px}
+.cp-lbl{grid-column:1/-1;justify-self:start;font-size:11.5px;font-weight:600;color:var(--muted);margin-top:2px}
+.cp-empty{grid-column:1/-1;margin:8px 6px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.4}
+.cp-bar{display:flex;align-items:center;gap:8px}
+.cp-add{width:34px;height:34px;border-radius:50%;border:1.5px dashed var(--muted);background:transparent;color:var(--fg);display:grid;place-items:center;padding:0;flex:none;cursor:pointer}
+.cp-q{flex:1;display:flex;align-items:center;gap:2px;height:34px;border-radius:99px;background:var(--surface);border:1px solid var(--line);padding:0 12px;min-width:0;box-sizing:border-box}
+.cp-q span{color:var(--muted);font-weight:700}
+.cp-q input{border:0;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:600;width:100%;min-width:0;outline:0;text-transform:uppercase;letter-spacing:.05em;padding:0}
+.cp-q input::placeholder{text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted)}
+.cp-ic{width:34px;height:34px;border-radius:50%;border:0;background:var(--surface);color:var(--fg);display:grid;place-items:center;padding:0;flex:none;cursor:pointer}
+.cpwrap{position:fixed;inset:0;z-index:60;background:rgba(10,14,22,.4);display:grid;place-items:center;padding:16px}
+.cpsheet{width:min(440px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);color:var(--fg);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35);border:1px solid var(--line);padding:4px 18px 16px;box-sizing:border-box}
+.cpsheet .sheet-h{gap:8px}
+.cpsheet .sheet-h h2{margin:0;font-size:18px}
+.cn-body{padding:2px 0 10px}
+.cn-sv{position:relative;height:190px;border-radius:16px;overflow:hidden;touch-action:none;cursor:crosshair}
+.cn-sv canvas{width:100%;height:100%;display:block}
+.cn-sv i{position:absolute;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none;box-sizing:border-box}
+.cn-hue{-webkit-appearance:none;appearance:none;display:block;width:100%;height:18px;border-radius:99px;margin:16px 0;background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);outline:0}
+.cn-hue::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 2px 6px rgba(0,0,0,.3)}
+.cn-hue::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:0}
+.cn-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.cn-prev{width:46px;height:46px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 14%,transparent);flex:none}
+.cn-hex{height:42px}
+.pm-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.pm-strip{display:flex;flex:none;width:92px;height:26px;border-radius:9px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.pm-strip i{flex:1}
+.pm-name{flex:1;min-width:0;display:flex;flex-direction:column}
+.pm-name strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-name small{font-size:12px;color:var(--muted)}
+.icon-btn.sm{width:32px;height:32px;flex:none}
+.btn.sm{height:32px;font-size:12.5px;padding:0 12px;flex:none}
+.pm-new{margin-top:14px}
+.pm-cols{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px;align-items:center}
+.cdot.rm svg{color:#fff;opacity:.0;filter:drop-shadow(0 0 2px rgba(0,0,0,.7))}
+.cdot.rm:hover svg,.cdot.rm:focus-visible svg{opacity:1}
+.cpsheet textarea{width:100%;box-sizing:border-box;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);font:inherit;font-size:13.5px;padding:10px;resize:vertical;margin-top:6px}
+@media (max-width:520px){ .pm-strip{width:60px} }
 .wsep{flex-basis:100%;height:0}
 .doc-name{cursor:text}
 .crumbs{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px}
@@ -404,6 +450,23 @@ input[type=range]{accent-color:var(--accent)}
 .h-name>div{min-width:0}
 .h-name strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .h-name small{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-row.drow{grid-template-columns:minmax(0,1fr) 140px 40px}
+.drow .fmore{position:static;box-shadow:none;background:transparent;width:36px;height:36px}
+.drow .fmore:hover{background:var(--surface-2)}
+.h-name .ph.fph{background:transparent;box-shadow:none;width:44px;height:44px}
+.h-name .ph.fph svg{width:40px;height:32px}
+.h-name .ph.tph{overflow:hidden;position:relative}
+.h-name .ph.tph img{position:absolute;inset:0;width:100%;height:100%;box-shadow:none;border-radius:0}
+.fmenu{min-width:250px;padding:6px;border-radius:16px}
+.fmenu button{display:flex;align-items:center;gap:12px;border:0;background:transparent;color:var(--fg);padding:11px 12px;border-radius:10px;font-size:14px;font-weight:600;text-align:left;width:100%}
+.fmenu button span{flex:1}
+.fmenu button:hover{background:var(--surface-2)}
+.fmenu button.danger{color:#d63a4a}
+.fmenu button.danger.armed{background:color-mix(in srgb,#d63a4a 14%,transparent)}
+.fm-sw{flex:none;width:36px;height:20px;border-radius:99px;background:var(--line);position:relative;transition:background .15s}
+.fm-sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+[aria-checked="true"] .fm-sw{background:var(--accent)}
+[aria-checked="true"] .fm-sw::after{transform:translateX(16px)}
 .h-cell{font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .h-acts{display:flex;gap:4px;justify-content:flex-end}
 .h-acts button{width:40px;height:40px;border-radius:10px;border:1px solid transparent;background:transparent;display:grid;place-items:center;padding:0;color:var(--muted)}
@@ -452,6 +515,7 @@ input[type=range]{accent-color:var(--accent)}
     </div>
     <div class="actions">
       <button class="btn" id="driveBtn" type="button"><span id="icDrive"></span><span class="lbl" id="driveLbl">Drive</span><em id="driveSt" hidden></em></button>
+      <button class="btn primary" id="newBtn" type="button" aria-label="Nuevo"><span id="icNew"></span><span class="lbl">Nuevo</span></button>
       <button class="icon-btn" id="setBtn" type="button" aria-label="Ajustes"></button>
     </div>
     <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
@@ -561,6 +625,10 @@ input[type=range]{accent-color:var(--accent)}
         <button type="button" data-tv="dark">Oscuro</button>
       </div>
     </div>
+    <div class="row">
+      <div><div class="lab">Paletas de colores</div><p class="hint">Crea tus paletas, pega códigos de color y elige cuáles se ven al escoger un color.</p></div>
+      <button type="button" class="btn" id="palMgr">Abrir</button>
+    </div>
     <div class="group">
       <div class="lab">Prueba del S Pen</div>
       <div class="pentest" id="penTest">Toca aquí con el S Pen: primero normal, luego manteniendo presionado su botón</div>
@@ -590,7 +658,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (18)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (19)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -668,7 +736,7 @@ $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); 
 $('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#idxBtn').innerHTML = svg('list', 20); $('#searchBtn').innerHTML = svg('search', 20);
 $('#findPrev').innerHTML = svg('up', 18); $('#findNext').innerHTML = svg('down', 18); $('#findClose').innerHTML = svg('close', 18);
 $('#icM1').innerHTML = svg('folder', 22); $('#icM2').innerHTML = svg('book', 22);
-$('#icM6').innerHTML = svg('image', 22); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
+$('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
 
 /* ---------- prefs ---------- */
@@ -698,10 +766,10 @@ const DEF = { sens:0.7, snap:true, finger:false, theme:'system', tool:'pen1', do
 const saved = store.get('drawsky:prefs') || {};
 const prefs = Object.assign({}, DEF, saved, {
   tools: Object.assign({}, DEF.tools, saved.tools || {}),
-  fav: { pen:(saved.fav && saved.fav.pen) || DEF_FAV.pen.slice(), hl:(saved.fav && saved.fav.hl) || DEF_FAV.hl.slice() }
+  fav: Object.assign({}, saved.fav || {}, { pen:(saved.fav && saved.fav.pen) || DEF_FAV.pen.slice(), hl:(saved.fav && saved.fav.hl) || DEF_FAV.hl.slice() })
 });
 if (!['float', 'left', 'right'].includes(prefs.dock)) prefs.dock = 'float';
-prefs.fav.text = prefs.fav.pen;
+['pen1', 'pen2', 'text'].forEach(k => { if (!Array.isArray(prefs.fav[k]) || k === 'text' && prefs.fav.text === prefs.fav.pen) prefs.fav[k] = prefs.fav.pen.slice(); });
 if (!Array.isArray(prefs.openNb)) prefs.openNb = [];
 let tool = TOOL_INFO[prefs.tool] ? prefs.tool : 'pen1';
 const savePrefs = () => { prefs.tool = tool; store.set('drawsky:prefs', prefs); };
@@ -881,7 +949,7 @@ function renderTabs(){
     docs.map(d => `<div class="tab" role="presentation" aria-selected="${d === doc && !homeOn}">
       <button type="button" class="tab-main" data-tab="${d.id}" role="tab" aria-selected="${d === doc && !homeOn}" title="${esc(d.name)}">${svg(kindIcon(d.kind), 16)}<span>${esc(d.name)}</span></button>
       <button type="button" class="tab-x" data-close="${d.id}" aria-label="Cerrar ${esc(d.name)}">${svg('close', 16)}</button>
-    </div>`).join('') + `<button type="button" class="tab-add" id="tabAdd" aria-label="Abrir o crear archivo">${svg('plus', 16)}Nuevo</button>`;
+    </div>`).join('');
   const cur = tabsEl.querySelector('.tab[aria-selected="true"]'); if (cur) cur.scrollIntoView({ block:'nearest', inline:'nearest' });
 }
 tabsEl.addEventListener('click', e => {
@@ -892,13 +960,14 @@ tabsEl.addEventListener('click', e => {
   else if (b.id === 'tabAdd') openAddMenu(b);
 });
 const addMenu = $('#addMenu');
+$('#newBtn').addEventListener('click', e => { if (!addMenu.hidden){ addMenu.hidden = true; return; } openAddMenu(e.currentTarget); });
 function openAddMenu(anchor){
   const r = anchor.getBoundingClientRect();
   addMenu.hidden = false;
-  addMenu.style.left = clamp(r.left, 8, innerWidth - addMenu.offsetWidth - 8) + 'px';
+  addMenu.style.left = clamp(r.right - addMenu.offsetWidth, 8, innerWidth - addMenu.offsetWidth - 8) + 'px';
   addMenu.style.top = (r.bottom + 6) + 'px';
 }
-document.addEventListener('pointerdown', e => { if (!addMenu.hidden && !addMenu.contains(e.target) && !e.target.closest('#tabAdd')) addMenu.hidden = true; }, true);
+document.addEventListener('pointerdown', e => { if (!addMenu.hidden && !addMenu.contains(e.target) && !e.target.closest('#newBtn')) addMenu.hidden = true; }, true);
 addMenu.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; addMenu.hidden = true;
   const m = b.dataset.m;
@@ -1050,6 +1119,7 @@ function renderHome(){
     `<h3>En la app</h3>` +
     [['all', 'Todos', 'pages'], ['notebook', 'Cuadernos', 'book'], ['pdf', 'PDFs', 'pdf'], ['image', 'Imágenes', 'image']].map(([k, l, ic]) => nav(`data-hf="${k}"`, homeFilter === k, svg(ic, 20), l, counts[k])).join('') +
     `<h3>Carpetas</h3>` + allFolders().map(f => { const m = folderMeta(f); return nav(`data-hf="f:${esc(f)}"`, homeFilter === 'f:' + f, folderSvg(m.c, m.i, 'fmini'), f, lib.filter(e => e.folder === f).length); }).join('') +
+    (prefs.fullDrive ? (prefs.dpins || []).filter(p => prefs.accounts.some(a => a.email === p.email)).map(p => { const m = dfolderMeta(p.id); return nav(`data-dpin="${esc(p.id)}"`, homeFilter === 'gdrive' && dnav && dnav.path[dnav.path.length - 1].id === p.id, folderSvg(m.c, m.i, 'fmini'), p.name); }).join('') : '') +
     nav('data-newfolder="1"', false, svg('plus', 20), 'Nueva carpeta') +
     `<h3>Google Drive</h3>` +
     (prefs.fullDrive ? prefs.accounts.map(a => [['root', 'Mi unidad', 'cloud'], ['shared', 'Compartidos conmigo', 'share'], ['recent', 'Recientes', 'pages']].map(([id, l, ic]) => nav(`data-dbrowse="${esc(a.email)}|${id}|${l}"`, gcur(id)(a), svg(ic, 20), l + (prefs.accounts.length > 1 ? ' · ' + a.email.split('@')[0] : ''))).join('')).join('')
@@ -1134,6 +1204,8 @@ function doRename(){
 $('#hSide').addEventListener('click', e => {
   if (e.target.closest('[data-sidemin]')){ prefs.homeSideMin = !prefs.homeSideMin; savePrefs(); renderHome(); return; }
   if (e.target.closest('[data-fulldrive]')){ enableFullDrive(true); return; }
+  const dp = e.target.closest('[data-dpin]');
+  if (dp){ const p = prefs.dpins.find(x => x.id === dp.dataset.dpin); if (!p) return; const go = () => openDriveBrowser(p.email, 'root', 'Mi unidad', [{ id:p.id, name:p.name }]); if (!tokenOk(p.email)) withToken(p.email, go); else go(); return; }
   const a = e.target.closest('[data-acc]');
   if (a){ if (a.dataset.acc && prefs.fullDrive){ const em = a.dataset.acc; if (!tokenOk(em)) withToken(em, () => openDriveBrowser(em, 'root', 'Mi unidad')); else openDriveBrowser(em, 'root', 'Mi unidad'); return; } if (a.dataset.acc) openPicker(a.dataset.acc); else requestToken(null, (email, tk) => { if (email) showPicker(email, tk); }); return; }
   if (e.target.closest('[data-sync]')){ syncPendingTap(); return; }
@@ -1152,7 +1224,7 @@ $('#hList').addEventListener('click', ev => {
   const fc = ev.target.closest('.fcard');
   if (fc){
     const ed = ev.target.closest('[data-fedit]');
-    if (ed) openFolderEdit(ed.dataset.fedit); else if (fc.dataset.fnew) openFolderEdit(null); else { homeFilter = 'f:' + fc.dataset.folder; renderHome(); $('#hList').scrollTop = 0; }
+    if (ed) openFolderMenu(ed, { app:ed.dataset.fedit }); else if (fc.dataset.fnew) openFolderEdit(null); else { homeFilter = 'f:' + fc.dataset.folder; renderHome(); $('#hList').scrollTop = 0; }
     return;
   }
   const row = ev.target.closest('.h-item'); if (!row) return;
@@ -2863,7 +2935,6 @@ window.addEventListener('pointercancel', e => endDrag(e, true));
 function setTool(t){ clearSel(); clearLasso(); if (textEdit) commitText(); tool = t; setTimeout(refreshToolPanel, 0); savePrefs(); renderRail(); if (!wheelWrap.hidden) renderWheelView(); if (t !== 'eraser') ecur.hidden = true; }
 function renderRail(){
   const items = ['hand', 'select', 'lasso', 'text', 'pen1', 'pen2', 'hl', 'eraser'];
-  const kdR = kind(tool), favR = kdR === 'pen' || kdR === 'text' ? prefs.fav.pen : kdR === 'hl' ? prefs.fav.hl : null, curC = prefs.tools[tool] && prefs.tools[tool].color;
   const u = doc ? doc.undo.length : 0, r = doc ? doc.redo.length : 0;
   const fold = rail.classList.contains('left') ? (prefs.railMin ? 'right' : 'left') : (prefs.railMin ? 'left' : 'right');
   rail.classList.toggle('min', !!prefs.railMin);
@@ -2881,7 +2952,7 @@ function renderRail(){
     items.map(t => {
       const c = prefs.tools[t] && prefs.tools[t].color;
       return `<button type="button" data-tool="${t}" aria-label="${toolName(t)}" title="${toolName(t)}${t === tool ? ' (toca otra vez para color y grosor)' : ''}" aria-pressed="${t === tool}">${svg(TOOL_INFO[t].icon)}${c ? `<i class="dot" style="background:${c}"></i>` : ''}</button>`;
-    }).join('') + '<hr>' + (favR ? favR.slice(0, 5).map(c => `<button type="button" class="rc" data-color="${c}" style="--c:${c}" aria-pressed="${sameColor(c, curC)}" aria-label="Color ${c}"></button>`).join('') + '<hr>' : '') +
+    }).join('') + '<hr>' +
     `<button type="button" data-act="undo" aria-label="Deshacer" title="Deshacer" ${u ? '' : 'disabled'}>${svg('undo')}</button>` +
     `<button type="button" data-act="redo" aria-label="Rehacer" title="Rehacer" ${r ? '' : 'disabled'}>${svg('redo')}</button>` +
     `<button type="button" data-act="settings" aria-label="Ajustes" title="Ajustes">${svg('settings')}</button>`;
@@ -2965,7 +3036,7 @@ function viewTool(){
   const kd = kind(tool), cfg = prefs.tools[tool], hasColor = kd === 'pen' || kd === 'hl' || kd === 'text';
   let s = `<svg viewBox="0 0 200 200" class="wsvg"><circle cx="100" cy="100" r="99" class="w-band"/>`;
   if (hasColor){
-    const favs = prefs.fav[kd].slice(0, MAX_FAV), n = favs.length + 1, step = 360 / n;
+    const favs = favOf(tool).slice(0, MAX_FAV), n = favs.length + 1, step = 360 / n;
     favs.forEach((c, i) => {
       s += `<path d="${sector(62, 96, -90 + i * step + 1, -90 + (i + 1) * step - 1)}" fill="${c}" class="w-slice${sameColor(c, cfg.color) ? ' on' : ''}" data-color="${c}"><title>Color favorito ${i + 1}</title></path>`;
     });
@@ -3064,7 +3135,7 @@ function viewColor(){
   wheel.innerHTML = `<div class="hue-ring"></div><span class="hue-knob" id="hueKnob"></span><canvas class="sv2" id="sv" aria-label="Elige el tono claro u oscuro"></canvas>`;
   wcap.innerHTML = `<button type="button" class="icon-btn" data-view="tool" aria-label="Volver">${svg('back', 20)}</button>
     <span class="big" id="pickBig"></span><code id="pickHex"></code><button type="button" class="btn" id="favBtn"></button>
-    <div class="wpal">${Object.values(PALETTES).map(p => p.colors.map(c => `<button type="button" class="sq" data-color="${c}" style="--c:${c}" aria-label="Color ${c}"></button>`).join('')).join('<i class="wsep"></i>')}</div>`;
+    <div class="wpal">${mainPals().map(p => p.colors.map(c => `<button type="button" class="sq" data-color="${c}" style="--c:${c}" aria-label="Color ${c}"></button>`).join('')).join('<i class="wsep"></i>')}</div>`;
   const c = $('#sv'), d = DPR(); c.width = Math.round(c.clientWidth * d); c.height = Math.round(c.clientHeight * d);
   drawSV(); placeHueKnob(); showPicked(prefs.tools[tool].color);
 }
@@ -3279,10 +3350,10 @@ function drawSV(){
 function updateFavBtn(){
   const b = $('#favBtn'); if (!b) return;
   const kd = kind(tool), c = prefs.tools[tool].color;
-  b.textContent = prefs.fav[kd].some(x => sameColor(x, c)) ? 'Quitar de la rueda' : 'Fijar en la rueda';
+  b.textContent = favOf(tool).some(x => sameColor(x, c)) ? 'Quitar de la rueda' : 'Fijar en la rueda';
 }
 function toggleFav(){
-  const kd = kind(tool), c = prefs.tools[tool].color, list = prefs.fav[kd];
+  const c = prefs.tools[tool].color, list = favOf(tool);
   const i = list.findIndex(x => sameColor(x, c));
   if (i >= 0){
     if (list.length <= 1){ toast('Deja al menos un color en la rueda.'); return; }
@@ -4159,7 +4230,7 @@ function drawLassoBox(){
 function showLassoMenu(){
   if (!lsel) return;
   const { p, box } = lsel, r = p.el.getBoundingClientRect(), k = r.width / p.wPt;
-  const cols = prefs.fav.pen.slice(0, 6);
+  const cols = favOf(['pen1', 'pen2', 'hl', 'text'].includes(tool) ? tool : 'pen1').slice(0, 6);
   lassoMenu.innerHTML = cols.map(c => `<button type="button" class="lc" data-lc="${c}" aria-label="Cambiar a este color" style="--c:${c}"></button>`).join('') +
     `<button type="button" data-l="dup">${svg('copy', 16)}Duplicar</button><button type="button" data-l="del">${svg('trash', 16)}Eliminar</button>`;
   lassoMenu.hidden = false;
@@ -4422,8 +4493,7 @@ function renderFolderEdit(){
   const dhint = st.drive ? `<p class="hint" style="margin:0 18px 10px">El color y el ícono se ven solo en DrawSky. Si cambias el nombre, también cambia en tu Drive.</p>` : '';
   dlg.innerHTML = `<header class="sheet-h"><h2>${st.old ? 'Editar carpeta' : 'Nueva carpeta'}</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
     <div class="fe-top">${folderSvg(st.c, st.i, 'fold big')}<label class="field" style="flex:1">Nombre<input type="text" id="feName" maxlength="40" value="${esc(st.name)}" placeholder="Por ejemplo: Cardiología"></label></div>
-    <div class="group"><div class="lab">Color</div><div class="swatches">${FOLDER_COLORS.concat(PALETTES.cherii.colors.filter(c => !['#000000', '#f1ecea'].includes(c))).map(c => `<button type="button" class="sw" data-do="fcol" data-c="${c}" style="--c:${c}" aria-pressed="${st.c === c}" aria-label="Color ${c}"></button>`).join('')}
-      <label class="sw any" title="Cualquier color" aria-label="Elegir cualquier color" style="--c:${st.c}">${svg('palette', 18)}<input type="color" id="feColor" value="${st.c}"></label></div>
+    <div class="group"><div class="lab">Color</div>${colorPickerHTML('fold', st.c, null)}
       <div class="lab" style="margin-top:14px">Ícono</div><div class="swatches">${FOLDER_ICONS.map(i => `<button type="button" class="ic" data-do="ficon" data-i="${i}" aria-pressed="${st.i === i}">${svg(i, 22)}</button>`).join('')}</div></div>${dhint}
     <div class="dlg-foot">${st.old && !st.drive ? `<button type="button" class="btn danger${st.delArmed ? ' armed' : ''}" data-do="fdel">${svg('trash', 18)}${st.delArmed ? 'Toca otra vez' : 'Eliminar'}</button><span style="flex:1"></span>` : ''}<button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="fsave">${st.old ? 'Guardar' : 'Crear carpeta'}</button></div>`;
 }
@@ -4449,7 +4519,6 @@ function folderEditAction(act, b){
   }
 }
 dlg.addEventListener('input', e => { if (dlgState && dlgState.kind === 'fedit' && e.target.id === 'feName') dlgState.name = e.target.value; });
-dlg.addEventListener('change', e => { if (dlgState && dlgState.kind === 'fedit' && e.target.id === 'feColor'){ dlgState.name = $('#feName').value; dlgState.c = e.target.value; renderFolderEdit(); } });
 function deleteFolder(name){
   prefs.folders = prefs.folders.filter(f => f !== name); delete prefs.folderMeta[name]; savePrefs();
   lib.filter(e => e.folder === name).forEach(e => setEntryFolder(e.key, '', true));
@@ -4457,22 +4526,278 @@ function deleteFolder(name){
 }
 
 /* ---------- tool panel: a rounded card next to the side bar (like Samsung Notes) ---------- */
+/* ---------- palettes: the app's, mine, which ones are main, search by code, new colors ---------- */
 const PALETTES = {
   cherii:{ name:'Cherii', colors:['#ee7ea0', '#ffa9ba', '#ffd7d6', '#ea7d70', '#f69f95', '#ffaf6e', '#ffcc80', '#ffe2a6', '#bcc07b', '#dbe098', '#7d8be0', '#b5bef5', '#abcdde', '#d5edf8', '#d5e2d3', '#9a81b0', '#cdbdeb', '#8e715b', '#c9a98d', '#e5daca', '#000000', '#4f3f3e', '#b19f9a', '#e1cfca', '#f1ecea'] },
+  goodnotes:{ name:'GoodNotes', colors:['#8e8e8e', '#636363', '#2d3235', '#c3a296', '#aa7b6f', '#80594e', '#42281d', '#311104', '#ff8a89', '#f85454', '#e41100', '#b20000', '#910100', '#ffc59e', '#ff9b57', '#ff7f1a', '#eb5f24', '#d35000', '#ffe785', '#ffda59', '#fbc15d', '#ffc340', '#faa300', '#ffa9cb', '#ed408b', '#ddaee4', '#a577b8', '#765f93', '#a858c8', '#7b4384', '#bae3ea', '#83a8d4', '#2874a6', '#cefff8', '#9bd9d0', '#9ad4bc', '#328c8d', '#396c6a', '#abae98', '#919561', '#62654a', '#485639', '#1d300b'] },
+  starter:{ name:'Starter', colors:['#7dbcb0', '#b5d3c7', '#a7c4e8', '#b092bd', '#c9b6cb', '#d5ccec', '#c4a2c8', '#f8cfe0', '#d5c1b0', '#e0b688', '#ec986e', '#f3ddb0', '#f1d276', '#d3dd6a', '#eebf4b'] },
   tierra:{ name:'Tierra', colors:['#f59cb2', '#b48d71', '#a05c46', '#e49e91', '#d5708b', '#e9b4b3', '#f2dcbe', '#f0b6c6', '#eeceb6'] },
   basic:{ name:'Básicos', colors:['#111111', '#1d2b53', '#1c7ed6', '#d63a4a', '#2f9e44', '#e67700', '#9c36b5', '#7a8594', '#ffd43b', '#8ce99a', '#74c0fc', '#ffa8a8'] }
 };
+if (!Array.isArray(prefs.myPals)) prefs.myPals = [];
+if (!Array.isArray(prefs.mainPals)) prefs.mainPals = ['cherii', 'goodnotes', 'starter', 'tierra'];
+if (!prefs.cpTab || typeof prefs.cpTab !== 'object') prefs.cpTab = {};
+const palById = id => { if (PALETTES[id]) return { id, name:PALETTES[id].name, colors:PALETTES[id].colors, own:false }; const p = prefs.myPals.find(x => x.id === id); return p ? { id, name:p.name, colors:p.colors, own:true } : null; };
+const allPals = () => Object.keys(PALETTES).concat(prefs.myPals.map(p => p.id)).map(palById);
+const mainPals = () => prefs.mainPals.map(palById).filter(Boolean);
+function normHex(s){
+  s = String(s || '').trim().replace(/^#/, '').toLowerCase();
+  if (/^[0-9a-f]{3}$/.test(s)) s = s.replace(/./g, '$&$&');
+  return /^[0-9a-f]{6}$/.test(s) ? '#' + s : null;
+}
+const parseCodes = txt => [...new Set((String(txt).match(/(?<![0-9a-z])#?[0-9a-f]{6}(?![0-9a-z])|#[0-9a-f]{3}(?![0-9a-z])/gi) || []).map(normHex).filter(Boolean))];
+function hexLab(h){
+  const n = parseInt(h.slice(1), 16), f = c => (c /= 255) > 0.04045 ? ((c + 0.055) / 1.055) ** 2.4 : c / 12.92;
+  const r = f(n >> 16 & 255), g = f(n >> 8 & 255), b = f(n & 255);
+  const t = v => v > 0.008856 ? Math.cbrt(v) : 7.787 * v + 16 / 116;
+  const x = t((r * .4124 + g * .3576 + b * .1805) / .95047), y = t(r * .2126 + g * .7152 + b * .0722), z = t((r * .0193 + g * .1192 + b * .9505) / 1.08883);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+}
+const colorDist = (a, b) => { const p = hexLab(a), q = hexLab(b); return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); };
+/* each pen, the highlighter and the text tool keep their own colors */
+const favKeyOf = t => t === 'hl' ? 'hl' : ['pen1', 'pen2', 'text'].includes(t) ? t : 'pen1';
+const favOf = t => { const k = favKeyOf(t); if (!Array.isArray(prefs.fav[k])) prefs.fav[k] = (prefs.fav.pen || DEF_FAV.pen).slice(); return prefs.fav[k]; };
+const TOOL_FAV_NAME = { pen1:'Bolígrafo 1', pen2:'Bolígrafo 2', hl:'el resaltador', text:'el texto' };
+
+/* the picker: palette tabs, color grid, + for a new color, search by code */
+const cpHooks = {};
+function colorPickerHTML(ctx, cur, fkey){
+  const tabs = (fkey ? [['fav', 'Mis colores']] : []).concat(mainPals().map(p => [p.id, p.name]));
+  let tab = prefs.cpTab[ctx];
+  if (!tabs.some(t => t[0] === tab)) tab = tabs[0] ? tabs[0][0] : 'fav';
+  return `<div class="cp" data-cp="${ctx}" data-fkey="${fkey || ''}" data-cur="${esc(cur || '')}">
+    <div class="ptabs">${tabs.map(([k, l]) => `<button type="button" data-cpt="${esc(k)}" aria-pressed="${k === tab}">${esc(l)}</button>`).join('')}</div>
+    <div class="cp-grid">${cpGridHTML(ctx, tab, cur, fkey)}</div>
+    <div class="cp-bar">
+      <button type="button" class="cp-add" data-cpadd="1" aria-label="Crear un color nuevo" title="Color nuevo">${svg('plus', 18)}</button>
+      <label class="cp-q"><span>#</span><input type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="7" placeholder="Buscar código" aria-label="Buscar color por código"></label>
+      ${fkey ? `<button type="button" class="cp-ic" data-cpfav="1" aria-label="Guardar este color en Mis colores" title="Mis colores">${svg('star', 18)}</button>` : ''}
+      <button type="button" class="cp-ic" data-cpman="1" aria-label="Paletas de colores" title="Paletas">${svg('palette', 18)}</button>
+    </div></div>`;
+}
+const dot = (c, cur, extra = '') => `<button type="button" class="cdot" data-cpc="${c}" style="--c:${c}" aria-pressed="${sameColor(c, cur)}" aria-label="Color ${c.toUpperCase()}" title="${c.toUpperCase()}"${extra}></button>`;
+function cpGridHTML(ctx, tab, cur, fkey){
+  if (tab === 'fav') return favOf(fkey).map(c => dot(c, cur)).join('') || `<p class="cp-empty">Toca la estrella para guardar aquí el color que usas.</p>`;
+  const p = palById(tab);
+  return p && p.colors.length ? p.colors.map(c => dot(c, cur)).join('') : `<p class="cp-empty">Esta paleta está vacía. Toca + para agregar colores.</p>`;
+}
+function cpSearchHTML(q, cur){
+  const s = q.replace(/^#/, '').toLowerCase();
+  if (!s) return null;
+  const all = []; allPals().forEach(p => p.colors.forEach(c => { if (!all.some(x => sameColor(x, c))) all.push(c); }));
+  const ex = normHex(s);
+  if (ex && s.length >= 6 || ex && s.length === 3){
+    const near = all.filter(c => !sameColor(c, ex)).map(c => [c, colorDist(c, ex)]).sort((a, b) => a[1] - b[1]).slice(0, 11).map(x => x[0]);
+    return dot(ex, cur, ' data-exact="1"') + `<span class="cp-lbl">Parecidos</span>` + near.map(c => dot(c, cur)).join('');
+  }
+  const hit = all.filter(c => c.slice(1).includes(s));
+  return hit.length ? hit.slice(0, 30).map(c => dot(c, cur)).join('') : `<p class="cp-empty">Escribe el código completo, por ejemplo FFC59E.</p>`;
+}
+function cpBox(el){ const b = el.closest('[data-cp]'); return b && { box:b, ctx:b.dataset.cp, fkey:b.dataset.fkey || null, cur:b.dataset.cur, hook:cpHooks[b.dataset.cp] }; }
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-cpt],[data-cpc],[data-cpadd],[data-cpfav],[data-cpman]'); if (!t) return;
+  const c = cpBox(t); if (!c || !c.hook) return;
+  const d = t.dataset;
+  if (d.cpt){ prefs.cpTab[c.ctx] = d.cpt; savePrefs(); c.hook.rerender(); return; }
+  if (d.cpc){ c.hook.pick(d.cpc); return; }
+  if (d.cpadd){ openColorNew(c.ctx, c.fkey, c.cur); return; }
+  if (d.cpman){ openPalManager(); return; }
+  if (d.cpfav){
+    const list = favOf(c.fkey), i = list.findIndex(x => sameColor(x, c.cur));
+    if (i >= 0){ list.splice(i, 1); toast('Color quitado de Mis colores'); }
+    else { list.unshift(c.cur); if (list.length > 24) list.length = 24; toast('Color guardado en Mis colores de ' + (TOOL_FAV_NAME[c.fkey] || 'esta herramienta')); }
+    prefs.cpTab[c.ctx] = 'fav'; savePrefs(); c.hook.rerender();
+  }
+});
+document.addEventListener('input', e => {
+  if (!e.target.closest('.cp-q')) return;
+  const c = cpBox(e.target); if (!c) return;
+  const v = e.target.value.trim(), g = c.box.querySelector('.cp-grid');
+  const h = cpSearchHTML(v, c.cur);
+  if (h != null) g.innerHTML = h;
+  else { let tab = prefs.cpTab[c.ctx]; const ok = c.box.querySelector(`[data-cpt="${CSS.escape(tab || '')}"]`); if (!ok){ const f = c.box.querySelector('[data-cpt]'); tab = f ? f.dataset.cpt : 'fav'; } g.innerHTML = cpGridHTML(c.ctx, tab, c.cur, c.fkey); }
+});
+
+/* a sheet above everything: new color and palette manager */
+const cpWrap = document.createElement('div');
+cpWrap.className = 'cpwrap'; cpWrap.hidden = true;
+cpWrap.innerHTML = `<div class="cpsheet" role="dialog" aria-modal="true"></div>`;
+document.body.appendChild(cpWrap);
+const cpSheet = cpWrap.firstChild;
+let cps = null;
+cpWrap.addEventListener('click', e => { if (e.target === cpWrap) closeCp(); });
+function closeCp(){
+  cpWrap.hidden = true;
+  const back = cps && cps.back; cps = null;
+  if (back) back();
+}
+
+/* new color: shade square + hue bar + code + where to keep it */
+function openColorNew(ctx, fkey, cur, opts = {}){
+  const c0 = normHex(cur) || '#f59cb2', h = hex2hsv(c0);
+  const dest = opts.dest || (fkey ? 'fav' : (prefs.myPals[0] ? prefs.myPals[0].id : 'none'));
+  cps = { mode:'new', ctx, fkey, hsv:h, hex:c0, dest, newName:'', back:opts.back || null, onDone:opts.onDone || null };
+  renderColorNew(); cpWrap.hidden = false; drawCpSV();
+}
+function renderColorNew(){
+  const s = cps;
+  const chips = [['none', 'No guardar']].concat(s.fkey ? [['fav', 'Mis colores de ' + (TOOL_FAV_NAME[s.fkey] || 'esta herramienta')]] : []).concat(prefs.myPals.map(p => [p.id, p.name])).concat([['new', '+ Paleta nueva']]);
+  cpSheet.setAttribute('aria-label', 'Color nuevo');
+  cpSheet.innerHTML = `<header class="sheet-h"><h2>Color nuevo</h2><button class="icon-btn" type="button" data-cx="close" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="cn-body">
+      <div class="cn-sv"><canvas id="cnSV" aria-label="Claro u oscuro"></canvas><i id="cnKnob"></i></div>
+      <input type="range" class="cn-hue" id="cnHue" min="0" max="359" step="1" value="${Math.round(s.hsv.h)}" aria-label="Tono">
+      <div class="cn-row"><span class="cn-prev" id="cnPrev" style="--c:${s.hex}"></span><label class="cp-q cn-hex"><span>#</span><input type="text" id="cnHex" value="${s.hex.slice(1).toUpperCase()}" maxlength="7" autocomplete="off" spellcheck="false" aria-label="Código del color"></label></div>
+      <div class="lab">Guardar en</div>
+      <div class="chips">${chips.map(([k, l]) => `<button type="button" class="cb" data-cdest="${esc(k)}" aria-pressed="${s.dest === k}">${esc(l)}</button>`).join('')}</div>
+      ${s.dest === 'new' ? `<label class="field" style="margin-top:10px">Nombre de la paleta<input type="text" id="cnNew" maxlength="30" value="${esc(s.newName)}" placeholder="Por ejemplo: Pastel"></label>` : ''}
+    </div>
+    <div class="dlg-foot"><button type="button" class="btn" data-cx="close">Cancelar</button><button type="button" class="btn primary" data-cx="use">${s.ctx ? 'Usar color' : 'Agregar'}</button></div>`;
+  drawCpSV();
+}
+function drawCpSV(){
+  const cv = $('#cnSV'); if (!cv || !cps) return;
+  const d = DPR(), w = cv.width = Math.round(cv.clientWidth * d), h = cv.height = Math.round(cv.clientHeight * d), x = cv.getContext('2d');
+  x.fillStyle = `hsl(${cps.hsv.h},100%,50%)`; x.fillRect(0, 0, w, h);
+  let g = x.createLinearGradient(0, 0, w, 0); g.addColorStop(0, '#fff'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h);
+  g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, w, h);
+  const k = $('#cnKnob'); if (k){ k.style.left = cps.hsv.s * 100 + '%'; k.style.top = (1 - cps.hsv.v) * 100 + '%'; k.style.background = cps.hex; }
+}
+function cpSetHex(hex, fromInput){
+  cps.hex = hex; const p = $('#cnPrev'); if (p) p.style.setProperty('--c', hex);
+  if (!fromInput){ const i = $('#cnHex'); if (i) i.value = hex.slice(1).toUpperCase(); }
+  const k = $('#cnKnob'); if (k) k.style.background = hex;
+}
+(() => {
+  let drag = false;
+  const at = e => {
+    const cv = $('#cnSV'); if (!cv) return;
+    const r = cv.getBoundingClientRect();
+    cps.hsv.s = clamp((e.clientX - r.left) / r.width, 0, 1); cps.hsv.v = clamp(1 - (e.clientY - r.top) / r.height, 0, 1);
+    cpSetHex(hsv2hex(cps.hsv.h, cps.hsv.s, cps.hsv.v)); drawCpSV();
+  };
+  cpSheet.addEventListener('pointerdown', e => { if (!e.target.closest('.cn-sv')) return; drag = true; e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); at(e); e.preventDefault(); });
+  cpSheet.addEventListener('pointermove', e => { if (drag) at(e); });
+  ['pointerup', 'pointercancel'].forEach(k => cpSheet.addEventListener(k, () => { drag = false; }));
+})();
+cpSheet.addEventListener('input', e => {
+  if (!cps) return;
+  const id = e.target.id;
+  if (id === 'cnHue'){ cps.hsv.h = +e.target.value; cpSetHex(hsv2hex(cps.hsv.h, cps.hsv.s, cps.hsv.v)); drawCpSV(); }
+  else if (id === 'cnHex'){ const h = normHex(e.target.value); if (h){ cps.hsv = hex2hsv(h); cpSetHex(h, true); const hu = $('#cnHue'); if (hu) hu.value = Math.round(cps.hsv.h); drawCpSV(); } }
+  else if (id === 'cnNew') cps.newName = e.target.value;
+  else if (id === 'pmName'){ const p = prefs.myPals.find(x => x.id === cps.edit); if (p){ p.name = e.target.value.slice(0, 30); savePrefs(); } }
+});
+function addToPal(id, colors){
+  const p = prefs.myPals.find(x => x.id === id); if (!p) return 0;
+  let n = 0; colors.forEach(c => { if (!p.colors.some(x => sameColor(x, c))){ p.colors.push(c); n++; } });
+  savePrefs(); return n;
+}
+function newPal(name, colors){
+  const p = { id:'my' + Date.now().toString(36), name:(name || '').trim().slice(0, 30) || 'Mi paleta ' + (prefs.myPals.length + 1), colors:[] };
+  prefs.myPals.push(p); prefs.mainPals.unshift(p.id); addToPal(p.id, colors || []); savePrefs();
+  return p;
+}
+function colorNewDone(){
+  const s = cps, c = s.hex;
+  if (s.dest === 'fav'){ const l = favOf(s.fkey); if (!l.some(x => sameColor(x, c))){ l.unshift(c); if (l.length > 24) l.length = 24; } savePrefs(); if (s.ctx) prefs.cpTab[s.ctx] = 'fav'; }
+  else if (s.dest === 'new'){ const p = newPal(s.newName, [c]); if (s.ctx) prefs.cpTab[s.ctx] = p.id; toast(`Paleta "${p.name}" creada`); }
+  else if (s.dest !== 'none'){ addToPal(s.dest, [c]); if (s.ctx) prefs.cpTab[s.ctx] = s.dest; }
+  savePrefs();
+  const hook = s.ctx && cpHooks[s.ctx], done = s.onDone;
+  closeCp();
+  if (done) done(c);
+  else if (hook) hook.pick(c);
+}
+
+/* palette manager: main ones (in order), saved ones, mine (edit, paste codes) */
+function openPalManager(back){
+  cps = { mode:'man', edit:null, delArmed:false, back:back || null };
+  renderPalManager(); cpWrap.hidden = false;
+}
+const strip = cols => `<span class="pm-strip">${cols.slice(0, 10).map(c => `<i style="background:${c}"></i>`).join('')}</span>`;
+function renderPalManager(){
+  const s = cps;
+  if (s.edit){ renderPalEdit(); return; }
+  const main = mainPals(), rest = allPals().filter(p => !prefs.mainPals.includes(p.id));
+  const row = (p, isMain, i) => `<div class="pm-row">${strip(p.colors)}<div class="pm-name"><strong>${esc(p.name)}</strong><small>${p.colors.length} ${p.colors.length === 1 ? 'color' : 'colores'}${p.own ? ' · mía' : ''}</small></div>
+    ${isMain ? `<button type="button" class="icon-btn sm" data-pm="up" data-id="${p.id}" aria-label="Subir" ${i === 0 ? 'disabled' : ''}>${svg('up', 18)}</button><button type="button" class="icon-btn sm" data-pm="down" data-id="${p.id}" aria-label="Bajar" ${i === main.length - 1 ? 'disabled' : ''}>${svg('down', 18)}</button>` : ''}
+    ${p.own ? `<button type="button" class="icon-btn sm" data-pm="edit" data-id="${p.id}" aria-label="Editar ${esc(p.name)}">${svg('edit', 18)}</button>` : ''}
+    <button type="button" class="btn sm${isMain ? '' : ' primary'}" data-pm="${isMain ? 'unpin' : 'pin'}" data-id="${p.id}">${isMain ? 'Quitar' : 'Anclar'}</button></div>`;
+  cpSheet.setAttribute('aria-label', 'Paletas de colores');
+  cpSheet.innerHTML = `<header class="sheet-h"><h2>Paletas de colores</h2><button class="icon-btn" type="button" data-cx="close" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="cn-body">
+      <div class="lab">Principales</div><p class="hint" style="margin:2px 0 8px">Son las que ves al elegir un color, en este orden.</p>
+      ${main.length ? main.map((p, i) => row(p, true, i)).join('') : '<p class="hint">No tienes paletas principales. Ancla alguna de abajo.</p>'}
+      ${rest.length ? `<div class="lab" style="margin-top:16px">Guardadas</div>${rest.map(p => row(p, false)).join('')}` : ''}
+      <button type="button" class="btn pm-new" data-pm="new">${svg('plus', 18)}Nueva paleta</button>
+    </div>
+    <div class="dlg-foot"><button type="button" class="btn primary" data-cx="close">Listo</button></div>`;
+}
+function renderPalEdit(){
+  const s = cps, p = prefs.myPals.find(x => x.id === s.edit); if (!p){ s.edit = null; renderPalManager(); return; }
+  cpSheet.setAttribute('aria-label', 'Editar paleta');
+  cpSheet.innerHTML = `<header class="sheet-h"><button class="icon-btn" type="button" data-pm="back" aria-label="Volver">${svg('back')}</button><h2 style="flex:1">Editar paleta</h2><button class="icon-btn" type="button" data-cx="close" aria-label="Cerrar">${svg('close')}</button></header>
+    <div class="cn-body">
+      <label class="field">Nombre<input type="text" id="pmName" maxlength="30" value="${esc(p.name)}"></label>
+      <div class="lab" style="margin-top:14px">Colores <small style="font-weight:500;color:var(--muted)">· toca uno para quitarlo</small></div>
+      <div class="pm-cols">${p.colors.map(c => `<button type="button" class="cdot rm" data-pmrm="${c}" style="--c:${c}" aria-label="Quitar ${c.toUpperCase()}" title="${c.toUpperCase()}">${svg('close', 14)}</button>`).join('')}<button type="button" class="cp-add" data-pm="addcolor" aria-label="Agregar un color">${svg('plus', 18)}</button></div>
+      <div class="lab" style="margin-top:14px">Pegar códigos</div>
+      <textarea id="pmCodes" rows="3" placeholder="Pega uno o varios códigos, como los de las paletas de pintores: FFC59E, #FF9B57, FF7F1A…"></textarea>
+      <button type="button" class="btn" data-pm="paste" style="margin-top:8px">${svg('plus', 18)}Agregar estos códigos</button>
+    </div>
+    <div class="dlg-foot"><button type="button" class="btn danger${s.delArmed ? ' armed' : ''}" data-pm="del">${svg('trash', 18)}${s.delArmed ? 'Toca otra vez' : 'Eliminar paleta'}</button><span style="flex:1"></span><button type="button" class="btn primary" data-pm="back">Listo</button></div>`;
+}
+cpSheet.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || !cps) return;
+  const d = b.dataset;
+  if (d.cx === 'close'){ closeCp(); return; }
+  if (d.cx === 'use'){
+    if (cps.dest === 'new' && !(cps.newName || '').trim()){ toast('Escribe el nombre de la paleta nueva.'); const i = $('#cnNew'); if (i) i.focus(); return; }
+    colorNewDone(); return;
+  }
+  if (d.cdest){ cps.dest = d.cdest; renderColorNew(); if (d.cdest === 'new') setTimeout(() => { const i = $('#cnNew'); if (i) i.focus(); }, 30); return; }
+  if (d.pmrm){ const p = prefs.myPals.find(x => x.id === cps.edit); if (p){ p.colors = p.colors.filter(c => !sameColor(c, d.pmrm)); savePrefs(); renderPalEdit(); } return; }
+  const pm = d.pm; if (!pm) return;
+  const id = d.id, mi = prefs.mainPals.indexOf(id);
+  if (pm === 'pin'){ prefs.mainPals.push(id); }
+  else if (pm === 'unpin'){ prefs.mainPals.splice(mi, 1); }
+  else if (pm === 'up' && mi > 0){ prefs.mainPals.splice(mi, 1); prefs.mainPals.splice(mi - 1, 0, id); }
+  else if (pm === 'down' && mi >= 0 && mi < prefs.mainPals.length - 1){ prefs.mainPals.splice(mi, 1); prefs.mainPals.splice(mi + 1, 0, id); }
+  else if (pm === 'edit'){ cps.edit = id; cps.delArmed = false; }
+  else if (pm === 'new'){ const p = newPal('', []); cps.edit = p.id; cps.delArmed = false; savePrefs(); renderPalEdit(); setTimeout(() => { const i = $('#pmName'); if (i){ i.focus(); i.select(); } }, 30); return; }
+  else if (pm === 'back'){ const p = prefs.myPals.find(x => x.id === cps.edit); if (p && !p.name.trim()) p.name = 'Mi paleta'; cps.edit = null; }
+  else if (pm === 'paste'){
+    const cols = parseCodes(($('#pmCodes') || {}).value || '');
+    if (!cols.length){ toast('No encontré códigos de color. Ejemplo: FFC59E'); return; }
+    const n = addToPal(cps.edit, cols); toast(n ? `${n} ${n === 1 ? 'color agregado' : 'colores agregados'}` : 'Esos colores ya estaban en la paleta');
+  }
+  else if (pm === 'addcolor'){
+    const pid = cps.edit, back = cps.back;
+    cps.back = null;
+    openColorNew(null, null, '#f59cb2', { dest:pid, back:() => { cps = { mode:'man', edit:pid, delArmed:false, back }; renderPalManager(); cpWrap.hidden = false; } });
+    return;
+  }
+  else if (pm === 'del'){
+    if (!cps.delArmed){ cps.delArmed = true; renderPalEdit(); return; }
+    prefs.myPals = prefs.myPals.filter(p => p.id !== cps.edit); prefs.mainPals = prefs.mainPals.filter(x => x !== cps.edit); cps.edit = null; toast('Paleta eliminada');
+  }
+  savePrefs(); renderPalManager(); refreshPickers();
+});
+/* redraw whatever picker is on screen after palettes change */
+function refreshPickers(){
+  Object.values(cpHooks).forEach(h => { try { if (h.visible && h.visible()) h.rerender(); } catch(e){} });
+}
+cpHooks.fold = {
+  pick:c => { const st = dlgState; if (!st || st.kind !== 'fedit') return; const n = $('#feName'); if (n) st.name = n.value; st.c = c; renderFolderEdit(); },
+  rerender:() => { const st = dlgState; if (!st || st.kind !== 'fedit') return; const n = $('#feName'); if (n) st.name = n.value; renderFolderEdit(); },
+  visible:() => !dlgWrap.hidden && dlgState && dlgState.kind === 'fedit'
+};
+$('#palMgr').addEventListener('click', () => openPalManager());
+cpHooks.tool = { pick:c => { applyColor(c); renderToolPanel(); }, rerender:() => renderToolPanel(), visible:() => !tpanel.hidden };
 const PEN_CHOICES = ['pluma', 'pincel', 'boligrafo', 'lapiz', 'estilografo'];
 const DASHES = { solid:'Sólido', dash:'Discontinuo', dot:'Punteado' };
-function paletteHTML(cur){
-  const kd = kind(tool), tab = prefs.palTab || 'fav';
-  const tabs = [['fav', 'Favoritos']].concat(Object.entries(PALETTES).map(([k, v]) => [k, v.name]));
-  const cols = tab === 'fav' ? prefs.fav[kd === 'hl' ? 'hl' : 'pen'] : PALETTES[tab].colors;
-  return `<div class="ptabs">${tabs.map(([k, l]) => `<button type="button" data-ptab="${k}" aria-pressed="${k === tab}">${l}</button>`).join('')}</div>
-    <div class="pal">${cols.map(c => `<button type="button" class="sq" data-color="${c}" style="--c:${c}" aria-pressed="${sameColor(c, cur)}" aria-label="Color ${c}"></button>`).join('')}
-    <label class="sq any" aria-label="Cualquier color" style="--c:${cur}">${svg('palette', 16)}<input type="color" id="tpColor" value="${cur}"></label>
-    <button type="button" class="sq fav" data-tp="fav" aria-label="Fijar este color en favoritos" title="Fijar en favoritos">${svg('star', 16)}</button></div>`;
-}
+function paletteHTML(cur){ return colorPickerHTML('tool', cur, favKeyOf(tool)); }
 function strokeIcon(st){
   const s = { t:'pen', st, size:2.4, color:'currentColor', pts:[] };
   for (let i = 0; i <= 24; i++){ const t = i / 24, pr = 0.25 + 0.75 * Math.sin(t * Math.PI); s.pts.push([6 + t * 52, 16 - 7 * Math.sin(t * Math.PI * 2), penWidth(st, 2.4, pr, 0.7)]); }
@@ -4544,7 +4869,7 @@ function openToolPanel(anchor){
 }
 function closeToolPanel(){ tpanel.hidden = true; }
 function refreshToolPanel(){ if (!tpanel.hidden){ if (noOpts(tool)) closeToolPanel(); else { renderToolPanel(); placeToolPanel(); } } }
-document.addEventListener('pointerdown', e => { if (!tpanel.hidden && !tpanel.contains(e.target) && !rail.contains(e.target)){ closeToolPanel(); if (viewer.contains(e.target)){ e.stopPropagation(); e.preventDefault(); } } }, true);
+document.addEventListener('pointerdown', e => { if (!tpanel.hidden && !tpanel.contains(e.target) && !rail.contains(e.target) && !e.target.closest('.cpwrap')){ closeToolPanel(); if (viewer.contains(e.target)){ e.stopPropagation(); e.preventDefault(); } } }, true);
 const TP_KEYS = { tpSize:'size', tpAlpha:'alpha', tpStab:'stab', tpSens:'sens', tpHlA:'alpha' };
 function setTpValue(id, v){
   const cfg = prefs.tools[tool], k = TP_KEYS[id]; if (!k) return;
@@ -4608,8 +4933,8 @@ $('#docName').addEventListener('click', () => {
 /* ---------- browse the whole Google Drive inside Inicio (optional, needs the bigger permission) ---------- */
 let dnav = null; /* { email, path:[{ id, name }], items, loading, err } */
 const DFOLDER = 'application/vnd.google-apps.folder';
-function openDriveBrowser(email, rootId, rootName){
-  dnav = { email, path:[{ id:rootId, name:rootName }], items:null };
+function openDriveBrowser(email, rootId, rootName, sub){
+  dnav = { email, path:[{ id:rootId, name:rootName }].concat(sub || []), items:null };
   homeFilter = 'gdrive'; renderHome(); loadDriveFolder();
 }
 async function loadDriveFolder(){
@@ -4639,6 +4964,7 @@ async function loadDriveFolder(){
 }
 function renderDriveBrowser(){
   const nav = dnav;
+  document.querySelectorAll('#hView button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.hv === prefs.homeView)));
   if (!nav){ homeFilter = 'all'; renderHome(); return; }
   $('#hTitle').innerHTML = `<span class="crumbs">${nav.path.map((p, i) => i < nav.path.length - 1 ? `<button type="button" class="crumb" data-crumb="${i}">${esc(p.name)}</button><span class="csep">›</span>` : `<span class="crumb cur">${esc(p.name)}</span>`).join('')}</span>`;
   let h = '';
@@ -4650,21 +4976,34 @@ function renderDriveBrowser(){
     let items = nav.items;
     if (homeQuery) items = items.filter(f => (f.name || '').toLowerCase().includes(homeQuery));
     const folders = items.filter(f => f.mimeType === DFOLDER), files = items.filter(f => f.mimeType !== DFOLDER);
-    if (folders.length) h += `<div class="h-sec">Carpetas</div><div class="h-folders">${folders.map(f => { const m = dfolderMeta(f.id); return `<div class="fcard" role="button" tabindex="0" data-dfolder="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir carpeta ${esc(f.name)}">${folderSvg(m.c, m.i)}<strong>${esc(f.name)}</strong><button type="button" class="fmore" data-dfedit="${esc(f.id)}" aria-label="Color e ícono de ${esc(f.name)}">${svg('dots', 18)}</button></div>`; }).join('')}</div>`;
-    if (files.length) h += `<div class="h-sec">Archivos</div><div class="h-grid">${files.map(f => {
-      const img = /^image\//.test(f.mimeType), known = lib.find(e => e.drive && e.drive.id === f.id);
-      return `<div class="h-card" role="button" tabindex="0" data-dfile="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir ${esc(f.name)}">
-        <div class="cover">${known && known.thumb ? `<img src="${known.thumb}" alt="">` : f.thumbnailLink ? `<img src="${esc(f.thumbnailLink)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}${svg(img ? 'image' : 'pdf', 28)}</div>
-        <strong>${esc(stripExt(f.name))}</strong><small>${img ? 'Imagen' : 'PDF'} · ${relTime(Date.parse(f.modifiedTime))}${known ? ' · ' + svg('check', 12) : ''}</small></div>`;
-    }).join('')}</div>`;
+    const grid = prefs.homeView === 'grid', thumbOf = f => { const known = lib.find(e => e.drive && e.drive.id === f.id); return known && known.thumb ? `<img src="${known.thumb}" alt="">` : f.thumbnailLink ? `<img src="${esc(f.thumbnailLink)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''; };
+    const isKnown = f => lib.some(e => e.drive && e.drive.id === f.id);
+    const fmore = f => `<button type="button" class="fmore" data-dfmenu="${esc(f.id)}" aria-label="Opciones de ${esc(f.name)}">${svg('dots', 18)}</button>`;
+    if (grid){
+      if (folders.length) h += `<div class="h-sec">Carpetas</div><div class="h-folders">${folders.map(f => { const m = dfolderMeta(f.id); return `<div class="fcard" role="button" tabindex="0" data-dfolder="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir carpeta ${esc(f.name)}">${folderSvg(m.c, m.i)}<strong>${esc(f.name)}</strong>${fmore(f)}</div>`; }).join('')}</div>`;
+      if (files.length) h += `<div class="h-sec">Archivos</div><div class="h-grid">${files.map(f => {
+        const img = /^image\//.test(f.mimeType);
+        return `<div class="h-card" role="button" tabindex="0" data-dfile="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir ${esc(f.name)}">
+          <div class="cover">${thumbOf(f)}${svg(img ? 'image' : 'pdf', 28)}</div>
+          <strong>${esc(stripExt(f.name))}</strong><small>${img ? 'Imagen' : 'PDF'} · ${relTime(Date.parse(f.modifiedTime))}${isKnown(f) ? ' · ' + svg('check', 12) : ''}</small></div>`;
+      }).join('')}</div>`;
+    } else if (folders.length || files.length){
+      h += `<div class="h-row drow h-head"><span>Nombre</span><span class="c-date">Modificado</span><span></span></div>` +
+        folders.map(f => { const m = dfolderMeta(f.id); return `<div class="h-row drow fcard-row" role="button" tabindex="0" data-dfolder="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir carpeta ${esc(f.name)}">
+          <div class="h-name"><span class="ph fph">${folderSvg(m.c, m.i, 'fmini')}</span><div><strong>${esc(f.name)}</strong><small>Carpeta</small></div></div>
+          <span class="h-cell c-date">${f.modifiedTime ? relTime(Date.parse(f.modifiedTime)) : ''}</span>${fmore(f)}</div>`; }).join('') +
+        files.map(f => { const img = /^image\//.test(f.mimeType), t = thumbOf(f); return `<div class="h-row drow" role="button" tabindex="0" data-dfile="${esc(f.id)}" data-name="${esc(f.name)}" aria-label="Abrir ${esc(f.name)}">
+          <div class="h-name">${t ? `<span class="ph tph">${t}</span>` : `<span class="ph">${svg(img ? 'image' : 'pdf', 20)}</span>`}<div><strong>${esc(stripExt(f.name))}</strong><small>${img ? 'Imagen' : 'PDF'}${isKnown(f) ? ' · ya abierto en DrawSky' : ''}</small></div></div>
+          <span class="h-cell c-date">${relTime(Date.parse(f.modifiedTime))}</span><span></span></div>`; }).join('');
+    }
     if (!folders.length && !files.length) h = `<div class="h-empty">${homeQuery ? 'No hay nada con ese nombre aquí.' : 'No hay PDFs, imágenes ni carpetas aquí.'}</div>`;
   }
   $('#hList').innerHTML = h;
 }
 $('#hList').addEventListener('click', ev => {
   if (homeFilter !== 'gdrive' || !dnav) return;
-  const fe = ev.target.closest('[data-dfedit]');
-  if (fe){ ev.stopImmediatePropagation(); const c = fe.closest('[data-dfolder]'); openDriveFolderEdit(c.dataset.dfolder, c.dataset.name); return; }
+  const fe = ev.target.closest('[data-dfmenu]');
+  if (fe){ ev.stopImmediatePropagation(); const c = fe.closest('[data-dfolder]'); openFolderMenu(fe, { drive:{ id:c.dataset.dfolder, name:c.dataset.name, email:dnav.email } }); return; }
   const fo = ev.target.closest('[data-dfolder]');
   if (fo){ ev.stopImmediatePropagation(); dnav.path.push({ id:fo.dataset.dfolder, name:fo.dataset.name }); loadDriveFolder(); $('#hList').scrollTop = 0; return; }
   const fi = ev.target.closest('[data-dfile]');
@@ -4678,13 +5017,15 @@ $('#hTitle').addEventListener('click', e => {
 /* colors and icons of real Drive folders: kept only in DrawSky */
 if (!prefs.dfolderMeta || typeof prefs.dfolderMeta !== 'object') prefs.dfolderMeta = {};
 const dfolderMeta = id => prefs.dfolderMeta[id] || { c:'#b8c4d6', i:'fdoc' };
-function openDriveFolderEdit(id, name){
+if (!Array.isArray(prefs.dpins)) prefs.dpins = [];
+function openDriveFolderEdit(id, name, email){
   const m = dfolderMeta(id);
-  dlgState = { kind:'fedit', drive:{ id, email:dnav && dnav.email }, old:name, name, c:m.c, i:m.i, delArmed:false };
+  dlgState = { kind:'fedit', drive:{ id, email:email || (dnav && dnav.email) }, old:name, name, c:m.c, i:m.i, delArmed:false };
   renderFolderEdit(); dlgWrap.hidden = false;
 }
 function saveDriveFolder(st, name){
-  prefs.dfolderMeta[st.drive.id] = { c:st.c, i:st.i }; savePrefs();
+  prefs.dfolderMeta[st.drive.id] = { c:st.c, i:st.i };
+  prefs.dpins.forEach(p => { if (p.id === st.drive.id) p.name = name; }); savePrefs();
   if (name !== st.old && st.drive.email && navigator.onLine && tokenOk(st.drive.email)){
     gfetch(st.drive.email, `${DRIVE}/files/${st.drive.id}?supportsAllDrives=true&fields=id`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ name }) })
       .then(() => toast('Nombre cambiado también en tu Drive')).catch(e => { console.warn(e); toast('No pude cambiar el nombre en Drive.'); });
@@ -4697,19 +5038,56 @@ function saveDriveFolder(st, name){
   let t = null, sx = 0, sy = 0, fired = false;
   const list = $('#hList');
   list.addEventListener('pointerdown', e => {
-    const c = e.target.closest('.fcard'); fired = false; clearTimeout(t);
+    const c = e.target.closest('.fcard,.fcard-row'); fired = false; clearTimeout(t);
     if (!c || c.dataset.fnew || e.target.closest('.fmore')) return;
     sx = e.clientX; sy = e.clientY;
     t = setTimeout(() => {
       fired = true;
       if (navigator.vibrate) navigator.vibrate(15);
-      if (c.dataset.dfolder) openDriveFolderEdit(c.dataset.dfolder, c.dataset.name); else if (c.dataset.folder) openFolderEdit(c.dataset.folder);
+      if (c.dataset.dfolder) openFolderMenu(c, { drive:{ id:c.dataset.dfolder, name:c.dataset.name, email:dnav && dnav.email } }); else if (c.dataset.folder) openFolderMenu(c, { app:c.dataset.folder });
     }, 550);
   });
   list.addEventListener('pointermove', e => { if (t && Math.hypot(e.clientX - sx, e.clientY - sy) > 10){ clearTimeout(t); t = null; } });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(k => list.addEventListener(k, () => { clearTimeout(t); t = null; }));
   window.addEventListener('click', e => { if (fired && list.contains(e.target)){ fired = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
-  list.addEventListener('contextmenu', e => { if (e.target.closest('.fcard')) e.preventDefault(); });
+  list.addEventListener('contextmenu', e => { if (e.target.closest('.fcard,.fcard-row')) e.preventDefault(); });
+})();
+/* the ⋯ menu of a folder: color and icon, name, side bar */
+const fmenu = document.createElement('div');
+fmenu.className = 'menu fmenu'; fmenu.hidden = true; fmenu.setAttribute('role', 'menu');
+document.body.appendChild(fmenu);
+let fmState = null;
+function openFolderMenu(anchor, target){
+  fmState = { target, delArmed:false };
+  renderFolderMenu();
+  fmenu.hidden = false;
+  const r = anchor.getBoundingClientRect();
+  fmenu.style.left = clamp(r.left, 8, innerWidth - fmenu.offsetWidth - 8) + 'px';
+  fmenu.style.top = (r.bottom + fmenu.offsetHeight + 8 < innerHeight ? r.bottom + 6 : Math.max(8, r.top - fmenu.offsetHeight - 6)) + 'px';
+}
+function renderFolderMenu(){
+  const t = fmState.target, pinned = t.drive && prefs.dpins.some(p => p.id === t.drive.id);
+  fmenu.innerHTML = `<button type="button" data-fm="look" role="menuitem">${svg('palette', 20)}<span>Color e ícono</span></button>
+    <button type="button" data-fm="name" role="menuitem">${svg('edit', 20)}<span>Cambiar nombre</span></button>` +
+    (t.drive ? `<button type="button" data-fm="pin" role="menuitemcheckbox" aria-checked="${pinned}">${svg('sidebar', 20)}<span>Mostrar en la barra lateral</span><i class="fm-sw" aria-hidden="true"></i></button>` : '') +
+    (t.app ? `<button type="button" data-fm="del" role="menuitem" class="danger${fmState.delArmed ? ' armed' : ''}">${svg('trash', 20)}<span>${fmState.delArmed ? 'Toca otra vez para eliminar' : 'Eliminar carpeta'}</span></button>` : '');
+}
+document.addEventListener('pointerdown', e => { if (!fmenu.hidden && !fmenu.contains(e.target)) fmenu.hidden = true; }, true);
+fmenu.addEventListener('click', e => {
+  const b = e.target.closest('[data-fm]'); if (!b || !fmState) return;
+  const t = fmState.target, k = b.dataset.fm;
+  if (k === 'pin'){
+    const i = prefs.dpins.findIndex(p => p.id === t.drive.id);
+    if (i >= 0){ prefs.dpins.splice(i, 1); toast('Quitada de la barra lateral'); }
+    else { prefs.dpins.push({ id:t.drive.id, name:t.drive.name, email:t.drive.email }); toast('Ahora aparece en la barra lateral'); }
+    savePrefs(); renderFolderMenu(); renderHome(); return;
+  }
+  if (k === 'del'){ if (!fmState.delArmed){ fmState.delArmed = true; renderFolderMenu(); return; } fmenu.hidden = true; deleteFolder(t.app); return; }
+  fmenu.hidden = true;
+  if (t.drive) openDriveFolderEdit(t.drive.id, t.drive.name, t.drive.email); else openFolderEdit(t.app);
+  if (k === 'name') setTimeout(() => { const i = $('#feName'); if (i){ i.focus(); i.select(); } }, 60);
+});
+(() => {
 })();
 /* with the full permission, Drive returns every PDF and image: keep Inicio to files used in DrawSky */
 function pruneDriveClutter(){
