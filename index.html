@@ -375,6 +375,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .tsize input{width:150px;margin:0}
 .drawer-wrap.edit .drawer{width:100%;border-right:0}
 .thumbs{flex:1;overflow:auto;padding:16px;display:grid;grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));gap:18px 14px;align-content:start;touch-action:none}
+.dr-mode{order:5;flex:1 1 100%;display:flex}
+.dr-mode button{flex:1}
+.dr-sec,.dr-empty,.dr-note{grid-column:1/-1}
+.dr-sec{display:flex;align-items:center;gap:2px;margin-top:6px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.dr-sec.lv2{padding-left:18px}
+.dr-sec.lv3{padding-left:36px}
+.dr-tw{width:30px;height:30px;flex:none;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;padding:0;border-radius:8px}
+.dr-go{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--fg);padding:8px 4px;text-align:left;font:inherit}
+.dr-go span{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25}
+.lv1>.dr-go span{font-weight:700;font-size:15px}
+.lv2>.dr-go span{font-weight:600;font-size:14px}
+.lv3>.dr-go span{font-weight:500;font-size:13.5px}
+.dr-go small{color:var(--muted);font-size:12px;flex:none}
+.dr-empty{padding:20px 6px;text-align:center}
+.dr-note{margin:0;font-size:12.5px;color:var(--muted)}
 .thumb{border:0;background:transparent;padding:0;display:flex;flex-direction:column;gap:6px;align-items:center;min-width:0}
 .thumb .tc{position:relative;width:100%;background:#fff;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.28);outline:3px solid transparent;outline-offset:2px;overflow:hidden}
 .thumb canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -606,7 +621,7 @@ input[type=range]{accent-color:var(--accent)}
 
 <div class="drawer-wrap" id="drawerWrap" hidden>
   <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle">
-    <div class="dr-h"><h2 id="drTitle">Páginas</h2><label class="tsize" id="drSize"><span>Tamaño</span><input type="range" id="thumbW" min="70" max="260" step="10" aria-label="Tamaño de las miniaturas"></label><button class="btn" type="button" id="drEdit">Editar</button><button class="icon-btn" type="button" id="drClose" aria-label="Cerrar páginas"></button></div>
+    <div class="dr-h"><h2 id="drTitle">Páginas</h2><div class="seg dr-mode" id="drMode"><button type="button" data-dm="pages">Páginas</button><button type="button" data-dm="toc">Índice</button></div><label class="tsize" id="drSize"><span>Tamaño</span><input type="range" id="thumbW" min="70" max="260" step="10" aria-label="Tamaño de las miniaturas"></label><button class="btn" type="button" id="drEdit">Editar</button><button class="icon-btn" type="button" id="drClose" aria-label="Cerrar páginas"></button></div>
     <div class="thumbs" id="thumbs"></div>
     <div class="dr-foot" id="drFoot" hidden></div>
   </aside>
@@ -683,7 +698,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (24)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (25)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -3512,11 +3527,15 @@ function renderDrawer(){
   const tw = clamp(+prefs.thumbW || 120, 70, 260); $('#thumbW').value = tw;
   thumbsEl.style.gridTemplateColumns = drawerEdit ? `repeat(auto-fill, ${tw}px)` : '';
   thumbsEl.style.justifyContent = drawerEdit ? 'center' : '';
-  const rowH = 0;
-  thumbsEl.innerHTML = doc.pages.map(p => `<button type="button" class="thumb${sel.has(p) ? ' sel' : ''}" data-i="${p.i}" aria-current="${p.i === doc.cur}" aria-label="Página ${p.i + 1}"${drawerEdit ? ` aria-pressed="${sel.has(p)}"` : ''}>
+  const rowH = 0, tocMode = !drawerEdit && prefs.drMode === 'toc';
+  $('#drMode').hidden = drawerEdit;
+  document.querySelectorAll('#drMode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dm === (tocMode ? 'toc' : 'pages'))));
+  const thumbHTML = p => `<button type="button" class="thumb${sel.has(p) ? ' sel' : ''}" data-i="${p.i}" aria-current="${p.i === doc.cur}" aria-label="Página ${p.i + 1}"${drawerEdit ? ` aria-pressed="${sel.has(p)}"` : ''}>
       <span class="tc" style="aspect-ratio:${r2(p.wPt)}/${r2(p.hPt)}${rowH ? `;width:min(100%,${Math.round(rowH * p.wPt / p.hPt)}px)` : ''}"><canvas></canvas>${drawerEdit ? `<i class="ck">${sel.has(p) ? svg('check', 14) : ''}</i>` : ''}</span>
       <span class="lbl2">${p.i + 1}${p.tpl && p.tpl.type !== 'none' ? ' · ' + TPL_NAMES[p.tpl.type] : ''}</span>
-    </button>`).join('');
+    </button>`;
+  thumbsEl.classList.toggle('tocv', tocMode);
+  thumbsEl.innerHTML = tocMode ? drawerTocHTML(thumbHTML) : doc.pages.map(thumbHTML).join('');
   thumbObs = new IntersectionObserver(entries => {
     for (const en of entries){
       if (!en.isIntersecting) continue;
@@ -3528,6 +3547,38 @@ function renderDrawer(){
   thumbsEl.querySelectorAll('.thumb').forEach(b => thumbObs.observe(b));
   renderDrawerFoot();
 }
+/* pages grouped under the titles of my index (or the book's): a chapter shows its pages until the next title */
+function drawerTocHTML(thumbHTML){
+  const d = doc;
+  let secs = allBms(d).map(({ p, b, j }) => ({ id:'m' + (b.id || p.i + '_' + j), t:bmTitle(b, p), lv:b.lv || 1, c:b.c, page:p.i }));
+  let from = 'mine';
+  if (!secs.length && d.bookToc && d.bookToc.length){ secs = d.bookToc.filter(x => x.page >= 0).map(x => ({ id:'k' + x.id, t:x.t, lv:x.lv, page:x.page })); from = 'book'; }
+  if (!secs.length){
+    if (d.pdf && !d.bookToc) bookToc(d).then(t => { if (t.length && !drawerWrap.hidden && prefs.drMode === 'toc') renderDrawer(); });
+    return `<div class="dr-empty"><p>Aún no tienes títulos en tu índice.</p><p class="hint">Marca una página con el botón del marcador de abajo, ponle título y elige Capítulo, Tema o Subtema. Aquí verás tus páginas agrupadas por esos títulos.</p></div>`;
+  }
+  secs.sort((a, b) => a.page - b.page);
+  let h = from === 'book' ? `<p class="dr-note">Índice del libro. Tus propios marcadores aparecerán aquí cuando los crees.</p>` : '';
+  if (secs[0].page > 0) secs.unshift({ id:'start', t:'Inicio', lv:1, page:0, start:true });
+  let hideBelow = 0;
+  secs.forEach((x, i) => {
+    if (hideBelow && x.lv > hideBelow) return;
+    hideBelow = 0;
+    const next = secs.slice(i + 1).find(y => y.page > x.page) || null, same = secs[i + 1] && secs[i + 1].page === x.page;
+    const end = same ? x.page - 1 : next ? next.page - 1 : d.pages.length - 1;
+    const kids = secs[i + 1] && secs[i + 1].lv > x.lv, closed = tocClosed.has('dr' + x.id);
+    const n = Math.max(0, end - x.page + 1), hasPages = n > 0 || kids;
+    h += `<div class="dr-sec lv${x.lv}"><button type="button" class="dr-tw" data-drh="${esc(x.id)}" aria-expanded="${!closed}" aria-label="${closed ? 'Mostrar' : 'Ocultar'}">${hasPages ? svg(closed ? 'right' : 'down', 16) : ''}</button><button type="button" class="dr-go" data-drgo="${x.page}">${x.c ? `<i class="toc-c" style="background:${x.c}"></i>` : ''}<span>${esc(x.t)}</span><small>${n > 1 ? `p. ${x.page + 1}–${end + 1}` : `p. ${x.page + 1}`}</small></button></div>`;
+    if (closed){ hideBelow = x.lv; return; }
+    for (let k = x.page; k <= end; k++) h += thumbHTML(d.pages[k]);
+  });
+  return h;
+}
+$('#drMode').addEventListener('click', e => {
+  const b = e.target.closest('[data-dm]'); if (!b) return;
+  prefs.drMode = b.dataset.dm; savePrefs(); renderDrawer();
+  const c = thumbsEl.querySelector('.thumb[aria-current="true"]'); if (c) c.scrollIntoView({ block:'center' });
+});
 function renderDrawerFoot(){
   drFoot.hidden = !drawerEdit;
   if (!drawerEdit) return;
@@ -3611,10 +3662,10 @@ function endThumbDrag(drop){
 }
 thumbsEl.addEventListener('pointerdown', e => {
   if (tdrag || (e.pointerType === 'mouse' && e.button !== 0)) return;
-  const b = e.target.closest('.thumb');
-  tdrag = { id:e.pointerId, type:e.pointerType, sx:e.clientX, sy:e.clientY, lx:e.clientX, ly:e.clientY, b, mode:'pending', timer:0 };
+  const b = e.target.closest('.thumb'), hd = e.target.closest('[data-drh],[data-drgo]');
+  tdrag = { id:e.pointerId, type:e.pointerType, sx:e.clientX, sy:e.clientY, lx:e.clientX, ly:e.clientY, b, hd, mode:'pending', timer:0 };
   try { thumbsEl.setPointerCapture(e.pointerId); } catch(_){}
-  if (b && e.pointerType === 'touch') tdrag.timer = setTimeout(() => { if (tdrag && tdrag.mode === 'pending') startThumbDrag(); }, 320);
+  if (b && e.pointerType === 'touch' && !thumbsEl.classList.contains('tocv')) tdrag.timer = setTimeout(() => { if (tdrag && tdrag.mode === 'pending') startThumbDrag(); }, 320);
 });
 thumbsEl.addEventListener('pointermove', e => {
   const t = tdrag; if (!t || e.pointerId !== t.id) return;
@@ -3622,7 +3673,7 @@ thumbsEl.addEventListener('pointermove', e => {
   if (t.mode === 'pending'){
     if (Math.hypot(e.clientX - t.sx, e.clientY - t.sy) < 8) return;
     clearTimeout(t.timer);
-    if (t.b && t.type !== 'touch'){ startThumbDrag(); return; }
+    if (t.b && t.type !== 'touch' && !thumbsEl.classList.contains('tocv')){ startThumbDrag(); return; }
     t.mode = 'scroll';
   }
   if (t.mode === 'scroll') thumbsEl.scrollTop -= dy;
@@ -3634,6 +3685,10 @@ thumbsEl.addEventListener('pointerup', e => {
   if (t.mode === 'drag') endThumbDrag(true);
   tdrag = null;
   if (t.mode === 'pending' && t.b) tapThumb(t.b);
+  else if (t.mode === 'pending' && t.hd){
+    if (t.hd.dataset.drh){ const k = 'dr' + t.hd.dataset.drh; if (tocClosed.has(k)) tocClosed.delete(k); else tocClosed.add(k); const st = thumbsEl.scrollTop; renderDrawer(); thumbsEl.scrollTop = st; }
+    else { closeDrawer(); scrollToPage(+t.hd.dataset.drgo); }
+  }
 });
 thumbsEl.addEventListener('pointercancel', e => {
   const t = tdrag; if (!t || e.pointerId !== t.id) return;
