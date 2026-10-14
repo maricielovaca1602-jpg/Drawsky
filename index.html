@@ -70,6 +70,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .doc-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:980px){ .word{display:none} }
 @media (max-width:700px){ #newBtn .lbl{display:none} #newBtn{padding:0 11px} }
+@media (max-width:860px){ #guideBtn .lbl{display:none} #guideBtn{padding:0 11px} }
+.guide-wrap{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column}
+.guide-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface)}
+.guide-wrap iframe{flex:1;border:0;width:100%}
 @media (max-width:760px){ #driveBtn em{display:none} }
 @media (max-width:620px){ .btn .lbl,.doc-meta,.btn em{display:none} .btn{padding:0 11px} .word{display:none} }
 
@@ -559,6 +563,7 @@ input[type=range]{accent-color:var(--accent)}
     </div>
     <div class="actions">
       <button class="btn" id="driveBtn" type="button"><span id="icDrive"></span><span class="lbl" id="driveLbl">Drive</span><em id="driveSt" hidden></em></button>
+      <button class="btn" id="guideBtn" type="button" aria-label="Guía de DrawSky" title="Guía: todo lo que puedes hacer"><span id="icGuide"></span><span class="lbl">Guía</span></button>
       <button class="btn primary" id="newBtn" type="button" aria-label="Nuevo"><span id="icNew"></span><span class="lbl">Nuevo</span></button>
       <button class="icon-btn" id="setBtn" type="button" aria-label="Ajustes"></button>
     </div>
@@ -670,7 +675,7 @@ input[type=range]{accent-color:var(--accent)}
     </div>
     <div class="row">
       <div><div class="lab">Guía de DrawSky</div><p class="hint">Todas las funciones explicadas, con trucos para estudiar.</p></div>
-      <a class="btn" href="guia.html" target="_blank" rel="noopener">Abrir guía</a>
+      <button type="button" class="btn" id="setGuide">Abrir guía</button>
     </div>
     <div class="row">
       <div><div class="lab">Paletas de colores</div><p class="hint">Crea tus paletas, pega códigos de color y elige cuáles se ven al escoger un color.</p></div>
@@ -705,7 +710,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (27)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (28)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -783,7 +788,7 @@ $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); 
 $('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#searchBtn').innerHTML = svg('search', 20);
 $('#findPrev').innerHTML = svg('up', 18); $('#findNext').innerHTML = svg('down', 18); $('#findClose').innerHTML = svg('close', 18);
 $('#icM1').innerHTML = svg('folder', 22); $('#icM2').innerHTML = svg('book', 22);
-$('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
+$('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); $('#icGuide').innerHTML = svg('obook', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
 
 /* ---------- prefs ---------- */
@@ -5128,6 +5133,17 @@ cpHooks.fold = {
   visible:() => !dlgWrap.hidden && dlgState && dlgState.kind === 'fedit'
 };
 $('#palMgr').addEventListener('click', () => openPalManager());
+/* the guide opens inside the app, on top, with a way back */
+const guideWrap = document.createElement('div');
+guideWrap.className = 'guide-wrap'; guideWrap.hidden = true;
+guideWrap.innerHTML = `<div class="guide-bar"><button type="button" class="btn" id="guideClose">${svg('back', 18)}Volver a DrawSky</button></div><iframe title="Guía de DrawSky" id="guideFrame"></iframe>`;
+document.body.appendChild(guideWrap);
+function openGuide(){ const f = $('#guideFrame'); if (!f.src) f.src = 'guia.html'; guideWrap.hidden = false; }
+function closeGuide(){ guideWrap.hidden = true; }
+$('#guideBtn').addEventListener('click', openGuide);
+$('#setGuide').addEventListener('click', () => { $('#sheetWrap').hidden = true; openGuide(); });
+$('#guideClose').addEventListener('click', closeGuide);
+window.addEventListener('message', e => { if (e.origin === location.origin && e.data === 'drawsky:closeGuide') closeGuide(); });
 cpHooks.tool = { pick:c => { applyColor(c); renderToolPanel(); }, rerender:() => renderToolPanel(), visible:() => !tpanel.hidden };
 const PEN_CHOICES = ['pluma', 'pincel', 'boligrafo', 'lapiz', 'estilografo'];
 const DASHES = { solid:'Sólido', dash:'Discontinuo', dot:'Punteado' };

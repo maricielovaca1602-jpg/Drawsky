@@ -482,5 +482,11 @@ footer .btn{margin-top:12px}
     <a class="btn main" href="./">Abrir DrawSky</a>
   </footer>
 </div>
+<script>
+/* inside the app: "Abrir DrawSky" just closes the guide */
+if (window.parent !== window){
+  document.querySelectorAll('a[href="./"]').forEach(a => { a.textContent = 'Volver a DrawSky'; a.addEventListener('click', e => { e.preventDefault(); window.parent.postMessage('drawsky:closeGuide', location.origin); }); });
+}
+</script>
 </body>
 </html>
