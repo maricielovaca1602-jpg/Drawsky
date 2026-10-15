@@ -839,7 +839,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 15-oct-2026 (56)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 15-oct-2026 (57)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -935,10 +935,34 @@ $('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20)
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
 
 /* ---------- prefs ---------- */
+/* Your writing is saved twice on the tablet: in the browser's big database (IndexedDB, hundreds of MB) and, while it fits, in the small
+   quick storage (localStorage, only ~5 MB for everything). Before, notebooks lived only in the small one: when it filled up, new strokes
+   were not saved. Each copy carries a time so the newest one always wins. */
+const docMem = new Map();
+const isDocKey = k => String(k).startsWith('drawsky:doc:');
+const dbReady = () => { try { return !!idb; } catch(e){ return false; } };
+let docSaveWarned = 0;
 const store = {
-  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
-  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } },
-  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+  get(k){
+    let ls = null; try { ls = JSON.parse(localStorage.getItem(k)); } catch(e){}
+    if (!isDocKey(k)) return ls;
+    const m = docMem.get(k);
+    if (ls && ls.inDb) ls = null;
+    if (m && (!ls || (m._t || 0) >= (ls._t || 0))) return m;
+    return ls;
+  },
+  set(k, v){
+    if (!isDocKey(k)){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+    if (v && typeof v === 'object') v._t = Date.now();
+    docMem.set(k, v);
+    const id = 'ldoc:' + k.slice(12);
+    let dbOk = true;
+    if (dbReady()) idb.put(id, { id, v, t:Date.now() }).catch(e => { console.warn(e); dbOk = false; if (Date.now() - docSaveWarned > 60000){ docSaveWarned = Date.now(); toast('¡Ojo! La tableta no tiene espacio para guardar. Sube a Drive y libera espacio.'); } });
+    try { localStorage.setItem(k, JSON.stringify(v)); }
+    catch(e){ try { localStorage.setItem(k, JSON.stringify({ v:2, inDb:true, name:v && v.name, kind:v && v.kind, _t:v && v._t })); } catch(_){ try { localStorage.removeItem(k); } catch(__){} } }
+    return dbOk;
+  },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} if (isDocKey(k)){ docMem.delete(k); if (dbReady()) idb.del('ldoc:' + k.slice(12)); } }
 };
 const TOOL_INFO = { hand:{name:'Mover',icon:'hand'}, pen1:{name:'Bolígrafo 1',icon:'pen'}, pen2:{name:'Bolígrafo 2',icon:'pen'}, hl:{name:'Resaltador',icon:'hl'}, eraser:{name:'Borrador',icon:'eraser'}, select:{name:'Seleccionar texto',icon:'cursor'}, lasso:{name:'Lazo',icon:'lasso'}, text:{name:'Texto',icon:'text'}, table:{name:'Tabla',icon:'table'}, stk:{name:'Stickers',icon:'sticker'}, tape:{name:'Cinta para repasar',icon:'tape'}, convert:{name:'Convertir a texto',icon:'aa'} };
 const SIZE_RANGE = { pen:{min:0.1 / 0.3528,max:3 / 0.3528,step:0.01 / 0.3528,unit:'mm'}, hl:{min:3,max:30,step:0.5,unit:'pt'}, eraser:{min:6,max:80,step:1,unit:'px'}, text:{min:8,max:40,step:1,unit:'pt'}, table:{min:6,max:24,step:1,unit:'pt'} };
@@ -1852,7 +1876,7 @@ async function cachePut(id, v){
   pruneCache(false);
 }
 async function pruneCache(all){
-  const items = (await idb.all()).filter(it => !/^(img|tpl|stk|cards|cardimg):/.test(String(it.id))).sort((a, b) => b.t - a.t);
+  const items = (await idb.all()).filter(it => !/^(img|tpl|stk|cards|cardimg|ldoc):/.test(String(it.id))).sort((a, b) => b.t - a.t);
   const keep = id => docs.some(d => d.drive && d.drive.id === id) || lib.some(e => e.drive && e.drive.id === id && e.pending);
   let n = 0;
   for (const it of items){
@@ -1864,7 +1888,7 @@ async function pruneCache(all){
 }
 async function cacheInfo(){
   const el = $('#cacheInfo'); if (!el) return;
-  const items = (await idb.all()).filter(it => !/^(img|tpl|stk|cards|cardimg):/.test(String(it.id)));
+  const items = (await idb.all()).filter(it => !/^(img|tpl|stk|cards|cardimg|ldoc):/.test(String(it.id)));
   const mb = items.reduce((s, it) => s + ((it.bytes && it.bytes.byteLength) || 0), 0) / 1048576;
   el.textContent = items.length
     ? `${items.length} ${items.length === 1 ? 'archivo de Drive guardado' : 'archivos de Drive guardados'} para usar sin internet (${mb < 0.1 ? '<0.1' : mb.toFixed(1)} MB). DrawSky guarda como máximo los ${CACHE_MAX} más recientes; los demás se vuelven a descargar al abrirlos.`
@@ -2203,7 +2227,7 @@ function markDirty(d){
   d.dirty = true;
   const e = lib.find(x => x.key === d.key); if (e && !e.pending){ e.pending = true; libSave(); }
   if (!d.syncing) driveState(d, !navigator.onLine ? 'offline' : tokenOk(d.drive.email) ? 'dirty' : 'auth');
-  if (prefs.autoSync && !d.syncT) scheduleSync(d, SYNC_WAIT);
+  if (prefs.autoSync && !d.syncT) scheduleSync(d, d.kind === 'notebook' ? 60000 : SYNC_WAIT);
 }
 function scheduleSync(d, ms){ clearTimeout(d.syncT); d.syncT = setTimeout(() => { d.syncT = 0; if (d.dirty) syncDoc(d); }, ms); }
 /* the doc now lives in Drive under a new file id */
@@ -2534,6 +2558,7 @@ window.addEventListener('online', () => {
 });
 window.addEventListener('offline', () => docs.forEach(d => { if (d.drive && d.dirty && !d.syncing) driveState(d, 'offline'); }));
 document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') docs.forEach(flushSave);
   /* leaving the app (home button, another app): upload now what is pending */
   if (document.visibilityState === 'hidden' && navigator.onLine) docs.forEach(d => { if (d.drive && d.dirty && !d.syncing && tokenOk(d.drive.email)){ flushSave(d); syncDoc(d); } });
   if (document.visibilityState === 'visible'){ setTimeout(syncPending, 800); setTimeout(() => refreshDriveList(true), 1200); } });
@@ -7294,9 +7319,17 @@ if (!prefs.seeded){
   if (!lib.some(e => e.key === 'muestra')) lib.push({ key:'muestra', name:'Hoja de prueba', kind:'sample', pages:2, created:Date.now(), opened:Date.now() });
   libSave(); prefs.seeded = true; savePrefs();
 }
+function startApp(){
 showHome();
 if (prefs.session && Array.isArray(prefs.session.tabs)) restoreSession();
 else prefs.openNb.map(loadNotebook).filter(Boolean).forEach(d => { docs.push(d); libTouch(d); });
+}
+{
+  const keys = [...new Set(lib.map(e => e.key).concat(prefs.openNb || [], ['muestra']))];
+  let started = false; const go = () => { if (!started){ started = true; startApp(); } };
+  Promise.all(keys.map(k => idb.get('ldoc:' + k).then(r => { if (r && r.v) docMem.set('drawsky:doc:' + k, r.v); }).catch(() => {}))).then(go, go);
+  setTimeout(go, 2500);
+}
 loadGoogle();
 setTimeout(syncPending, 4000);
 setTimeout(() => refreshDriveList(true), 2500);
