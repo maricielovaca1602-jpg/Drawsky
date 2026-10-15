@@ -744,10 +744,6 @@ input[type=range]{accent-color:var(--accent)}
       <input type="checkbox" class="switch" id="snap" aria-label="Figuras perfectas al detenerte">
     </div>
     <div class="row">
-      <div><div class="lab">Botón del S Pen: borrador rápido</div><p class="hint">Encendido: presionas el botón, borras y, cuando dejas de borrar un momento, vuelves solo a lo que usabas. Apagado: un toque activa el borrador y otro lo quita.</p></div>
-      <input type="checkbox" class="switch" id="penHold" aria-label="Borrar solo mientras mantienes el botón del S Pen">
-    </div>
-    <div class="row">
       <div><div class="lab">Doble toque del lápiz = borrador</div><p class="hint">Dos toques rápidos con la punta del S Pen cambian entre tu bolígrafo y el borrador. Úsalo si el botón del S Pen no responde.</p></div>
       <input type="checkbox" class="switch" id="dblTap" aria-label="Doble toque del lápiz para cambiar al borrador">
     </div>
@@ -808,7 +804,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (42)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (43)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -2986,9 +2982,7 @@ function endPinch(){
 }
 function isPalm(e){ return performance.now() - lastPenT < 700 || (e.width > 48 && e.height > 48); }
 
-let lastTouchT = 0;
 function onTouchDown(e){
-  lastTouchT = performance.now();
   if (isPalm(e)) return;
   stopInertia();
   touches.set(e.pointerId, { x:e.clientX, y:e.clientY, sx:e.clientX, sy:e.clientY, t0:performance.now() });
@@ -3134,7 +3128,6 @@ function endPointer(e){
   if (a.mode === 'draw') made = endStroke();
   else if (a.mode === 'erase'){ endErase(); if (tool !== 'eraser') ecur.hidden = true; }
   active = null;
-  if (holdErase) armHoldIdle(a.mode === 'erase' ? 1300 : 6000);
   if (tap) penDoubleTap(e, a.p, made);
 }
 /* fallback when Samsung keeps the S Pen button for itself: two quick taps with the pen tip switch between your pen and the eraser */
@@ -3171,49 +3164,15 @@ document.addEventListener('contextmenu', e => {
   const now = performance.now();
   if (now - lastCtx < 450) return;
   lastCtx = now;
-  /* this tablet sends the button press while the pen is already touching: turn that stroke into erasing (only for this stroke) */
-  if (active && active.mode === 'draw' && active.ptype === 'pen'){ penBtnSeen = true; strokeToErase(active); return; }
-  /* a finger long-press also makes a contextmenu: ignore those; accept everything else (the pen may not report hovering) */
-  if (active || (now - lastTouchT < 1500 && now - lastPenT > 1500)) return;
+  if (active || now - lastPenT > 1500) return;
   if (!$('#sheetWrap').hidden){ penBtnSeen = true; logPen('botón del S Pen detectado: cambia al borrador'); updateDiag(e); return; }
   if (!doc || homeOn || !wheelWrap.hidden || !drawerWrap.hidden || !dlgWrap.hidden) return;
   /* only over the sheet: a long press on a slider, button or panel must never switch to the eraser */
   if (!e.target.closest || !e.target.closest('#viewer') || e.target.closest('.tpanel,.rail,.menu,.selmenu,.note-pin,.findbar,input,button')) return;
   penBtnSeen = true;
-  if (prefs.penHold === false) toggleEraser(); else startHoldErase();
+  toggleEraser();
 });
-/* hold mode: the eraser lasts while the button is held. This tablet tells Chrome when the button is pressed but not always when it is let go,
-   so DrawSky goes back to your tool when the pen reports the button up, when you lift the pen after erasing, when the pen moves away, or after a few idle seconds */
-function strokeToErase(a){
-  clearTimeout(a.ht); clearTimeout(a.lp); if (a.raf) cancelAnimationFrame(a.raf);
-  const pts = a.stroke ? a.stroke.pts.slice() : [];
-  clearWet(); a.stroke = null;
-  a.mode = 'erase'; a.removed = []; a.lastE = null; a.before = a.p.strokes.slice(); a.btnErase = true;
-  /* erase along what was traced so far, then keep erasing while the pen moves */
-  for (const q of pts) eraseAt({ clientX:a.rect.left + q[0] / a.k, clientY:a.rect.top + q[1] / a.k });
-  ecur.hidden = true;
-}
-let holdErase = null;
-/* Samsung keeps drags made while the button is held for itself, so the press arms the eraser: erase (with or without the button) and
-   when you stop erasing for a moment you are back on your pen. Pressing the button again also goes back. */
-function startHoldErase(){
-  if (holdErase){ endHoldErase(); return; }
-  if (tool === 'eraser') return;
-  holdErase = { prev:tool, sawBtn:false, idle:0 };
-  setTool('eraser'); armHoldIdle(6000);
-  toast('Borrador · cuando dejas de borrar vuelves a tu ' + toolName(holdErase.prev).toLowerCase());
-}
-function armHoldIdle(ms){ if (!holdErase) return; clearTimeout(holdErase.idle); holdErase.idle = setTimeout(() => { if (holdErase && !active) endHoldErase(); else armHoldIdle(1200); }, ms || 6000); }
-function endHoldErase(){
-  if (!holdErase) return;
-  const h = holdErase; holdErase = null; clearTimeout(h.idle);
-  if (tool === 'eraser') setTool(h.prev);
-}
-window.addEventListener('pointermove', e => {
-  if (!holdErase || e.pointerType !== 'pen') return;
-  if (penButton(e)){ holdErase.sawBtn = true; armHoldIdle(6000); }
-  else if (holdErase.sawBtn && !active) endHoldErase();
-}, { passive:true });
+
 
 
 viewer.addEventListener('wheel', e => {
@@ -3235,7 +3194,7 @@ function logPen(line){
 function updateDiag(e){
   if ($('#sheetWrap').hidden) return;
   diagEl.innerHTML = `Presión <b>${(e.pressure || 0).toFixed(2)}</b> · botón <b>${penButton(e) ? 'presionado' : 'suelto'}</b><br>` +
-    (penBtnSeen ? (prefs.penHold === false ? 'El botón del S Pen se detecta: presiónalo una vez para borrar y otra para volver.' : 'El botón del S Pen se detecta: presiónalo, borra y al dejar de borrar vuelves a tu herramienta.') : 'Aún no detecto el botón del S Pen.');
+    (penBtnSeen ? 'El botón del S Pen se detecta: presiónalo una vez para borrar y otra para volver.' : 'Aún no detecto el botón del S Pen.');
 }
 const penTest = $('#penTest');
 ['pointerdown', 'pointerup'].forEach(type => penTest.addEventListener(type, e => {
@@ -6829,7 +6788,7 @@ function enableFullDrive(on){
 const sheetWrap = $('#sheetWrap');
 function syncSheet(){
   $('#sens').value = Math.round(prefs.sens * 100); $('#sensOut').textContent = Math.round(prefs.sens * 100) + '%';
-  $('#snap').checked = prefs.snap; $('#finger').checked = prefs.finger; $('#dblTap').checked = !!prefs.dblTap; $('#penHold').checked = prefs.penHold !== false;
+  $('#snap').checked = prefs.snap; $('#finger').checked = prefs.finger; $('#dblTap').checked = !!prefs.dblTap;
   document.querySelectorAll('#themeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tv === prefs.theme)));
   document.querySelectorAll('#dockSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dv === prefs.dock)));
   renderDriveSettings();
@@ -6843,7 +6802,6 @@ $('#sens').addEventListener('input', e => { prefs.sens = +e.target.value / 100; 
 $('#snap').addEventListener('change', e => { prefs.snap = e.target.checked; savePrefs(); });
 $('#finger').addEventListener('change', e => { prefs.finger = e.target.checked; savePrefs(); });
 $('#dblTap').addEventListener('change', e => { prefs.dblTap = e.target.checked; savePrefs(); });
-$('#penHold').addEventListener('change', e => { prefs.penHold = e.target.checked; savePrefs(); });
 $('#themeSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   prefs.theme = b.dataset.tv; savePrefs(); applyTheme(); syncSheet();
