@@ -188,6 +188,13 @@ footer .btn{margin-top:12px}
 .dimg{display:flex;justify-content:center;margin:2px 0 4px}
 .dimg svg{width:100%;max-width:220px;height:auto}
 .mini{font:600 11px var(--font);fill:var(--ink)}.mini.w{fill:#fff}.mini.b{font-weight:800;font-size:13px}
+
+.mini.big{font:700 26px var(--font)}
+.mini.hand{font:700 14px var(--hand)}
+.shapes.mini4{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;width:100%}
+.shapes.mini4 svg{width:100%;height:auto}
+.note-line{margin-top:16px}
+.mock>svg{max-width:300px;width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -254,156 +261,77 @@ footer .btn{margin-top:12px}
   <nav class="toc" aria-label="Contenido">
     <a href="#empezar" style="--c:var(--pink)"><span class="n">1</span><span><b>Primeros pasos</b><small>Conecta Drive y abre tu primer PDF</small></span></a>
     <a href="#inicio" style="--c:var(--peach)"><span class="n">2</span><span><b>Inicio y carpetas</b><small>Ordena tus cursos por colores</small></span></a>
-    <a href="#escribir" style="--c:var(--plum)"><span class="n">3</span><span><b>Escribir</b><small>Plumas, grosor y presión</small></span></a>
-    <a href="#resaltar" style="--c:var(--butter)"><span class="n">4</span><span><b>Resaltar</b><small>Resaltador y rotulador</small></span></a>
-    <a href="#borrar" style="--c:var(--coral)"><span class="n">5</span><span><b>Borrar y deshacer</b><small>Sin miedo a equivocarte</small></span></a>
-    <a href="#figuras" style="--c:var(--sage)"><span class="n">6</span><span><b>Figuras perfectas</b><small>Esquemas limpios en segundos</small></span></a>
-    <a href="#texto" style="--c:var(--sky)"><span class="n">7</span><span><b>Texto, notas y lazo</b><small>Copia, comenta y mueve</small></span></a>
-    <a href="#indice" style="--c:var(--rose)"><span class="n">8</span><span><b>Índice y marcadores</b><small>Encuentra cada tema al toque</small></span></a>
-    <a href="#colores" style="--c:var(--lav)"><span class="n">9</span><span><b>Paletas de colores</b><small>Tu propio código de colores</small></span></a>
-    <a href="#drive" style="--c:var(--mint)"><span class="n">10</span><span><b>Drive y sin internet</b><small>Estudia en cualquier lugar</small></span></a>
-    <a href="#herramientas" style="--c:var(--mocha)"><span class="n">11</span><span><b>Tus herramientas</b><small>Ruedita, cinta, tarjetas y más</small></span></a>
-    <a href="#trucos" style="--c:var(--peach)"><span class="n">12</span><span><b>¿Sabías que…?</b><small>Trucos para estudiar mejor</small></span></a>
+    <a href="#escribir" style="--c:var(--plum)"><span class="n">3</span><span><b>Escribir</b><small>Plumas, figuras y texto</small></span></a>
+    <a href="#resaltar" style="--c:var(--butter)"><span class="n">4</span><span><b>Resaltar y borrar</b><small>Sin miedo a equivocarte</small></span></a>
+    <a href="#organiza" style="--c:var(--sky)"><span class="n">5</span><span><b>Organiza tu hoja</b><small>Lazo, notas, tablas y stickers</small></span></a>
+    <a href="#indice" style="--c:var(--rose)"><span class="n">6</span><span><b>Índice y marcadores</b><small>Encuentra cada tema al toque</small></span></a>
+    <a href="#repasa" style="--c:var(--coral)"><span class="n">7</span><span><b>Repasa</b><small>Cinta, tarjetas y Cornell</small></span></a>
+    <a href="#colores" style="--c:var(--lav)"><span class="n">8</span><span><b>Tus colores</b><small>Paletas y códigos</small></span></a>
+    <a href="#drive" style="--c:var(--mint)"><span class="n">9</span><span><b>Drive y sin internet</b><small>Estudia en cualquier lugar</small></span></a>
+    <a href="#herramientas" style="--c:var(--mocha)"><span class="n">10</span><span><b>Ruedita y atajos</b><small>Zoom, plantillas y más</small></span></a>
   </nav>
 
   <!-- 1 -->
   <section class="sec" id="empezar" style="--c:var(--pink)">
     <span class="label"><svg class="i"><use href="#cloud"/></svg>1 · Primeros pasos</span>
     <h2>Empieza en un minuto</h2>
-    <p class="lead">Solo necesitas tu tableta, el S Pen y tu cuenta de Google. No hay nada que instalar: DrawSky se abre desde el navegador y puedes agregarla a tu pantalla de inicio como una app.</p>
+    <p class="lead">Solo necesitas tu tableta, el S Pen y tu cuenta de Google. No hay nada que instalar.</p>
     <div class="cols">
-      <ol class="steps">
+      <div><ol class="steps">
         <li>Abre DrawSky y toca <span class="k">Ajustes</span> → <strong>Conectar Google Drive</strong>. Acepta el permiso con tu Gmail.</li>
-        <li>Toca <span class="k"><svg class="i"><use href="#plus"/></svg>Nuevo</span> arriba a la derecha y elige qué quieres abrir:
-          <ul class="dots" style="margin-top:8px">
-            <li><strong>Desde Google Drive:</strong> tus guías, separatas y libros en PDF.</li>
-            <li><strong>Documento PDF:</strong> un archivo que tengas en la tableta.</li>
-            <li><strong>Foto de la galería</strong> o <strong>Tomar foto:</strong> una placa, un esquema de la pizarra o una página de tu cuaderno.</li>
-            <li><strong>Cuaderno en blanco:</strong> hojas lisas, rayadas, cuadriculadas o Cornell.</li>
-          </ul>
-        </li>
-        <li>Empieza a escribir con el S Pen. Todo se guarda solo, en el mismo archivo de tu Drive.</li>
-      </ol>
+        <li>Toca <span class="k"><svg class="i"><use href="#plus"/></svg>Nuevo</span> y elige: un PDF de <strong>Google Drive</strong>, un <strong>PDF de la tableta</strong>, una <strong>foto</strong> (una placa, un ECG, la pizarra) o un <strong>cuaderno en blanco</strong>.</li>
+        <li>Escribe con el S Pen. Todo se guarda solo, en tu Drive.</li>
+      </ol></div>
       <div class="sticky" style="--c2:var(--blush)">
         <h3>Para qué te sirve</h3>
         <ul>
-          <li>Tener en un solo lugar tus guías de práctica clínica, diapositivas de clase y libros.</li>
-          <li>Fotografiar una radiografía o un ECG y anotarlo encima.</li>
-          <li>Abrir el mismo PDF en la computadora y ver tus anotaciones.</li>
+          <li>Tus guías, diapositivas y libros en un solo lugar.</li>
+          <li>Anotar encima de una radiografía o un ECG.</li>
+          <li>Ver tus apuntes también en la computadora.</li>
         </ul>
       </div>
     </div>
-    <p class="tip">En Chrome, toca ⋮ → "Agregar a pantalla de inicio" y DrawSky se abrirá como una app más.</p>
+    <p class="tip">En Chrome, toca ⋮ → "Agregar a pantalla de inicio" y DrawSky se abre como una app más.</p>
   </section>
 
   <!-- 2 -->
   <section class="sec" id="inicio" style="--c:var(--peach)">
     <span class="label"><svg class="i"><use href="#folder"/></svg>2 · Inicio y carpetas</span>
     <h2>Todo ordenado, como tu mochila ideal</h2>
-    <p class="lead">En Inicio ves todo lo que has abierto. A la izquierda tienes tus carpetas y, si lo activas, todo tu Google Drive con sus carpetas reales.</p>
+    <p class="lead">En Inicio ves todo lo que abriste, con tus carpetas a la izquierda.</p>
     <div class="cols">
-      <div>
-        <ul class="dots">
-          <li><strong>Carpetas con color e ícono:</strong> crea una por curso o rotación (Cardiología, Pediatría, Farmacología…) y dale su color.</li>
-          <li><strong>Tres puntitos de cada carpeta:</strong> cambiar color e ícono, renombrar o mostrarla en la barra lateral.</li>
-          <li><strong>Ver todo mi Drive:</strong> actívalo en Ajustes y navega Mi unidad, Compartidos conmigo y Recientes sin salir de la app.</li>
-          <li><strong>Buscar por nombre</strong> y elegir entre vista de lista o portadas.</li>
-          <li><strong>Contraer la barra</strong> para dejar solo los íconos y ganar espacio.</li>
-          <li><strong>Cambia el nombre de un archivo</strong> tocando su título arriba, mientras lo tienes abierto.</li>
-        </ul>
-        <p class="tip">Usa el mismo color para la carpeta y para tus resaltados de ese curso: tu cerebro asocia color y tema.</p>
-      </div>
-      <div class="mock">
-        <div class="folders">
+      <div><ul class="dots"><li><strong>Carpetas con color e ícono:</strong> una por curso o rotación.</li><li><strong>Tres puntitos:</strong> cambiar color e ícono, renombrar o mostrarla en la barra.</li><li><strong>Ver todo mi Drive</strong> (en Ajustes): tus carpetas reales sin salir de la app.</li><li><strong>Buscar</strong> por nombre y ver en lista o portadas.</li><li><strong>Renombrar un archivo:</strong> toca su título arriba.</li></ul></div>
+      <div class="mock"><div class="folders">
           <div><svg viewBox="0 0 120 92"><path d="M6 17a9 9 0 0 1 9-9h26c2.6 0 5 1 6.8 2.8L52 15h53a9 9 0 0 1 9 9v8H6z" fill="#c9758f"/><rect x="6" y="22" width="108" height="64" rx="11" fill="#ee7ea0"/><g transform="translate(45 39) scale(1.25)" fill="none" stroke="rgba(66,34,30,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#heart" width="24" height="24"/></g></svg>Cardiología</div>
           <div><svg viewBox="0 0 120 92"><path d="M6 17a9 9 0 0 1 9-9h26c2.6 0 5 1 6.8 2.8L52 15h53a9 9 0 0 1 9 9v8H6z" fill="#8fadbd"/><rect x="6" y="22" width="108" height="64" rx="11" fill="#abcdde"/><g transform="translate(45 39) scale(1.25)" fill="none" stroke="rgba(66,34,30,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#steth" width="24" height="24"/></g></svg>Pediatría</div>
           <div><svg viewBox="0 0 120 92"><path d="M6 17a9 9 0 0 1 9-9h26c2.6 0 5 1 6.8 2.8L52 15h53a9 9 0 0 1 9 9v8H6z" fill="#9da163"/><rect x="6" y="22" width="108" height="64" rx="11" fill="#bcc07b"/><g transform="translate(45 39) scale(1.25)" fill="none" stroke="rgba(66,34,30,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#cap" width="24" height="24"/></g></svg>ENAM</div>
           <div><svg viewBox="0 0 120 92"><path d="M6 17a9 9 0 0 1 9-9h26c2.6 0 5 1 6.8 2.8L52 15h53a9 9 0 0 1 9 9v8H6z" fill="#d6955c"/><rect x="6" y="22" width="108" height="64" rx="11" fill="#ffaf6e"/><g transform="translate(45 39) scale(1.25)" fill="none" stroke="rgba(66,34,30,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#obook" width="24" height="24"/></g></svg>Farmaco</div>
           <div><svg viewBox="0 0 120 92"><path d="M6 17a9 9 0 0 1 9-9h26c2.6 0 5 1 6.8 2.8L52 15h53a9 9 0 0 1 9 9v8H6z" fill="#a993c4"/><rect x="6" y="22" width="108" height="64" rx="11" fill="#cdbdeb"/><g transform="translate(45 39) scale(1.25)" fill="none" stroke="rgba(66,34,30,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#star" width="24" height="24"/></g></svg>Repasos</div>
           <div><svg viewBox="0 0 120 92"><path d="M6 17a9 9 0 0 1 9-9h26c2.6 0 5 1 6.8 2.8L52 15h53a9 9 0 0 1 9 9v8H6z" fill="#77604d"/><rect x="6" y="22" width="108" height="64" rx="11" fill="#8e715b"/><g transform="translate(45 39) scale(1.25)" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#steth" width="24" height="24"/></g></svg>Internado</div>
-        </div>
-      </div>
+        </div></div>
     </div>
+    <p class="tip">Usa el mismo color para la carpeta y para tus resaltados de ese curso: tu cerebro asocia color y tema.</p>
   </section>
 
   <!-- 3 -->
   <section class="sec" id="escribir" style="--c:var(--plum)">
     <span class="label"><svg class="i"><use href="#pen"/></svg>3 · Escribir</span>
     <h2>Cinco plumas, una para cada momento</h2>
-    <p class="lead">Toca la pluma en tu barra de herramientas y vuelve a tocarla para abrir sus ajustes. Tienes dos plumas listas (Pluma 1 y Pluma 2), cada una con su propio color, grosor y estilo.</p>
+    <p class="lead">Toca la pluma en tu barra y vuelve a tocarla para sus ajustes. Pluma 1 y Pluma 2 guardan cada una su color, grosor y estilo.</p>
     <div class="cols">
-      <div class="mock">
-        <div class="pens">
+      <div><ul class="dots"><li><strong>Grosor</strong> con la punta a tamaño real.</li><li><strong>Presión y estabilización:</strong> trazo más limpio si tu letra tiembla.</li><li><strong>Líneas punteadas</strong> y <strong>enderezar líneas</strong> para flechas y esquemas.</li><li><strong>Plumas favoritas</strong> <span class="k"><svg class="i"><use href="#star"/></svg></span>: tu combinación de color y grosor en un toque.</li><li><strong>Apoya la palma</strong> tranquila: solo escribe el S Pen.</li></ul></div>
+      <div class="mock"><div class="pens">
           <div><svg viewBox="0 0 120 26"><path d="M4 18c16-14 30 4 46-6s28-10 40 0 20 2 26-4" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" style="stroke-width:3"/></svg>Pluma <small>· trazo elegante que se afina</small></div>
           <div><svg viewBox="0 0 120 26"><path d="M4 18c16-14 30 4 46-6s28-10 40 0 20 2 26-4" fill="none" stroke="var(--pink)" stroke-width="5" stroke-linecap="round"/></svg>Pluma pincel <small>· gruesa o fina según presiones</small></div>
           <div><svg viewBox="0 0 120 26"><path d="M4 18c16-14 30 4 46-6s28-10 40 0 20 2 26-4" fill="none" stroke="#2874a6" stroke-width="2.4" stroke-linecap="round"/></svg>Bolígrafo <small>· parejo, ideal para apuntes</small></div>
           <div><svg viewBox="0 0 120 26"><path d="M4 18c16-14 30 4 46-6s28-10 40 0 20 2 26-4" fill="none" stroke="var(--soft)" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 0" opacity=".75"/></svg>Lápiz <small>· textura de grafito</small></div>
           <div><svg viewBox="0 0 120 26"><path d="M4 18c16-14 30 4 46-6s28-10 40 0 20 2 26-4" fill="none" stroke="var(--mocha)" stroke-width="1.6" stroke-linecap="round"/></svg>Estilógrafo <small>· línea fina para esquemas</small></div>
-        </div>
-      </div>
-      <div>
-        <ul class="dots">
-          <li><strong>Grosor en milímetros:</strong> sube o baja de 0.01 en 0.01 mm y mira el tamaño real de la punta.</li>
-          <li><strong>Presión:</strong> cuánto cambia el trazo cuando aprietas más el lápiz.</li>
-          <li><strong>Estabilización:</strong> súbela si tu letra sale temblorosa; el trazo sale más limpio.</li>
-          <li><strong>Opacidad</strong> y líneas <strong>discontinuas o punteadas</strong> para flechas y esquemas.</li>
-          <li><strong>Enderezar líneas:</strong> tus rayas salen rectas solas.</li>
-          <li><strong>Mis colores:</strong> cada pluma guarda sus colores favoritos con la estrella <span class="k"><svg class="i"><use href="#star"/></svg></span>.</li>
-          <li><strong>Plumas favoritas:</strong> guarda una combinación (tipo + color + grosor) y vuelve a ella en un toque.</li>
-        </ul>
-      </div>
+        </div></div>
     </div>
-    <p class="tip">Pluma 1 en azul oscuro para la teoría y Pluma 2 en rojo para lo que "siempre preguntan".</p>
-  </section>
-
-  <!-- 4 -->
-  <section class="sec" id="resaltar" style="--c:var(--butter)">
-    <span class="label"><svg class="i"><use href="#hl"/></svg>4 · Resaltar</span>
-    <h2>Resalta sin tapar el texto</h2>
-    <p class="lead">El resaltador deja ver las letras debajo, como uno de verdad. El rotulador (en la misma herramienta) pinta más intenso, como un plumón.</p>
-    <div class="cols">
-      <div>
-        <ul class="dots">
-          <li><strong>Intensidad:</strong> desde casi transparente hasta marcado, a tu gusto.</li>
-          <li><strong>Resaltado recto:</strong> actívalo y cada resaltado sale en línea recta aunque tu mano se mueva.</li>
-          <li><strong>Resaltar texto del PDF:</strong> con la herramienta de selección, desliza sobre el texto y toca <em>Resaltar</em>; queda perfecto sobre las líneas.</li>
-          <li><strong>Borrar solo el resaltado</strong> sin tocar lo que escribiste (en las opciones del borrador).</li>
-        </ul>
-      </div>
-      <div class="mock hlline">
-        <span style="--c:var(--butter)"><mark>La noradrenalina es el vasopresor de primera línea</mark></span> en el shock séptico. Si persiste la hipotensión, <span style="--c:var(--rose)"><mark>agregar vasopresina</mark></span>; considerar <span style="--c:var(--sky)"><mark>hidrocortisona 200 mg/día</mark></span> en shock refractario.
-      </div>
-    </div>
-    <p class="tip">Un color por tipo de dato: amarillo = definición, rosa = tratamiento, celeste = dosis.</p>
-  </section>
-
-  <!-- 5 -->
-  <section class="sec" id="borrar" style="--c:var(--coral)">
-    <span class="label"><svg class="i"><use href="#eraser"/></svg>5 · Borrar y deshacer</span>
-    <h2>Equivocarte no cuesta nada</h2>
-    <div class="grid2">
-      <ul class="dots">
-        <li><strong>Trazo completo:</strong> tocas una línea y se borra entera.</li>
-        <li><strong>Parcial:</strong> borra solo lo que tocas, por ejemplo una letra.</li>
-        <li><strong>Solo resaltado:</strong> limpia el resaltado y deja tu letra.</li>
-        <li><strong>Limpiar página:</strong> borra todo lo de esa hoja (te pide confirmar).</li>
-      </ul>
-      <ul class="dots">
-        <li><strong>Botón del S Pen:</strong> con el lápiz sobre la hoja, presiona su botón para cambiar al borrador; presiónalo otra vez para volver.</li>
-        <li><strong>Doble toque con la punta:</strong> si tu tableta no deja usar el botón, activa esta opción en Ajustes.</li>
-        <li><strong>Deshacer y rehacer</strong> <span class="k"><svg class="i"><use href="#undo"/></svg></span> siempre a mano en tu barra.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- 6 -->
-  <section class="sec" id="figuras" style="--c:var(--sage)">
-    <span class="label"><svg class="i"><use href="#spark"/></svg>6 · Figuras perfectas</span>
-    <h2>Esquemas limpios, sin regla</h2>
-    <p class="lead">Dibuja una figura y, <strong>sin levantar el lápiz</strong>, déjalo quieto medio segundo. La tableta vibra un poquito y tu figura se vuelve perfecta.</p>
-    <div class="cols">
-      <div class="mock">
-        <div class="shapes">
+    <div class="demos">
+      <div class="demo">
+        <h4>Figuras perfectas</h4>
+        <div class="dimg"><div class="shapes mini4">
           <svg viewBox="0 0 80 60"><path d="M8 46L72 14" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/></svg>
           <svg viewBox="0 0 80 60"><circle cx="40" cy="30" r="22" fill="none" stroke="var(--pink)" stroke-width="3"/></svg>
           <svg viewBox="0 0 80 60"><rect x="16" y="10" width="48" height="40" fill="none" stroke="var(--coral)" stroke-width="3"/></svg>
@@ -415,52 +343,106 @@ footer .btn{margin-top:12px}
           <svg viewBox="0 0 80 60"><path d="M40 6l6.5 13.4 14.8 2.1-10.7 10.4 2.5 14.7L40 39.7l-13.2 6.9 2.5-14.7L18.7 21.5l14.8-2.1z" fill="none" stroke="var(--butter)" stroke-width="3" stroke-linejoin="round"/></svg>
           <svg viewBox="0 0 80 60"><path d="M40 52S16 38 16 22a11 11 0 0 1 24-4 11 11 0 0 1 24 4c0 16-24 30-24 30z" fill="none" stroke="var(--pink)" stroke-width="3" stroke-linejoin="round"/></svg>
           <svg viewBox="0 0 80 60"><rect x="8" y="20" width="64" height="20" rx="10" fill="none" stroke="var(--ink)" stroke-width="3"/></svg>
-        </div>
+        </div></div>
+        <p>Dibuja y deja el lápiz quieto medio segundo, sin levantarlo: la figura sale perfecta. Ideal para algoritmos y mapas.</p>
       </div>
-      <div class="sticky" style="--c2:var(--lime)">
-        <h3>Para qué te sirve</h3>
-        <ul>
-          <li>Mapas conceptuales y algoritmos de manejo.</li>
-          <li>Cuadros comparativos (por ejemplo, síndrome nefrótico vs. nefrítico).</li>
-          <li>Esquemas de anatomía con flechas rectas y limpias.</li>
-        </ul>
+      <div class="demo">
+        <h4>Texto y letra a texto</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><path d="M14 58c6-24 10-30 12-18s-2 22 2 16 8-16 14-10-2 14 6 10 6-14 10-6-2 14 8 8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="var(--plum)" stroke-width="2.6"/><path d="M96 46h30" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5"/><path d="M120 40l8 6-8 6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="146" y="55" class="mini big">Hola</text></svg></div>
+        <p>Con <span class="k"><svg class="i"><use href="#text"/></svg></span> escribes con teclado. Con <b>Aa</b> encierras tu letra y se vuelve texto bonito (necesita internet).</p>
       </div>
     </div>
-    <p class="tip">Reconoce líneas, círculos, óvalos, triángulos, cuadrados, rectángulos, rombos, pentágonos, hexágonos, estrellas, corazones y barras redondeadas.</p>
+    <p class="tip">Pluma 1 en azul oscuro para la teoría y Pluma 2 en rojo para lo que "siempre preguntan".</p>
   </section>
 
-  <!-- 7 -->
-  <section class="sec" id="texto" style="--c:var(--sky)">
-    <span class="label"><svg class="i"><use href="#note"/></svg>7 · Texto, notas y lazo</span>
-    <h2>Comenta, copia y reorganiza</h2>
-    <div class="tiles">
-      <div class="tile" style="--c:var(--sky)"><h4>Seleccionar texto del PDF</h4><p>Con la herramienta de selección, desliza sobre el texto: puedes <strong>copiarlo</strong>, <strong>resaltarlo</strong> o <strong>agregarle una nota</strong>.</p></div>
-      <div class="tile" style="--c:var(--rose)"><h4>Notas con imágenes</h4><p>Mantén presionado sobre la hoja → <em>Agregar nota</em>. Escribe tu comentario y adjunta fotos (por ejemplo, la imagen de una lesión). Las notas también se guardan al final del PDF.</p></div>
-      <div class="tile" style="--c:var(--lav)"><h4>Escribir con teclado</h4><p>Con la herramienta de texto <span class="k"><svg class="i"><use href="#text"/></svg></span> toca la hoja y escribe: ideal para dosis, valores y datos que deben verse claros.</p></div>
-      <div class="tile" style="--c:var(--mint)"><h4>Lazo</h4><p>Encierra lo que escribiste <span class="k"><svg class="i"><use href="#lasso"/></svg></span>: se ilumina solo lo que elegiste. Arrástralo para <strong>moverlo</strong>, usa las esquinas para <strong>agrandarlo</strong>, el círculo de arriba para <strong>girarlo</strong>, y cambia su color, duplícalo o bórralo.</p></div>
-      <div class="tile" style="--c:var(--peach)"><h4>Tablas</h4><p>Con la herramienta de tabla <span class="k"><svg class="i"><use href="#pages"/></svg></span> tocas la hoja y aparece una tabla. Escribe en cada celda, agrega filas o columnas y pinta el encabezado. Tócala otra vez cuando quieras editarla.</p></div>
-      <div class="tile" style="--c:var(--lime)"><h4>Convertir a texto</h4><p>Con "Aa" encierra lo que escribiste a mano: DrawSky lo lee y lo convierte en texto con la letra que elijas (manuscrita, plumón, caligrafía, elegante…).</p></div>
-      <div class="tile" style="--c:var(--butter)"><h4>Buscar en el PDF</h4><p>La lupa <span class="k"><svg class="i"><use href="#search"/></svg></span> encuentra una palabra en todo el documento: "Spurling", "Murphy", "QT largo"…</p></div>
-    </div>
-  </section>
-
-  <!-- 8 -->
-  <section class="sec" id="indice" style="--c:var(--rose)">
-    <span class="label"><svg class="i"><use href="#bookmark"/></svg>8 · Índice y marcadores</span>
-    <h2>Tu propio índice, en tres niveles</h2>
-    <p class="lead">En un libro de 900 páginas, encontrar "Colecistitis aguda" no debería tomarte más de un segundo. Marca la página donde empieza cada tema y ponle título.</p>
+  <!-- 4 -->
+  <section class="sec" id="resaltar" style="--c:var(--butter)">
+    <span class="label"><svg class="i"><use href="#hl"/></svg>4 · Resaltar y borrar</span>
+    <h2>Resalta sin tapar, borra sin miedo</h2>
+    <p class="lead">El resaltador deja ver las letras debajo; el rotulador (en la misma herramienta) pinta más intenso.</p>
     <div class="cols">
-      <div>
-        <ol class="steps">
-          <li>Ve a la página donde empieza el tema y toca el marcador <span class="k"><svg class="i"><use href="#bookmark"/></svg></span> de abajo. DrawSky te propone el título de la página.</li>
-          <li>Elige el nivel: <strong>Capítulo</strong>, <strong>Tema</strong> o <strong>Subtema</strong>, y un color.</li>
-          <li>Abre el panel de páginas <span class="k"><svg class="i"><use href="#pages"/></svg></span> → <strong>Índice</strong>: ahí ves todos tus títulos, pliegas capítulos y saltas a cualquier tema.</li>
-          <li>¿El PDF ya trae su propio índice? En <strong>Del libro</strong> lo ves y lo copias al tuyo con un toque.</li>
-        </ol>
-        <p class="tip">Tu índice se guarda dentro del PDF: lo verás también en la computadora con cualquier lector.</p>
+      <div><ul class="dots"><li><strong>Intensidad</strong> a tu gusto y <strong>resaltado recto</strong> aunque tu mano se mueva.</li><li><strong>Texto del PDF:</strong> con la herramienta de selección desliza sobre el texto y toca <em>Resaltar</em>.</li></ul></div>
+      <div class="mock hlline">
+        <span style="--c:var(--butter)"><mark>La noradrenalina es el vasopresor de primera línea</mark></span> en el shock séptico. Si persiste la hipotensión, <span style="--c:var(--rose)"><mark>agregar vasopresina</mark></span>; considerar <span style="--c:var(--sky)"><mark>hidrocortisona 200 mg/día</mark></span> en shock refractario.
       </div>
-      <div class="mock">
-        <div class="tree">
+    </div>
+    <div class="demos">
+      <div class="demo">
+        <h4>Borrador</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><path d="M14 52c20-18 34 6 52-6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="var(--plum)" stroke-width="3"/><path d="M104 46c18-12 30 4 46-4s24-8 34 0" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="var(--plum)" stroke-width="3"/><g transform="translate(70 18) rotate(30)"><rect x="0" y="0" width="34" height="20" rx="4" fill="#ffd7d6" stroke="var(--ink)" stroke-width="2"/><path d="M12 0v20" stroke="var(--ink)" stroke-width="2"/></g><path d="M80 66l6 6M92 64l4 8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg></div>
+        <p>Trazo completo, parcial (una letra) o solo el resaltado. <b>Botón del S Pen:</b> un toque = borrador, otro = vuelves.</p>
+      </div>
+      <div class="demo">
+        <h4>Deshacer</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><g fill="#fff" stroke="var(--ink)" stroke-width="2"><circle cx="80" cy="45" r="26"/><circle cx="140" cy="45" r="26"/></g><g fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M72 38h12a8 8 0 0 1 0 16h-10M78 32l-6 6 6 6"/><path d="M148 38h-12a8 8 0 0 0 0 16h10M142 32l6 6-6 6"/></g></svg></div>
+        <p>Deshacer y rehacer siempre a mano en tu barra.</p>
+      </div>
+    </div>
+    <p class="tip">Un color por tipo de dato: amarillo = definición, rosa = tratamiento, celeste = dosis.</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="sec" id="organiza" style="--c:var(--sky)">
+    <span class="label"><svg class="i"><use href="#lasso"/></svg>5 · Organiza tu hoja</span>
+    <h2>Mueve, copia y comenta</h2>
+    <p class="lead">Con el lazo eliges lo que escribiste. Manteniendo presionado sobre la hoja aparece <b>Pegar · Nota aquí</b>.</p>
+    <div class="demos">
+      <div class="demo">
+        <h4>Lazo</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><path d="M70 50c8-14 18 6 26-6s14-6 22 2 10 0 16-4" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="var(--plum)" stroke-width="2.6"/><rect x="58" y="28" width="94" height="40" rx="4" fill="none" stroke="#3d8bfd" stroke-width="1.8"/><g fill="#fff" stroke="#3d8bfd" stroke-width="1.8"><circle cx="58" cy="28" r="5"/><circle cx="152" cy="28" r="5"/><circle cx="58" cy="68" r="5"/><circle cx="152" cy="68" r="5"/><circle cx="105" cy="12" r="6"/></g><path d="M105 18v10" stroke="#3d8bfd" stroke-width="1.8"/></svg></div>
+        <p>Encierra tus trazos: arrástralos, agrándalos con las esquinas o gíralos con el círculo de arriba.</p>
+      </div>
+      <div class="demo">
+        <h4>Copiar y pegar</h4>
+        <div class="menudemo"><span>Copiar</span><span>Cortar</span><span>Duplicar</span><span>Eliminar</span><span>Tarjeta</span><span>Fijar</span></div>
+        <div class="menudemo two"><span class="on">Pegar</span><span>Nota aquí</span></div>
+        <p>Elige en el menú. Para pegar, <b>mantén presionado</b> donde quieras. También pega imágenes copiadas de la web.</p>
+      </div>
+      <div class="demo">
+        <h4>Fijar imágenes</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="62" y="12" width="96" height="66" rx="6" fill="#d5edf8" stroke="var(--ink)" stroke-width="2"/><circle cx="132" cy="32" r="8" fill="#ffcc80"/><path d="M62 70l26-26 18 16 14-12 38 30" fill="#bcc07b" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><circle cx="160" cy="14" r="13" fill="var(--ink)"/><rect x="154" y="12" width="12" height="9" rx="2" fill="#fff"/><path d="M156.5 12v-3a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="#fff" stroke-width="1.8"/></svg></div>
+        <p><b>Fijar</b> deja una imagen quieta para escribir encima sin moverla.</p>
+      </div>
+      <div class="demo">
+        <h4>Notas</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="30" y="8" width="70" height="76" rx="4" fill="#fff" stroke="var(--ink)" stroke-width="2"/><g stroke="#c9d6e3" stroke-width="3" stroke-linecap="round"><path d="M40 24h50M40 36h40M40 48h48M40 60h34"/></g><rect x="76" y="40" width="20" height="16" rx="2" fill="#ffd43b" stroke="var(--ink)" stroke-width="1.8"/><text x="86" y="52" text-anchor="middle" class="mini">1</text><path d="M100 48c14 0 18-8 26-8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/><rect x="128" y="20" width="76" height="52" rx="8" fill="#fff" stroke="var(--ink)" stroke-width="2"/><g stroke="#c9d6e3" stroke-width="3" stroke-linecap="round"><path d="M138 34h52M138 46h40"/></g><rect x="138" y="54" width="22" height="12" rx="2" fill="#f6b8c8"/></svg></div>
+        <p>Mantén presionado → <b>Nota aquí</b>. Escribe y adjunta fotos, como la de una lesión.</p>
+      </div>
+      <div class="demo">
+        <h4>Tablas</h4>
+        <div class="tbldemo">
+          <span class="grip" style="left:42%"></span><span class="grip" style="left:72%"></span>
+          <table><tr><th>Grupo</th><th>Porciones</th><th>Kcal</th></tr><tr><td>Lácteos</td><td>2</td><td>240</td></tr><tr><td>Frutas</td><td>3</td><td>180</td></tr><tr><td>Cereales</td><td>6</td><td>480</td></tr></table>
+        </div>
+        <p>Toca la hoja para crearla. <b>Fila − +</b> y <b>Columna − +</b>; arrastra las agarraderas para el tamaño.</p>
+      </div>
+      <div class="demo">
+        <h4>Stickers</h4>
+        <div class="stkdemo" id="stkDemo" aria-label="Algunos stickers de DrawSky"></div>
+        <p>Estudio, Washi y Flechas. Con <b>Crear sticker</b> recortas cualquier foto con el lápiz.</p>
+      </div>
+      <div class="demo">
+        <h4>Buscar</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="30" y="8" width="160" height="26" rx="13" fill="#fff" stroke="var(--ink)" stroke-width="2"/><circle cx="48" cy="21" r="6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M52 25l5 5" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="64" y="26" class="mini b">Murphy</text><g stroke="#c9d6e3" stroke-width="3" stroke-linecap="round"><path d="M34 50h150M34 62h60M150 62h34M34 74h120"/></g><rect x="98" y="56" width="48" height="12" rx="3" fill="#ffe785"/><text x="122" y="66" text-anchor="middle" class="mini">Murphy</text></svg></div>
+        <p>La lupa <span class="k"><svg class="i"><use href="#search"/></svg></span> encuentra una palabra en todo el PDF.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 6 -->
+  <section class="sec" id="indice" style="--c:var(--rose)">
+    <span class="label"><svg class="i"><use href="#bookmark"/></svg>6 · Índice y marcadores</span>
+    <h2>Tu propio índice, en tres niveles</h2>
+    <p class="lead">En un libro de 900 páginas, encontrar "Colecistitis aguda" te toma un segundo.</p>
+    <div class="cols">
+      <div><ol class="steps">
+          <li>En la página donde empieza el tema toca el marcador <span class="k"><svg class="i"><use href="#bookmark"/></svg></span>. DrawSky te propone el título.</li>
+          <li>Elige <strong>Capítulo</strong>, <strong>Tema</strong> o <strong>Subtema</strong>.</li>
+          <li>Abre el panel <span class="k"><svg class="i"><use href="#pages"/></svg></span> → <strong>Índice</strong> y salta a cualquier tema. Ahí también están tus <strong>Páginas</strong> y <strong>Notas</strong>.</li>
+          <li>¿El PDF trae su índice? En <strong>Del libro</strong> lo copias al tuyo.</li>
+        </ol></div>
+      <div class="mock"><div class="tree">
           <div class="l1" style="--c:var(--coral)"><i></i>Cirugía general<small>p. 1</small></div>
           <div class="l2" style="--c:var(--pink)"><i></i>Hígado<small>p. 12</small></div>
           <div class="l3" style="--c:var(--rose)"><i></i>Quiste hidatídico<small>p. 18</small></div>
@@ -468,65 +450,79 @@ footer .btn{margin-top:12px}
           <div class="l3" style="--c:var(--rose)"><i></i>Colecistitis aguda<small>p. 34</small></div>
           <div class="l3" style="--c:var(--rose)"><i></i>Coledocolitiasis<small>p. 40</small></div>
           <div class="l2" style="--c:var(--pink)"><i></i>Páncreas<small>p. 52</small></div>
-        </div>
+        </div></div>
+    </div>
+    <p class="tip">Copia el índice del libro antes de leer y ve marcando con un color los temas que ya estudiaste.</p>
+  </section>
+
+  <!-- 7 -->
+  <section class="sec" id="repasa" style="--c:var(--coral)">
+    <span class="label"><svg class="i"><use href="#obook"/></svg>7 · Repasa</span>
+    <h2>Repasa para recordar, no solo para releer</h2>
+    <p class="lead">Tres formas de ponerte a prueba con tus propios apuntes.</p>
+    <div class="demos">
+      <div class="demo">
+        <h4>Cinta para repasar</h4>
+        <p class="tapedemo">Dosis alta de amoxicilina en otitis media: <button type="button" class="tapex" aria-pressed="false" aria-label="Cinta: toca para ver la respuesta"><span>80–90 mg/kg/día</span></button></p>
+        <p>Arrastra la cinta sobre la respuesta. Para repasar, <b>tócala</b> y se descubre; otra vez y se tapa.</p>
+      </div>
+      <div class="demo">
+        <h4>Tarjetas de repaso</h4>
+        <button type="button" class="flashx" aria-pressed="false" aria-label="Tarjeta: toca para ver la respuesta"><span class="f">¿Qué es el signo de Murphy?</span><span class="b">Dolor que interrumpe la inspiración al palpar el hipocondrio derecho: orienta a colecistitis aguda.</span></button>
+        <p>Encierra una zona con el lazo y toca <b>Tarjeta</b>. Te vuelven a salir justo antes de olvidarlas: Otra vez · Difícil · Bien · Fácil.</p>
+      </div>
+      <div class="demo">
+        <h4>Método Cornell</h4>
+        <div class="dimg"><svg viewBox="0 0 220 120" aria-hidden="true"><rect x="30" y="6" width="160" height="108" rx="5" fill="#fff" stroke="var(--ink)" stroke-width="2"/><path d="M92 6v82M30 88h160" stroke="#ea7d70" stroke-width="2"/><text x="61" y="32" text-anchor="middle" class="mini hand">¿Qué es?</text><text x="61" y="58" text-anchor="middle" class="mini hand">¿Dosis?</text><rect x="97" y="12" width="88" height="70" rx="2" fill="#a8dcef"/><g stroke="rgba(255,255,255,.65)" stroke-width="3"><path d="M104 82l20-70M120 82l20-70M136 82l20-70M152 82l20-70M168 82l17-60"/></g><text x="42" y="106" class="mini hand">Resumen: …</text></svg></div>
+        <p>Crea un cuaderno <b>Cornell</b>: preguntas a la izquierda, notas a la derecha y resumen abajo. Tapa la derecha con una cinta y responde.</p>
       </div>
     </div>
-    <ul class="dots" style="margin-top:14px">
-      <li>En el mismo panel tienes <strong>Páginas</strong> (miniaturas para reordenar, duplicar o insertar hojas) y <strong>Notas</strong> (todas tus notas del documento).</li>
-    </ul>
+    <div class="note-line"><ul class="dots"><li>El botón de tarjetas de abajo muestra con un número rojo cuántas te tocan hoy.</li><li>En el panel de páginas → <strong>Notas</strong> ves todas tus notas juntas: un resumen listo la noche antes.</li></ul></div>
+    <p class="tip">Diez minutos al día con tus tarjetas valen más que una noche entera releyendo.</p>
+  </section>
+
+  <!-- 8 -->
+  <section class="sec" id="colores" style="--c:var(--lav)">
+    <span class="label"><svg class="i"><use href="#palette"/></svg>8 · Tus colores</span>
+    <h2>Tu código de colores, siempre igual</h2>
+    <p class="lead">Paletas listas o las tuyas. El mismo selector sirve para plumas, resaltador y carpetas.</p>
+    <div class="cols">
+      <div><ul class="dots"><li><strong>Crea un color</strong> con el <span class="k"><svg class="i"><use href="#plus"/></svg></span>: en el cuadro de tonos o con su código.</li><li><strong>Busca por código:</strong> escribe FFC59E y ves ese color y los parecidos.</li><li><strong>Pega varios códigos</strong> de Pinterest y se arma la paleta.</li><li><strong>Ancla</strong> tus favoritas y quita las que no uses.</li></ul></div>
+      <div class="mock">
+        <span class="badge">Paleta Cerezo</span>
+        <div class="swatches" style="margin-bottom:12px"><i style="--c:#ee7ea0"></i><i style="--c:#ffa9ba"></i><i style="--c:#ffd7d6"></i><i style="--c:#ea7d70"></i><i style="--c:#ffaf6e"></i><i style="--c:#ffcc80"></i><i style="--c:#bcc07b"></i><i style="--c:#abcdde"></i><i style="--c:#cdbdeb"></i></div>
+        <span class="badge">Paleta Estudio</span>
+        <div class="swatches" style="margin-bottom:12px"><i style="--c:#ff8a89"></i><i style="--c:#ffc59e"></i><i style="--c:#ffe785"></i><i style="--c:#ffa9cb"></i><i style="--c:#ddaee4"></i><i style="--c:#bae3ea"></i><i style="--c:#9bd9d0"></i><i style="--c:#abae98"></i></div>
+        <span class="badge">Paleta Tierra</span>
+        <div class="swatches"><i style="--c:#f59cb2"></i><i style="--c:#b48d71"></i><i style="--c:#a05c46"></i><i style="--c:#e49e91"></i><i style="--c:#d5708b"></i><i style="--c:#f2dcbe"></i></div>
+      </div>
+    </div>
+
   </section>
 
   <!-- 9 -->
-  <section class="sec" id="colores" style="--c:var(--lav)">
-    <span class="label"><svg class="i"><use href="#palette"/></svg>9 · Paletas de colores</span>
-    <h2>Tu código de colores, siempre igual</h2>
-    <p class="lead">Elige entre paletas listas (Cherii, GoodNotes, Starter, Tierra, Básicos) o crea las tuyas. El mismo selector sirve para plumas, resaltador y carpetas.</p>
+  <section class="sec" id="drive" style="--c:var(--mint)">
+    <span class="label"><svg class="i"><use href="#cloud"/></svg>9 · Drive y sin internet</span>
+    <h2>Estudia en la guardia, en el bus o en la biblioteca</h2>
+
     <div class="cols">
-      <div>
-        <ul class="dots">
-          <li><strong>Crea un color</strong> con el <span class="k"><svg class="i"><use href="#plus"/></svg></span> del selector: arrastras en el cuadro de tonos o escribes su código.</li>
-          <li><strong>Busca por código:</strong> escribe FFC59E y te muestra ese color y los más parecidos.</li>
-          <li><strong>Pega varios códigos</strong> de una paleta de Pinterest o de pintores y se arma la paleta completa.</li>
-          <li><strong>Ancla</strong> tus paletas favoritas para que salgan primero y <strong>quita</strong> las que no uses.</li>
-        </ul>
-      </div>
-      <div class="mock">
-        <span class="badge">Cherii</span>
-        <div class="swatches" style="margin-bottom:12px"><i style="--c:#ee7ea0"></i><i style="--c:#ffa9ba"></i><i style="--c:#ffd7d6"></i><i style="--c:#ea7d70"></i><i style="--c:#ffaf6e"></i><i style="--c:#ffcc80"></i><i style="--c:#bcc07b"></i><i style="--c:#7d8be0"></i><i style="--c:#abcdde"></i><i style="--c:#9a81b0"></i><i style="--c:#8e715b"></i><i style="--c:#4f3f3e"></i></div>
-        <span class="badge">GoodNotes</span>
-        <div class="swatches"><i style="--c:#ff8a89"></i><i style="--c:#ffc59e"></i><i style="--c:#ffe785"></i><i style="--c:#ffa9cb"></i><i style="--c:#ddaee4"></i><i style="--c:#bae3ea"></i><i style="--c:#9bd9d0"></i><i style="--c:#abae98"></i><i style="--c:#c3a296"></i><i style="--c:#2874a6"></i><i style="--c:#7b4384"></i><i style="--c:#2d3235"></i></div>
-      </div>
+      <div><ul class="dots"><li><strong>Se guarda solo en tu Drive,</strong> en el mismo archivo, y lo ves en el celular o la computadora.</li><li><strong>Sin internet</strong> sigues escribiendo; al volver la conexión se sube solo.</li><li><strong>Ábrelo en un solo lugar a la vez:</strong> si lo editas en dos sitios, DrawSky guarda una copia para no perder nada.</li><li>Los cuadernos nuevos van a la carpeta <strong>DrawSky</strong> de tu Drive.</li><li><strong>Solo en la tableta:</strong> tus tarjetas de repaso y tus stickers propios.</li></ul></div>
+      <div><div class="mock" style="margin-bottom:16px;display:flex;justify-content:center"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="12" y="22" width="52" height="64" rx="7" fill="#fff" stroke="var(--ink)" stroke-width="2"/><path d="M24 44c6-6 10 4 16-2s8-2 12 2" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="var(--plum)"/><path d="M90 50c-8 0-12-6-10-12 2-7 10-8 14-4 2-8 14-10 20-3 6-2 14 2 13 10 7 1 9 9 2 9z" fill="#d5edf8" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M70 54h8M136 54h8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/><rect x="152" y="34" width="56" height="36" rx="4" fill="#fff" stroke="var(--ink)" stroke-width="2"/><path d="M146 74h68" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M162 50c6-6 10 4 16-2s8-2 12 2" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="var(--plum)"/></svg></div>
+      <div class="sticky" style="--c2:var(--mint)">
+        <h3>Antes de una rotación sin señal</h3>
+        <p>Abre una vez, con internet, los PDFs que vas a necesitar: DrawSky guarda los últimos 10 para usarlos sin conexión.</p>
+      </div></div>
     </div>
+
   </section>
 
   <!-- 10 -->
-  <section class="sec" id="drive" style="--c:var(--mint)">
-    <span class="label"><svg class="i"><use href="#cloud"/></svg>10 · Drive y sin internet</span>
-    <h2>Estudia en la guardia, en el bus o en la biblioteca</h2>
-    <div class="cols">
-      <ul class="dots">
-        <li><strong>Se guarda en el mismo archivo:</strong> si abriste un PDF de Drive, tus trazos quedan en ese PDF. No se crean copias.</li>
-        <li><strong>Cuándo se sube:</strong> al instante queda en tu tableta; a Drive sube cada 3 minutos mientras escribes y siempre al cerrar el archivo o salir de la app. "Guardar en Drive" lo sube en ese momento.</li>
-        <li><strong>Tu sesión de Google:</strong> dura una hora; DrawSky la renueva sola con el siguiente toque que des en cualquier botón.</li>
-        <li><strong>Lo ves en todos tus aparatos:</strong> tableta, celular o computadora.</li>
-        <li><strong>Sin internet:</strong> sigues escribiendo en los archivos que ya abriste; cuando vuelve la conexión, se suben solos.</li>
-        <li><strong>Sin pisar nada:</strong> si abres el mismo archivo en dos lugares a la vez, u otra app lo cambia, DrawSky guarda tus trazos como copia aparte. Ábrelo en un solo lugar a la vez.</li>
-        <li>Los cuadernos y archivos de la tableta se guardan en una carpeta <strong>DrawSky</strong> de tu Drive.</li>
-      </ul>
-      <div class="sticky" style="--c2:var(--mint)">
-        <h3>Antes de una rotación sin señal</h3>
-        <p>Abre una vez, con internet, los PDFs que vas a necesitar. DrawSky guarda en la tableta los últimos 10 que abriste para usarlos sin conexión.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 11 -->
   <section class="sec" id="herramientas" style="--c:var(--mocha)">
-    <span class="label"><svg class="i"><use href="#settings"/></svg>11 · Tus herramientas</span>
-    <h2>Todo lo que tienes a mano</h2>
-    <p class="lead">Así funciona la ruedita, y debajo cada herramienta con su ejemplo. Toca la cinta y la tarjeta para probarlas.</p>
+    <span class="label"><svg class="i"><use href="#settings"/></svg>10 · Ruedita y atajos</span>
+    <h2>Todo a mano</h2>
+
     <figure class="wheelfig">
-<svg viewBox="0 0 760 480" role="img" aria-label="Cómo funciona la ruedita: tocas el botón flotante, se abre la ruedita con tus herramientas, el lápiz marca en celeste la opción que vas a elegir">
+<svg viewBox="0 0 760 480" role="img" aria-label="Cómo funciona la ruedita: tocas el botón flotante, se abre la ruedita con tus herramientas">
   <g transform="translate(36 462) rotate(-38)" fill="none" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
     <path d="M0 -9 H215 L248 0 L215 9 H0 Q-8 9 -8 0 Q-8 -9 0 -9Z" fill="var(--card)"/>
     <path d="M238 -3 L248 0 L238 3" fill="var(--ink)"/>
@@ -541,25 +537,19 @@ footer .btn{margin-top:12px}
   <text x="178" y="66" class="hn c">tócalo</text>
   <circle cx="400" cy="200" r="130" fill="#2a2d33" stroke="var(--ink)" stroke-width="2.6"/>
   <circle cx="400" cy="200" r="112" fill="#1d2026"/>
-  <path d="M376.9 81.2A121 121 0 0 1 423.1 81.2" fill="none" stroke="#6ec6f0" stroke-width="10" stroke-linecap="round"/>
   <g style="color:#fff"><use href="#pen" x="387.0" y="107.0" width="26" height="26" class="wi"/><use href="#pen" x="427.0" y="117.7" width="26" height="26" class="wi"/><use href="#hl" x="456.3" y="147.0" width="26" height="26" class="wi"/><use href="#eraser" x="467.0" y="187.0" width="26" height="26" class="wi"/><use href="#lasso" x="456.3" y="227.0" width="26" height="26" class="wi"/><use href="#text" x="427.0" y="256.3" width="26" height="26" class="wi"/><use href="#pages" x="387.0" y="267.0" width="26" height="26" class="wi"/><use href="#tpl" x="347.0" y="256.3" width="26" height="26" class="wi"/><use href="#note" x="317.7" y="227.0" width="26" height="26" class="wi"/><use href="#palette" x="307.0" y="187.0" width="26" height="26" class="wi"/><use href="#star" x="317.7" y="147.0" width="26" height="26" class="wi"/><use href="#undo" x="347.0" y="117.7" width="26" height="26" class="wi"/></g>
   <circle cx="400" cy="200" r="38" fill="#d6e9f5"/>
   <image href="logo-round.svg" x="366" y="166" width="68" height="68"/>
-  <text x="540" y="38" class="hn">Pasa el lápiz encima:</text><text x="540" y="62" class="hn">se marca en celeste</text>
-  <path class="ar" d="M534 50 C 500 50, 456 54, 424 70"/><path class="ar" d="M434 61 L423 71 L437 74"/>
+  
+  
   <text x="556" y="190" class="hn">Toca una herramienta:</text><text x="556" y="214" class="hn">se abren su color</text><text x="556" y="238" class="hn">y su grosor</text>
   <path class="ar" d="M550 204 C 530 200, 512 186, 492 176"/><path class="ar" d="M504 172 L491 175 L499 186"/>
   <text x="556" y="300" class="hn">Toca el elefantito</text><text x="556" y="324" class="hn">para cerrarla</text>
   <path class="ar" d="M550 310 C 500 310, 460 270, 430 232"/><path class="ar" d="M429 246 L429 231 L442 237"/>
 </svg>
-<figcaption>Arrastra la ruedita a un borde de la pantalla y se convierte en <b>barra lateral</b>; arrástrala al centro y vuelve a ser ruedita.</figcaption>
+<figcaption>Arrástrala a un borde de la pantalla y se vuelve <b>barra lateral</b>; al centro, vuelve a ser ruedita.</figcaption>
 </figure>
     <div class="demos">
-      <div class="demo">
-        <h4>Ruedita o barra</h4>
-        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="20" y="10" width="34" height="74" rx="17" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/><g fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 26h14M30 40h14M30 54h14M30 68h14"/></g><path d="M66 46h40" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5"/><path d="M98 40l8 6-8 6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="160" cy="46" r="30" fill="#2a2d33" stroke="var(--ink)" stroke-width="2"/><circle cx="160" cy="46" r="11" fill="#d6e9f5"/></svg></div>
-        <p>Arrástrala a un borde y se vuelve barra; al centro, ruedita.</p>
-      </div>
       <div class="demo">
         <h4>Plantillas</h4>
         <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"><rect x="16" y="8" width="52" height="74" rx="4"/><rect x="84" y="8" width="52" height="74" rx="4"/><rect x="152" y="8" width="52" height="74" rx="4"/></g><g stroke="#8fb3d6" stroke-width="1.4"><path d="M22 26h40M22 36h40M22 46h40M22 56h40M22 66h40"/><path d="M94 8v74M104 8v74M114 8v74M124 8v74M84 22h52M84 34h52M84 46h52M84 58h52M84 70h52"/><path d="M168 8v58M152 66h52"/></g></svg></div>
@@ -569,35 +559,6 @@ footer .btn{margin-top:12px}
         <h4>Barrita de páginas</h4>
         <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="60" y="6" width="80" height="80" rx="4" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/><g stroke="#c9d6e3" stroke-width="3" stroke-linecap="round"><path d="M72 22h50M72 32h56M72 42h44M72 52h52M72 62h40"/></g><rect x="148" y="30" width="54" height="24" rx="12" fill="var(--ink)"/><text x="175" y="47" text-anchor="middle" class="mini w">3 / 12</text><path d="M175 12v12M175 60v14M170 18l5-6 5 6M170 68l5 6 5-6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <p>Sale al deslizar: arrástrala y salta a cualquier página.</p>
-      </div>
-      <div class="demo">
-        <h4>Stickers</h4>
-        <div class="stkdemo" id="stkDemo" aria-label="Algunos stickers de DrawSky"></div>
-        <p>Packs Estudio, Washi y Flechas. Toca uno y luego la hoja. Con <b>Crear sticker</b> recortas cualquier foto con el lápiz.</p>
-      </div>
-      <div class="demo">
-        <h4>Tablas</h4>
-        <div class="tbldemo">
-          <span class="grip" style="left:42%"></span><span class="grip" style="left:72%"></span>
-          <table><tr><th>Grupo</th><th>Porciones</th><th>Kcal</th></tr><tr><td>Lácteos</td><td>2</td><td>240</td></tr><tr><td>Frutas</td><td>3</td><td>180</td></tr><tr><td>Cereales</td><td>6</td><td>480</td></tr></table>
-        </div>
-        <p>Escribe en cada celda. <b>Fila − +</b> y <b>Columna − +</b> agregan o quitan; arrastra las agarraderas para el ancho y el alto.</p>
-      </div>
-      <div class="demo">
-        <h4>Cinta para repasar</h4>
-        <p class="tapedemo">Dosis alta de amoxicilina en otitis media: <button type="button" class="tapex" aria-pressed="false" aria-label="Cinta: toca para ver la respuesta"><span>80–90 mg/kg/día</span></button></p>
-        <p>Arrastra la cinta sobre la respuesta. Para repasar, <b>tócala</b> y se descubre; otra vez y se tapa.</p>
-      </div>
-      <div class="demo">
-        <h4>Tarjetas de repaso</h4>
-        <button type="button" class="flashx" aria-pressed="false" aria-label="Tarjeta: toca para ver la respuesta"><span class="f">¿Qué es el signo de Murphy?</span><span class="b">Dolor que interrumpe la inspiración al palpar el hipocondrio derecho: orienta a colecistitis aguda.</span></button>
-        <p>Encierra una zona con el lazo y toca <b>Tarjeta</b>. Te vuelven a salir justo antes de olvidarlas: Otra vez · Difícil · Bien · Fácil.</p>
-      </div>
-      <div class="demo">
-        <h4>Copiar y pegar</h4>
-        <div class="menudemo"><span>Copiar</span><span>Cortar</span><span>Duplicar</span><span>Eliminar</span><span>Tarjeta</span><span>Fijar</span></div>
-        <div class="menudemo two"><span class="on">Pegar</span><span>Nota aquí</span></div>
-        <p>Selecciona con el lazo y elige. Para pegar, <b>mantén presionado</b> donde quieras. También pega imágenes copiadas de la web.</p>
       </div>
       <div class="demo">
         <h4>Zoom 1250%</h4>
@@ -615,19 +576,7 @@ footer .btn{margin-top:12px}
         <p>Tema claro, oscuro o del sistema, en Ajustes.</p>
       </div>
     </div>
-  </section>
 
-  <section class="sec" id="trucos" style="--c:var(--peach)">
-    <span class="label"><svg class="i"><use href="#star"/></svg>12 · ¿Sabías que…?</span>
-    <h2>Trucos para estudiar mejor</h2>
-    <div class="tiles">
-      <div class="tile" style="--c:var(--butter)"><h4>Método Cornell</h4><p>Crea un cuaderno con plantilla Cornell: a la izquierda las preguntas, a la derecha tus notas y abajo el resumen. Tapa la derecha y repasa respondiendo.</p></div>
-      <div class="tile" style="--c:var(--pink)"><h4>Índice antes de leer</h4><p>Copia el índice del libro a tu índice y ve marcando con un color los temas que ya estudiaste.</p></div>
-      <div class="tile" style="--c:var(--sky)"><h4>Foto + nota</h4><p>Toma foto a un caso de la pizarra o un monitor y agrégale una nota con tus conclusiones.</p></div>
-      <div class="tile" style="--c:var(--sage)"><h4>Algoritmos</h4><p>Con las figuras perfectas y las líneas punteadas haces algoritmos de manejo en minutos.</p></div>
-      <div class="tile" style="--c:var(--lav)"><h4>Repaso exprés</h4><p>En Notas ves todas tus anotaciones de un documento juntas: un resumen listo la noche antes.</p></div>
-      <div class="tile" style="--c:var(--coral)"><h4>Palma tranquila</h4><p>Apoya la mano mientras escribes: DrawSky solo escribe con el S Pen, la palma no raya.</p></div>
-    </div>
   </section>
 
   <footer>
