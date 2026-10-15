@@ -597,6 +597,7 @@ input[type=range]{accent-color:var(--accent)}
 .h-nav[aria-current="true"]{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
 .h-nav em{font-style:normal;font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:99px;background:var(--line);color:var(--muted)}
 .h-nav span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av{position:relative;overflow:hidden}.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .h-nav .av,.acc .av{flex:none;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:12px;font-weight:700}
 .h-nav.warn{color:#e8a33d}
 .pend{color:#e8a33d;font-weight:600}
@@ -838,7 +839,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (46)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (47)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -1365,7 +1366,7 @@ function renderHome(){
       : prefs.accounts.length ? nav('data-fulldrive="1"', false, svg('cloud', 20), 'Ver todo mi Drive') : '') +
     (pend ? nav('data-sync="1"', false, svg('share', 20), 'Sin subir', pend, ' warn') : '') +
     (prefs.accounts.length ? nav('data-refresh="1"', false, svg('redo', 20), 'Actualizar lista') : '') +
-    prefs.accounts.map(a => nav(`data-acc="${esc(a.email)}"`, false, `<span class="av">${initial(a)}</span>`, a.email)).join('') +
+    prefs.accounts.map(a => nav(`data-acc="${esc(a.email)}"`, false, `${avatar(a)}`, a.email)).join('') +
     nav('data-acc=""', false, svg('plus', 20), prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive') +
     nav('data-learn="1"', false, svg('obook', 20), 'Aprende', null, ' h-learn');
   if (homeFilter === 'gdrive'){ renderDriveBrowser(); return; }
@@ -1692,6 +1693,8 @@ const tokenOk = email => { const t = email && tokens[email]; return t && t.exp >
 function dropToken(email){ delete tokens[email]; store.set(TOK_KEY, tokens); }
 const account = email => prefs.accounts.find(a => a.email === email);
 const initial = a => esc(((a.name || a.email || '?').trim()[0] || '?').toUpperCase());
+/* your Google profile photo (the letter stays underneath in case the photo can't load, e.g. without internet) */
+const avatar = a => `<span class="av">${initial(a)}${a.photo ? `<img src="${esc(a.photo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`;
 
 /* must be called directly from a tap: Google opens its sign-in window */
 function requestToken(hint, done){
@@ -1716,7 +1719,7 @@ function requestToken(hint, done){
         tokens[email] = { t:r.access_token, exp:Date.now() + (+r.expires_in || 3600) * 1000, sc:prefs.fullDrive ? 'full' : 'file' }; store.set(TOK_KEY, tokens);
         let a = account(email);
         if (!a){ a = { email }; prefs.accounts.push(a); }
-        a.name = u.displayName || email;
+        a.name = u.displayName || email; if (u.photoLink) a.photo = u.photoLink;
         savePrefs(); renderDriveSettings(); if (homeOn) renderHome();
         setTimeout(() => refreshDriveList(true), 300);
         end(email, r.access_token);
@@ -1744,7 +1747,7 @@ function chooseAccount(title, cb){
   dlgState = { kind:'acc', cb };
   dlg.setAttribute('aria-label', title);
   dlg.innerHTML = `<header class="sheet-h"><h2>${esc(title)}</h2><button class="icon-btn" type="button" data-do="cancel" aria-label="Cerrar">${svg('close')}</button></header>
-    <div class="acc-pick">${prefs.accounts.map(a => `<button type="button" data-do="acc" data-email="${esc(a.email)}"><span class="av">${initial(a)}</span><span><strong>${esc(a.name || a.email)}</strong><br><small>${esc(a.email)}</small></span></button>`).join('')}
+    <div class="acc-pick">${prefs.accounts.map(a => `<button type="button" data-do="acc" data-email="${esc(a.email)}">${avatar(a)}<span><strong>${esc(a.name || a.email)}</strong><br><small>${esc(a.email)}</small></span></button>`).join('')}
     <button type="button" data-do="accNew"><span class="av">${svg('plus', 18)}</span><span>Otra cuenta de Google</span></button></div>`;
   dlgWrap.hidden = false;
 }
@@ -2428,12 +2431,16 @@ function openDriveEntry(e){
 /* ---------- Drive settings ---------- */
 function renderDriveSettings(){
   const el = $('#accList'); if (!el) return;
-  el.innerHTML = prefs.accounts.length ? prefs.accounts.map(a => `<div class="acc"><span class="av">${initial(a)}</span><div><strong>${esc(a.name || a.email)}</strong><small>${esc(a.email)}</small></div><button type="button" class="btn" data-rm="${esc(a.email)}">Quitar</button></div>`).join('')
+  el.innerHTML = prefs.accounts.length ? prefs.accounts.map(a => `<div class="acc">${avatar(a)}<div><strong>${esc(a.name || a.email)}</strong><small>${esc(a.email)}</small></div><button type="button" class="btn" data-rm="${esc(a.email)}">Quitar</button></div>`).join('')
     : '<p class="hint" style="margin:0">Aún no conectaste ninguna cuenta. Puedes conectar varias (personal, de la universidad…).</p>';
   $('#accAdd').innerHTML = svg('plus', 16) + (prefs.accounts.length ? 'Agregar otra cuenta' : 'Conectar Google Drive');
   $('#autoSync').checked = !!prefs.autoSync; $('#autoUpload').checked = !!prefs.autoUpload; $('#fullDrive').checked = !!prefs.fullDrive;
   cacheInfo();
 }
+setTimeout(() => prefs.accounts.forEach(async a => {
+  const t = !a.photo && navigator.onLine && tokenOk(a.email); if (!t) return;
+  try { const u = (await (await fetch(DRIVE + '/about?fields=user(photoLink)', { headers:{ Authorization:'Bearer ' + t } })).json()).user || {}; if (u.photoLink){ a.photo = u.photoLink; savePrefs(); renderDriveSettings(); if (homeOn) renderHome(); } } catch(_){}
+}), 2500);
 $('#accList').addEventListener('click', ev => {
   const b = ev.target.closest('[data-rm]'); if (!b) return;
   const email = b.dataset.rm;
