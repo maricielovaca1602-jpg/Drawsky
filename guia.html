@@ -145,6 +145,41 @@ footer .btn{margin-top:12px}
 .sec:nth-of-type(4n){--dood:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M6 34c10-14 22-20 34-18M30 9l10 7-7 10' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 @media (max-width:620px){ .sec::before{width:34px;height:34px;top:14px;right:14px} }
 
+
+/* examples */
+.wheelfig{margin:6px 0 22px}
+.wheelfig svg{width:100%;height:auto;display:block}
+.wheelfig .hn{font:700 21px var(--hand);fill:var(--ink)}
+.wheelfig .hn.c{fill:var(--coral)}
+.wheelfig .ar{fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.wheelfig .wi{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wheelfig figcaption{font:600 21px/1.3 var(--hand);color:var(--soft);text-align:center;margin-top:4px}
+.demos{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.demo{position:relative;padding:18px;border-radius:22px 18px 24px 16px/18px 24px 16px 22px;background:var(--card)}
+.demo::after{content:"";position:absolute;inset:2px;border:2px solid var(--ink);border-radius:inherit;filter:url(#rough);pointer-events:none}
+.demo h4{margin:0 0 10px;font:700 25px/1 var(--hand)}
+.demo p{margin:10px 0 0;font-size:14.5px}
+.stkdemo{display:flex;flex-wrap:wrap;gap:6px;min-height:64px}
+.stkdemo svg{width:60px;height:60px}
+.tbldemo{position:relative;padding-top:12px}
+.tbldemo table{width:100%;border-collapse:collapse;font-size:14px}
+.tbldemo th,.tbldemo td{border:1.5px solid var(--ink);padding:5px 8px;text-align:left}
+.tbldemo th{background:color-mix(in srgb,var(--sage) 45%,var(--card))}
+.tbldemo .grip{position:absolute;top:0;width:8px;height:18px;margin-left:-4px;border:1.5px solid #3d8bfd;border-radius:5px;background:#fff}
+.tapedemo{font-size:15.5px!important;margin:0!important;line-height:2}
+.tapex{position:relative;border:0;padding:2px 8px;border-radius:2px;font:inherit;cursor:pointer;color:var(--ink);
+  background:repeating-linear-gradient(45deg,#f6b8c8 0 6px,#fad3dd 6px 10px)}
+.tapex span{visibility:hidden}
+.tapex[aria-pressed="true"]{background:transparent;outline:1.5px dashed #ee7ea0}
+.tapex[aria-pressed="true"] span{visibility:visible}
+.flashx{display:block;width:100%;min-height:96px;padding:16px;border:2px solid var(--ink);border-radius:14px;background:color-mix(in srgb,var(--lav) 30%,var(--card));font:inherit;color:var(--ink);text-align:center;cursor:pointer}
+.flashx .f{font:700 22px/1.2 var(--hand)}
+.flashx .b{display:none;font-size:14.5px}
+.flashx[aria-pressed="true"]{background:color-mix(in srgb,var(--sky) 35%,var(--card))}
+.flashx[aria-pressed="true"] .f{display:none}.flashx[aria-pressed="true"] .b{display:block}
+.menudemo{display:flex;flex-wrap:wrap;gap:4px;padding:5px;border:1.5px solid var(--ink);border-radius:12px;width:max-content;max-width:100%;font-size:12.5px;font-weight:600}
+.menudemo span{padding:5px 9px;border-radius:8px}
+.menudemo.two{margin-top:8px;border-radius:20px}.menudemo .on{background:var(--ink);color:#fff;border-radius:16px}
 </style>
 </head>
 <body>
@@ -220,7 +255,8 @@ footer .btn{margin-top:12px}
     <a href="#colores" style="--c:var(--lav)"><span class="n">9</span><span><b>Paletas de colores</b><small>Tu propio código de colores</small></span></a>
     <a href="#drive" style="--c:var(--mint)"><span class="n">10</span><span><b>Drive y sin internet</b><small>Estudia en cualquier lugar</small></span></a>
     <a href="#herramientas" style="--c:var(--mocha)"><span class="n">11</span><span><b>Tus herramientas</b><small>Barra lateral o ruedita</small></span></a>
-    <a href="#trucos" style="--c:var(--peach)"><span class="n">12</span><span><b>¿Sabías que…?</b><small>Trucos para estudiar mejor</small></span></a>
+    <a href="#ejemplos" style="--c:var(--lav)"><span class="n">12</span><span><b>Repasa y decora</b><small>Stickers, tablas, cinta y tarjetas</small></span></a>
+    <a href="#trucos" style="--c:var(--peach)"><span class="n">13</span><span><b>¿Sabías que…?</b><small>Trucos para estudiar mejor</small></span></a>
   </nav>
 
   <!-- 1 -->
@@ -481,6 +517,35 @@ footer .btn{margin-top:12px}
   <section class="sec" id="herramientas" style="--c:var(--mocha)">
     <span class="label"><svg class="i"><use href="#settings"/></svg>11 · Tus herramientas</span>
     <h2>Barra lateral o ruedita, como te acomode</h2>
+<figure class="wheelfig">
+<svg viewBox="0 0 760 480" role="img" aria-label="Cómo funciona la ruedita: tocas el botón flotante, se abre la ruedita con tus herramientas, el lápiz marca en celeste la opción que vas a elegir">
+  <g transform="translate(36 462) rotate(-38)" fill="none" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 -9 H215 L248 0 L215 9 H0 Q-8 9 -8 0 Q-8 -9 0 -9Z" fill="var(--card)"/>
+    <path d="M238 -3 L248 0 L238 3" fill="var(--ink)"/>
+    <rect x="140" y="-5" width="30" height="10" rx="5" fill="var(--coral)" stroke="var(--ink)"/>
+  </g>
+  <path class="ar" d="M170 382 C 196 404, 222 410, 246 402"/><path class="ar" d="M236 397 L247 402 L240 411"/>
+  <text x="254" y="400" class="hn">Botón del S Pen: un toque = borrador,</text><text x="254" y="426" class="hn">otro toque = vuelves a tu bolígrafo</text>
+  <circle cx="110" cy="110" r="30" fill="var(--ink)"/>
+  <use href="#pen" x="96" y="96" width="28" height="28" class="wi" style="color:#fff"/>
+  <text x="40" y="172" class="hn">tu botón flotante</text>
+  <path class="ar" d="M148 100 C 190 70, 236 80, 268 120"/><path class="ar" d="M256 115 L269 121 L268 107"/>
+  <text x="178" y="66" class="hn c">tócalo</text>
+  <circle cx="400" cy="200" r="130" fill="#2a2d33" stroke="var(--ink)" stroke-width="2.6"/>
+  <circle cx="400" cy="200" r="112" fill="#1d2026"/>
+  <path d="M376.9 81.2A121 121 0 0 1 423.1 81.2" fill="none" stroke="#6ec6f0" stroke-width="10" stroke-linecap="round"/>
+  <g style="color:#fff"><use href="#pen" x="387.0" y="107.0" width="26" height="26" class="wi"/><use href="#pen" x="427.0" y="117.7" width="26" height="26" class="wi"/><use href="#hl" x="456.3" y="147.0" width="26" height="26" class="wi"/><use href="#eraser" x="467.0" y="187.0" width="26" height="26" class="wi"/><use href="#lasso" x="456.3" y="227.0" width="26" height="26" class="wi"/><use href="#text" x="427.0" y="256.3" width="26" height="26" class="wi"/><use href="#pages" x="387.0" y="267.0" width="26" height="26" class="wi"/><use href="#tpl" x="347.0" y="256.3" width="26" height="26" class="wi"/><use href="#note" x="317.7" y="227.0" width="26" height="26" class="wi"/><use href="#palette" x="307.0" y="187.0" width="26" height="26" class="wi"/><use href="#star" x="317.7" y="147.0" width="26" height="26" class="wi"/><use href="#undo" x="347.0" y="117.7" width="26" height="26" class="wi"/></g>
+  <circle cx="400" cy="200" r="38" fill="#d6e9f5"/>
+  <image href="logo-round.svg" x="366" y="166" width="68" height="68"/>
+  <text x="540" y="38" class="hn">Pasa el lápiz encima:</text><text x="540" y="62" class="hn">se marca en celeste</text>
+  <path class="ar" d="M534 50 C 500 50, 456 54, 424 70"/><path class="ar" d="M434 61 L423 71 L437 74"/>
+  <text x="556" y="190" class="hn">Toca una herramienta:</text><text x="556" y="214" class="hn">se abren su color</text><text x="556" y="238" class="hn">y su grosor</text>
+  <path class="ar" d="M550 204 C 530 200, 512 186, 492 176"/><path class="ar" d="M504 172 L491 175 L499 186"/>
+  <text x="556" y="300" class="hn">Toca el elefantito</text><text x="556" y="324" class="hn">para cerrarla</text>
+  <path class="ar" d="M550 310 C 500 310, 460 270, 430 232"/><path class="ar" d="M429 246 L429 231 L442 237"/>
+</svg>
+<figcaption>Arrastra la ruedita a un borde de la pantalla y se convierte en <b>barra lateral</b>; arrástrala al centro y vuelve a ser ruedita.</figcaption>
+</figure>
     <div class="grid2">
       <ul class="dots">
         <li><strong>Ruedita flotante:</strong> la arrastras a donde quieras y te muestra tus colores, el grosor y deshacer. "Más ajustes" abre el panel completo.</li>
@@ -502,8 +567,46 @@ footer .btn{margin-top:12px}
   </section>
 
   <!-- 12 -->
+  <!-- 12 -->
+  <section class="sec" id="ejemplos" style="--c:var(--lav)">
+    <span class="label"><svg class="i"><use href="#spark"/></svg>12 · Repasa y decora</span>
+    <h2>Míralo en acción</h2>
+    <p class="lead">Así se ven las herramientas para estudiar y decorar tus apuntes. Toca la cinta y la tarjeta para probarlas.</p>
+    <div class="demos">
+      <div class="demo">
+        <h4>Stickers</h4>
+        <div class="stkdemo" id="stkDemo" aria-label="Algunos stickers de DrawSky"></div>
+        <p>Packs Estudio, Washi y Flechas. Toca uno y luego la hoja. Con <b>Crear sticker</b> recortas cualquier foto con el lápiz.</p>
+      </div>
+      <div class="demo">
+        <h4>Tablas</h4>
+        <div class="tbldemo">
+          <span class="grip" style="left:42%"></span><span class="grip" style="left:72%"></span>
+          <table><tr><th>Grupo</th><th>Porciones</th><th>Kcal</th></tr><tr><td>Lácteos</td><td>2</td><td>240</td></tr><tr><td>Frutas</td><td>3</td><td>180</td></tr><tr><td>Cereales</td><td>6</td><td>480</td></tr></table>
+        </div>
+        <p>Escribe en cada celda. <b>Fila − +</b> y <b>Columna − +</b> agregan o quitan; arrastra las agarraderas para el ancho y el alto.</p>
+      </div>
+      <div class="demo">
+        <h4>Cinta para repasar</h4>
+        <p class="tapedemo">Dosis alta de amoxicilina en otitis media: <button type="button" class="tapex" aria-pressed="false" aria-label="Cinta: toca para ver la respuesta"><span>80–90 mg/kg/día</span></button></p>
+        <p>Arrastra la cinta sobre la respuesta. Para repasar, <b>tócala</b> y se descubre; otra vez y se tapa.</p>
+      </div>
+      <div class="demo">
+        <h4>Tarjetas de repaso</h4>
+        <button type="button" class="flashx" aria-pressed="false" aria-label="Tarjeta: toca para ver la respuesta"><span class="f">¿Qué es el signo de Murphy?</span><span class="b">Dolor que interrumpe la inspiración al palpar el hipocondrio derecho: orienta a colecistitis aguda.</span></button>
+        <p>Encierra una zona con el lazo y toca <b>Tarjeta</b>. Te vuelven a salir justo antes de olvidarlas: Otra vez · Difícil · Bien · Fácil.</p>
+      </div>
+      <div class="demo">
+        <h4>Copiar y pegar</h4>
+        <div class="menudemo"><span>Copiar</span><span>Cortar</span><span>Duplicar</span><span>Eliminar</span><span>Tarjeta</span><span>Fijar</span></div>
+        <div class="menudemo two"><span class="on">Pegar</span><span>Nota aquí</span></div>
+        <p>Selecciona con el lazo y elige. Para pegar, <b>mantén presionado</b> donde quieras. También pega imágenes copiadas de la web.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="sec" id="trucos" style="--c:var(--peach)">
-    <span class="label"><svg class="i"><use href="#star"/></svg>12 · ¿Sabías que…?</span>
+    <span class="label"><svg class="i"><use href="#star"/></svg>13 · ¿Sabías que…?</span>
     <h2>Trucos para estudiar mejor</h2>
     <div class="tiles">
       <div class="tile" style="--c:var(--butter)"><h4>Método Cornell</h4><p>Crea un cuaderno con plantilla Cornell: a la izquierda las preguntas, a la derecha tus notas y abajo el resumen. Tapa la derecha y repasa respondiendo.</p></div>
@@ -520,6 +623,15 @@ footer .btn{margin-top:12px}
     <a class="btn main" href="./">Abrir DrawSky</a>
   </footer>
 </div>
+<script src="stickers.js"></script>
+<script>
+/* examples: a few real stickers, the tape and the card can be tapped */
+(function(){
+  const box = document.getElementById('stkDemo');
+  if (box && window.DSStickers) ['star', 'important', 'idea', 'review', 'washi1', 'curve'].forEach(id => { const st = DSStickers.list.find(x => x.id === id); if (st) box.insertAdjacentHTML('beforeend', DSStickers.svg(st, 60)); });
+  document.querySelectorAll('.tapex,.flashx').forEach(b => b.addEventListener('click', () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true'))));
+})();
+</script>
 <script>
 /* inside the app: "Abrir DrawSky" just closes the guide */
 if (window.parent !== window){
