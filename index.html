@@ -839,7 +839,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 15-oct-2026 (57)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 15-oct-2026 (58)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -958,7 +958,8 @@ const store = {
     const id = 'ldoc:' + k.slice(12);
     let dbOk = true;
     if (dbReady()) idb.put(id, { id, v, t:Date.now() }).catch(e => { console.warn(e); dbOk = false; if (Date.now() - docSaveWarned > 60000){ docSaveWarned = Date.now(); toast('¡Ojo! La tableta no tiene espacio para guardar. Sube a Drive y libera espacio.'); } });
-    try { localStorage.setItem(k, JSON.stringify(v)); }
+    const pts = v && Array.isArray(v.pages) ? v.pages.reduce((m, pg) => m + (pg.strokes || []).reduce((n, st) => n + ((st.pts && st.pts.length) || 0), 0), 0) : 0;
+    try { if (pts > 60000) throw new Error('grande'); localStorage.setItem(k, JSON.stringify(v)); }
     catch(e){ try { localStorage.setItem(k, JSON.stringify({ v:2, inDb:true, name:v && v.name, kind:v && v.kind, _t:v && v._t })); } catch(_){ try { localStorage.removeItem(k); } catch(__){} } }
     return dbOk;
   },
@@ -1550,12 +1551,14 @@ function serialize(d){
 function save(){
   if (!doc) return;
   const d = doc; setStatus('Guardando…'); clearTimeout(d.saveT); markDirty(d);
-  d.saveT = setTimeout(() => {
+  const run = () => {
+    if (active && active.mode === 'draw'){ d.saveT = setTimeout(run, 700); return; }
     d.saveT = 0;
     const ok = store.set('drawsky:doc:' + d.key, serialize(d));
     libTouch(d); thumbSoon(d);
     if (d === doc && !d.syncing) setStatus(ok ? localSavedMsg(d) : 'No hay espacio para guardar en la tableta; no cierres la página');
-  }, 600);
+  };
+  d.saveT = setTimeout(run, 1200);
 }
 function buildPages(d, savedData, fallback){
   let specs = fallback;
@@ -2756,8 +2759,14 @@ function penWidth(st, size, pr, sens){
 function addPoint(ev){
   const a = active, s = a.stroke;
   let x = (ev.clientX - a.rect.left) * a.k, y = (ev.clientY - a.rect.top) * a.k;
-  if (a.shape && a.shape !== 'line') return;
-  if (a.shape === 'line'){ s.pts[1] = [x, y, s.pts[1][2]]; return; }
+  if (a.shape){
+    /* a letter with a pause in a corner (E, o, a…) must not stay a figure: moving on means you are still writing */
+    const sa = a.snapAt, mx = ev.clientX - sa.x, my = ev.clientY - sa.y, d = Math.hypot(mx, my);
+    let keep = d < 26;
+    if (!keep && a.shape === 'line'){ const L = s.pts[1][0] - s.pts[0][0], M = s.pts[1][1] - s.pts[0][1], ll = Math.hypot(L, M) || 1; keep = Math.abs((mx * L + my * M) / (d * ll)) > 0.94; }
+    if (keep){ if (a.shape === 'line') s.pts[1] = [x, y, s.pts[1][2]]; return; }
+    s.pts = a.preSnap; delete s.poly; delete s.closed; a.shape = null; a.noSnap = true; a.fx = null;
+  }
   /* stabilization: the ink follows the pen with a little lag, which smooths an unsteady hand */
   const cfgT = prefs.tools[a.tool] || {}, stab = s.t === 'pen' ? (cfgT.stab != null ? cfgT.stab : 0.3) : 0;
   a.rx = x; a.ry = y;
@@ -2777,11 +2786,11 @@ function addPoint(ev){
     a.travel += Math.hypot(dx, dy) / a.k;
   }
   s.pts.push([x, y, w]);
-  if (prefs.snap && n){
+  if (prefs.snap && n && !a.noSnap){
     const cx = ev.clientX, cy = ev.clientY;
-    if (!a.hold || Math.hypot(cx - a.hold.x, cy - a.hold.y) > 5){
+    if (!a.hold || Math.hypot(cx - a.hold.x, cy - a.hold.y) > 4){
       a.hold = { x:cx, y:cy }; clearTimeout(a.ht);
-      if (a.travel > 28) a.ht = setTimeout(snapShape, 520);
+      if (a.travel > 28) a.ht = setTimeout(snapShape, 750);
     }
   }
 }
@@ -2890,8 +2899,9 @@ function specialShape(P, x0, y0, w, h, size){
   return best.e < 0.05 && best.e < base * 0.72 ? best : null;
 }
 function snapShape(){
-  const a = active; if (!a || a.mode !== 'draw' || a.shape) return;
+  const a = active; if (!a || a.mode !== 'draw' || a.shape || a.noSnap) return;
   const s = a.stroke, P = s.pts.slice(); if (P.length < 4) return;
+  a.preSnap = s.pts.slice(); a.snapAt = a.hold ? { x:a.hold.x, y:a.hold.y } : { x:0, y:0 };
   if (a.rx != null){ const l0 = P[P.length - 1]; if (Math.hypot(a.rx - l0[0], a.ry - l0[1]) > 0.5) P.push([a.rx, a.ry, l0[2]]); }
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, len = 0, wsum = 0;
   P.forEach((q, i) => {
@@ -3149,7 +3159,7 @@ function endPinch(){
   const pz = pinch; pagesEl.style.transform = ''; pinch = null;
   setZoom(zoom * pz.r, { cx:pz.cx, cy:pz.cy, ox:pz.nx != null ? pz.nx : pz.ox, oy:pz.ny != null ? pz.ny : pz.oy });
 }
-function isPalm(e){ return performance.now() - lastPenT < 700 || (e.width > 48 && e.height > 48); }
+function isPalm(e){ return performance.now() - lastPenT < 1500 || (e.width > 34 && e.height > 34); }
 
 function onTouchDown(e){
   if (isPalm(e)) return;
@@ -3243,12 +3253,12 @@ viewer.addEventListener('pointerdown', e => {
     t0:performance.now(), sx:e.clientX, sy:e.clientY, maxMove:0, ptype:e.pointerType, before:p.strokes.slice() };
   if (active.mode === 'erase'){ eraseAt(e); showEraserCursor(e, true); }
   else beginStroke(e);
-  const a0 = active; a0.lp = setTimeout(() => longPress(a0), LONG_MS);
+  const a0 = active; a0.lp = setTimeout(() => longPress(a0), e.pointerType === 'pen' ? 1600 : LONG_MS);
 });
 /* hold the pen (or a finger) still on the page ~1 second: offer a note right there */
 const LONG_MS = 1000;
 function longPress(a){
-  if (active !== a || (a.maxMove || 0) > 8 || (a.mode !== 'draw' && a.mode !== 'erase')) return;
+  if (active !== a || (a.maxMove || 0) > (a.ptype === 'pen' ? 5 : 8) || (a.mode !== 'draw' && a.mode !== 'erase')) return;
   clearTimeout(a.ht); if (a.raf) cancelAnimationFrame(a.raf);
   if (a.mode === 'erase'){
     if (a.removed.length){ for (const r of a.removed.slice().reverse()) a.p.strokes.splice(r.idx, 0, r.s); a.removed = []; drawInk(a.p); }
