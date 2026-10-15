@@ -757,7 +757,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (36)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (37)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -5797,7 +5797,7 @@ function makeScrub(host, scroller, label){
   return { el, sync };
 }
 const docScrub = makeScrub($('#stage'), viewer, full => doc ? (full ? `${doc.cur + 1} / ${doc.pages.length}` : String(doc.cur + 1)) : '');
-docScrub.el.classList.add('doc');
+docScrub.el.classList.add('scrub-doc');
 const thumbScrub = makeScrub($('#drawerWrap .drawer'), thumbsEl, full => { const t = [...thumbsEl.querySelectorAll('.thumb')].find(b => b.getBoundingClientRect().bottom > thumbsEl.getBoundingClientRect().top + 30); return t ? String(+t.dataset.i + 1) + (full && doc ? ' / ' + doc.pages.length : '') : ''; });
 thumbScrub.el.classList.add('thumbs-s');
 function placeDocScrub(){
