@@ -14,17 +14,21 @@
   --paper:#fbf7f0; --grid:rgba(120,96,80,.08); --card:#fffdf9; --ink:#3d302c; --soft:#7b6a63; --line:#eadfd5;
   --pink:#ee7ea0; --rose:#ffa9ba; --blush:#ffd7d6; --coral:#ea7d70; --peach:#ffaf6e; --butter:#ffcc80; --cream:#ffe2a6;
   --sage:#bcc07b; --lime:#dbe098; --sky:#abcdde; --ice:#d5edf8; --mint:#d5e2d3; --lav:#cdbdeb; --plum:#9a81b0; --mocha:#8e715b; --sand:#e5daca;
-  --tape-ink:#3d302c; --shadow:0 1px 2px rgba(61,48,44,.06),0 10px 30px rgba(61,48,44,.08);
+  --tape-ink:#3d302c; --desk:#3a3836; --desk-grid:rgba(255,255,255,.045); --desk-ink:#efe9e4; --shadow:0 1px 2px rgba(61,48,44,.06),0 10px 30px rgba(61,48,44,.08);
   --hand:'Caveat',cursive; --font:'Inter',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){ --paper:#1b1817; --grid:rgba(255,240,230,.05); --card:#262120; --ink:#f3ece8; --soft:#b9aaa3; --line:#3a3230; --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.35); }
+  :root:not([data-theme="light"]){ --desk:#232120; --desk-grid:rgba(255,255,255,.035); --paper:#1b1817; --grid:rgba(255,240,230,.05); --card:#262120; --ink:#f3ece8; --soft:#b9aaa3; --line:#3a3230; --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.35); }
 }
-:root[data-theme="dark"]{ --paper:#1b1817; --grid:rgba(255,240,230,.05); --card:#262120; --ink:#f3ece8; --soft:#b9aaa3; --line:#3a3230; --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.35); }
+:root[data-theme="dark"]{ --desk:#232120; --desk-grid:rgba(255,255,255,.035); --paper:#1b1817; --grid:rgba(255,240,230,.05); --card:#262120; --ink:#f3ece8; --soft:#b9aaa3; --line:#3a3230; --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.35); }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--font);
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px}
+body{margin:0;background:var(--desk);color:var(--ink);font:400 16px/1.6 var(--font);
+  background-image:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 60%),linear-gradient(var(--desk-grid) 1px,transparent 1px),linear-gradient(90deg,var(--desk-grid) 1px,transparent 1px);background-size:auto,26px 26px,26px 26px;background-attachment:fixed}
+/* graphite desk; cards stay like sheets of paper */
+.hero,.sec{background-color:var(--card);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px}
+.top b,footer,footer .hand{color:var(--desk-ink)}
+.top .btn.main,footer .btn.main{background:var(--desk-ink);color:var(--desk)}
 a{color:inherit}
 .wrap{max-width:1080px;margin:0 auto;padding:0 16px 80px}
 svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -345,6 +349,9 @@ footer .btn{margin-top:12px}
           <svg viewBox="0 0 80 60"><path d="M40 6l24 17-9 28H25l-9-28z" fill="none" stroke="var(--mocha)" stroke-width="3" stroke-linejoin="round"/></svg>
           <svg viewBox="0 0 80 60"><path d="M27 8h26l13 22-13 22H27L14 30z" fill="none" stroke="var(--sage)" stroke-width="3" stroke-linejoin="round"/></svg>
           <svg viewBox="0 0 80 60"><ellipse cx="40" cy="30" rx="30" ry="18" fill="none" stroke="var(--peach)" stroke-width="3"/></svg>
+          <svg viewBox="0 0 80 60"><path d="M40 6l6.5 13.4 14.8 2.1-10.7 10.4 2.5 14.7L40 39.7l-13.2 6.9 2.5-14.7L18.7 21.5l14.8-2.1z" fill="none" stroke="var(--butter)" stroke-width="3" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 80 60"><path d="M40 52S16 38 16 22a11 11 0 0 1 24-4 11 11 0 0 1 24 4c0 16-24 30-24 30z" fill="none" stroke="var(--pink)" stroke-width="3" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 80 60"><rect x="8" y="20" width="64" height="20" rx="10" fill="none" stroke="var(--ink)" stroke-width="3"/></svg>
         </div>
       </div>
       <div class="sticky" style="--c2:var(--lime)">
@@ -356,7 +363,7 @@ footer .btn{margin-top:12px}
         </ul>
       </div>
     </div>
-    <p class="tip">Reconoce líneas, círculos, óvalos, triángulos, cuadrados, rectángulos, rombos, pentágonos y hexágonos.</p>
+    <p class="tip">Reconoce líneas, círculos, óvalos, triángulos, cuadrados, rectángulos, rombos, pentágonos, hexágonos, estrellas, corazones y barras redondeadas.</p>
   </section>
 
   <!-- 7 -->
@@ -367,7 +374,7 @@ footer .btn{margin-top:12px}
       <div class="tile" style="--c:var(--sky)"><h4>Seleccionar texto del PDF</h4><p>Con la herramienta de selección, desliza sobre el texto: puedes <strong>copiarlo</strong>, <strong>resaltarlo</strong> o <strong>agregarle una nota</strong>.</p></div>
       <div class="tile" style="--c:var(--rose)"><h4>Notas con imágenes</h4><p>Mantén presionado sobre la hoja → <em>Agregar nota</em>. Escribe tu comentario y adjunta fotos (por ejemplo, la imagen de una lesión). Las notas también se guardan al final del PDF.</p></div>
       <div class="tile" style="--c:var(--lav)"><h4>Escribir con teclado</h4><p>Con la herramienta de texto <span class="k"><svg class="i"><use href="#text"/></svg></span> toca la hoja y escribe: ideal para dosis, valores y datos que deben verse claros.</p></div>
-      <div class="tile" style="--c:var(--mint)"><h4>Lazo</h4><p>Encierra lo que escribiste <span class="k"><svg class="i"><use href="#lasso"/></svg></span> para <strong>moverlo</strong>, <strong>cambiarle el color</strong>, <strong>duplicarlo</strong> o <strong>borrarlo</strong>.</p></div>
+      <div class="tile" style="--c:var(--mint)"><h4>Lazo</h4><p>Encierra lo que escribiste <span class="k"><svg class="i"><use href="#lasso"/></svg></span>: se ilumina solo lo que elegiste. Arrástralo para <strong>moverlo</strong>, usa las esquinas para <strong>agrandarlo</strong>, el círculo de arriba para <strong>girarlo</strong>, y cambia su color, duplícalo o bórralo.</p></div>
       <div class="tile" style="--c:var(--butter)"><h4>Buscar en el PDF</h4><p>La lupa <span class="k"><svg class="i"><use href="#search"/></svg></span> encuentra una palabra en todo el documento: "Spurling", "Murphy", "QT largo"…</p></div>
     </div>
   </section>
@@ -458,6 +465,7 @@ footer .btn{margin-top:12px}
       <ul class="dots">
         <li><strong>Plantillas de hoja</strong> <span class="k"><svg class="i"><use href="#tpl"/></svg></span>: lisa, rayada, cuadriculada, punteada o <strong>Cornell</strong> (columna de preguntas, notas y resumen).</li>
         <li><strong>Zoom hasta 1250%</strong>, pellizcando con dos dedos: perfecto para leer letras pequeñas de tablas y figuras.</li>
+        <li><strong>Ampliar</strong> con el botón de la esquina superior izquierda: se esconden las barras y la hoja ocupa toda la pantalla. El mismo botón te regresa.</li>
         <li><strong>Tema claro, oscuro o del sistema</strong>, en Ajustes.</li>
       </ul>
     </div>

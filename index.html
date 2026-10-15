@@ -48,6 +48,10 @@ button:disabled{opacity:.4;cursor:default}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .app{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);position:fixed;inset:0;height:auto;overflow:hidden}
 .app>*{min-width:0}
+.app.focus{grid-template-rows:minmax(0,1fr)}
+.app.focus>.top,.app.focus>.tabs,.app.focus>.bottom{display:none}
+.focus-out{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;z-index:24;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent);color:var(--fg);display:grid;place-items:center;box-shadow:var(--shadow);backdrop-filter:blur(6px)}
+#focusBtn{flex:none}
 
 /* top bar */
 .top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
@@ -70,7 +74,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .doc-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:980px){ .word{display:none} }
 @media (max-width:700px){ #newBtn .lbl{display:none} #newBtn{padding:0 11px} }
-@media (max-width:860px){ #guideBtn .lbl{display:none} #guideBtn{padding:0 11px} }
 .guide-wrap{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column}
 .guide-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface)}
 .guide-wrap iframe{flex:1;border:0;width:100%}
@@ -154,7 +157,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .pmark{position:absolute;top:-4px;right:22px;width:22px;height:34px;background:#d63a4a;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);z-index:3;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 #markBtn[aria-pressed="true"]{background:#d63a4a;color:#fff;border-color:transparent}
 .tbox{position:absolute;z-index:4;min-width:120px;min-height:1.4em;padding:2px 4px;margin:-3px 0 0 -5px;border:1.5px dashed #1b7bd3;border-radius:6px;background:rgba(255,255,255,.85);font-family:Inter,Helvetica,Arial,sans-serif;resize:none;overflow:hidden;white-space:pre;outline:none;-webkit-user-select:text;user-select:text;box-sizing:content-box}
-.lassobox{position:absolute;border:1.5px dashed #1b7bd3;background:rgba(27,123,211,.05);z-index:3;pointer-events:none;border-radius:4px}
+.lassobox{position:absolute;border:1.5px solid #3d8bfd;z-index:3;pointer-events:none}
+.lassobox .lh{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;border:1.5px solid #3d8bfd;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.lassobox .tl{left:-8px;top:-8px}.lassobox .tr{right:-8px;top:-8px}.lassobox .bl{left:-8px;bottom:-8px}.lassobox .br{right:-8px;bottom:-8px}
+.lassobox .lrot-line{position:absolute;left:50%;top:-22px;width:1.5px;height:22px;background:#3d8bfd;transform:translateX(-50%)}
+.lassobox .lrot{position:absolute;left:50%;top:-38px;width:20px;height:20px;border-radius:50%;background:#fff;border:1.5px solid #3d8bfd;transform:translateX(-50%);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.lassobox .lrot::after{content:"";position:absolute;inset:4px;border:1.5px solid #3d8bfd;border-radius:50%;border-top-color:transparent}
+.lassoglow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.lassoglow path,.lassoglow rect{fill:none;stroke:rgba(0,183,222,.55);stroke-linecap:round;stroke-linejoin:round}
+.lassoglow path.f{fill:rgba(0,183,222,.55)}
+.lassoglow rect{fill:rgba(0,183,222,.3);stroke-width:2}
 .lasso-h{position:absolute;right:-11px;bottom:-11px;width:20px;height:20px;border-radius:50%;background:#1b7bd3;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .lassomenu .lc{width:30px;height:30px;padding:0;border-radius:50%!important;background:var(--c)!important;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
 .lassomenu button:first-child{background:var(--c)}
@@ -368,7 +380,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dr-h{flex-wrap:wrap}
 /* quick view: a slim strip of small pages; edit mode takes the whole screen */
 .drawer-wrap:not(.edit){background:transparent}
-.drawer-wrap:not(.edit) .drawer{width:min(176px,46vw)}
+.drawer-wrap:not(.edit) .drawer{width:min(250px,62vw)}
 .drawer-wrap:not(.edit) .dr-h{padding:10px;gap:6px}
 .drawer-wrap:not(.edit) .dr-h h2{font-size:15px;flex:1 1 100%}
 .drawer-wrap:not(.edit) .dr-h .btn{height:34px;padding:0 10px;font-size:13px;flex:1}
@@ -383,8 +395,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .thumbs.listv{display:block;touch-action:pan-y}
 .dr-list{display:flex;flex-direction:column;gap:6px}
 .dr-list .idx-tabs{margin:0 0 4px}
-.dr-mode{order:5;flex:1 1 100%;display:flex}
-.dr-mode button{flex:1}
+.dr-h .dr-mode{order:5;flex:1 1 100%;display:flex;min-width:0}
+.dr-mode button{flex:1;min-width:0;padding:7px 4px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dr-sec,.dr-empty,.dr-note{grid-column:1/-1}
 .dr-sec{display:flex;align-items:center;gap:2px;margin-top:6px;border-bottom:1px solid var(--line);padding-bottom:4px}
 .dr-sec.lv2{padding-left:18px}
@@ -459,6 +471,8 @@ input[type=range]{accent-color:var(--accent)}
 .home.smin .h-nav{justify-content:center;padding:10px 0}
 .home.smin .h-nav>span:not(.av),.home.smin .h-nav b{display:none}
 .h-collapse{color:var(--muted);margin-bottom:2px}
+.h-nav.h-learn{margin-top:auto;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--fg)}
+.h-side{min-height:0}
 .home:not(.smin) .h-collapse{justify-content:flex-start}
 @media (max-width:520px){ .nmenu{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .h-side{border-right:1px solid var(--line);background:var(--surface);padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow:auto}
@@ -553,6 +567,7 @@ input[type=range]{accent-color:var(--accent)}
 <body>
 <div class="app">
   <header class="top">
+    <button class="icon-btn" type="button" id="focusBtn" aria-label="Ampliar: ver solo el documento" title="Ampliar el documento" hidden></button>
     <div class="brand">
       <img class="logo" src="data:image/png;base64,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" width="34" height="34" alt="">
       <span class="word">DrawSky</span>
@@ -563,7 +578,6 @@ input[type=range]{accent-color:var(--accent)}
     </div>
     <div class="actions">
       <button class="btn" id="driveBtn" type="button"><span id="icDrive"></span><span class="lbl" id="driveLbl">Drive</span><em id="driveSt" hidden></em></button>
-      <button class="btn" id="guideBtn" type="button" aria-label="Guía de DrawSky" title="Guía: todo lo que puedes hacer"><span id="icGuide"></span><span class="lbl">Guía</span></button>
       <button class="btn primary" id="newBtn" type="button" aria-label="Nuevo"><span id="icNew"></span><span class="lbl">Nuevo</span></button>
       <button class="icon-btn" id="setBtn" type="button" aria-label="Ajustes"></button>
     </div>
@@ -710,7 +724,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (28)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (30)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -734,6 +748,8 @@ const ecur = $('#ecur'), statusEl = $('#status');
 
 /* ---------- icons ---------- */
 const ICON = {
+  expand:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  shrink:'<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>',
   sidebar:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9.5 4v16M5.5 8.5h1.5M5.5 11.5h1.5"/>',
   hand:'<path d="M8 12.5V6a1.5 1.5 0 0 1 3 0v5.5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v6M17 9.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-5.1-2.9L5 14.2a1.5 1.5 0 0 1 2.5-1.6L8 13.5"/>',
   pen:'<path d="M4 20l1.2-4.2L15.5 5.5a2.1 2.1 0 0 1 3 3L8.2 18.8z"/><path d="M13.5 7.5l3 3"/>',
@@ -788,7 +804,7 @@ $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); 
 $('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#searchBtn').innerHTML = svg('search', 20);
 $('#findPrev').innerHTML = svg('up', 18); $('#findNext').innerHTML = svg('down', 18); $('#findClose').innerHTML = svg('close', 18);
 $('#icM1').innerHTML = svg('folder', 22); $('#icM2').innerHTML = svg('book', 22);
-$('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); $('#icGuide').innerHTML = svg('obook', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
+$('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
 
 /* ---------- prefs ---------- */
@@ -1218,7 +1234,8 @@ function renderHome(){
     (pend ? nav('data-sync="1"', false, svg('share', 20), 'Sin subir', pend, ' warn') : '') +
     (prefs.accounts.length ? nav('data-refresh="1"', false, svg('redo', 20), 'Actualizar lista') : '') +
     prefs.accounts.map(a => nav(`data-acc="${esc(a.email)}"`, false, `<span class="av">${initial(a)}</span>`, a.email)).join('') +
-    nav('data-acc=""', false, svg('plus', 20), prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive');
+    nav('data-acc=""', false, svg('plus', 20), prefs.accounts.length ? 'Otra cuenta' : 'Conectar Drive') +
+    nav('data-learn="1"', false, svg('obook', 20), 'Aprende', null, ' h-learn');
   if (homeFilter === 'gdrive'){ renderDriveBrowser(); return; }
   const fsel = homeFilter.startsWith('f:') ? homeFilter.slice(2) : null;
   $('#hTitle').innerHTML = fsel ? `<button type="button" class="btn back-btn" data-hf-back="1" aria-label="Volver">${svg('left', 18)}</button>${folderSvg(folderMeta(fsel).c, folderMeta(fsel).i, 'fmini big')} ${esc(fsel)} <button type="button" class="btn" data-editfolder="${esc(fsel)}" style="height:32px;font-size:12.5px;margin-left:8px">${svg('edit', 16)}Editar</button>` : ({ all:'Inicio', notebook:'Cuadernos', pdf:'PDFs', image:'Imágenes', drive:'En Google Drive' }[homeFilter] || 'Todos tus archivos');
@@ -1293,6 +1310,7 @@ function doRename(){
   closeDlg(); renderTabs(); if (homeOn) renderHome(); else updateDocMeta();
 }
 $('#hSide').addEventListener('click', e => {
+  if (e.target.closest('[data-learn]')){ openGuide(); return; }
   if (e.target.closest('[data-sidemin]')){ prefs.homeSideMin = !prefs.homeSideMin; savePrefs(); renderHome(); return; }
   if (e.target.closest('[data-fulldrive]')){ enableFullDrive(true); return; }
   const dp = e.target.closest('[data-dpin]');
@@ -1913,6 +1931,8 @@ async function applyPacked(d, pk){
 /* ---------- sync ---------- */
 const STATE = { saved:['Guardado', 'ok'], dirty:['Sin subir', 'warn'], saving:['Subiendo…', ''], offline:['Sin conexión', 'warn'], auth:['Toca para subir', 'warn'], error:['Reintentar', 'warn'], readonly:['Solo en la tableta', 'warn'] };
 function renderDriveBtn(){
+  $('#focusBtn').hidden = homeOn || !doc;
+  if (homeOn && document.querySelector('.app.focus')) setFocus(false);
   const lbl = $('#driveLbl'), st = $('#driveSt'), d = doc;
   $('#driveBtn').hidden = homeOn || !d;
   if (homeOn || !d){ st.hidden = true; return; }
@@ -2508,6 +2528,64 @@ function polyErr(P, v){
   }
   return sum / P.length;
 }
+/* even spacing along a path (closed when asked), used to compare a drawing with ideal shapes */
+function resample(P, n, closed){
+  const Q = closed ? P.concat([P[0]]) : P, seg = [];
+  let L = 0; for (let i = 1; i < Q.length; i++){ const d = Math.hypot(Q[i][0] - Q[i - 1][0], Q[i][1] - Q[i - 1][1]); seg.push(d); L += d; }
+  if (!L) return [P[0]];
+  const out = []; let i = 0, acc = 0;
+  for (let k = 0; k < n; k++){
+    const t = k * L / n;
+    while (i < seg.length - 1 && acc + seg[i] < t){ acc += seg[i]; i++; }
+    const u = seg[i] ? (t - acc) / seg[i] : 0;
+    out.push([Q[i][0] + (Q[i + 1][0] - Q[i][0]) * u, Q[i][1] + (Q[i + 1][1] - Q[i][1]) * u]);
+  }
+  return out;
+}
+/* how far two point sets are from each other, both ways (0 = identical) */
+function chamfer(A, B){
+  const one = (X, Y) => { let s = 0; for (const p of X){ let m = 1e18; for (const q of Y){ const d = (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2; if (d < m) m = d; } s += Math.sqrt(m); } return s / X.length; };
+  return (one(A, B) + one(B, A)) / 2;
+}
+/* ideal shapes fitted to the drawing's box */
+function heartPts(x0, y0, w, h, n = 72){
+  const raw = []; for (let i = 0; i < n; i++){ const t = i / n * Math.PI * 2; raw.push([16 * Math.sin(t) ** 3, -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t))]); }
+  return fitBox(raw, x0, y0, w, h);
+}
+function starPts(x0, y0, w, h, inner = 0.4){
+  const raw = []; for (let i = 0; i < 10; i++){ const t = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? inner : 1; raw.push([r * Math.cos(t), r * Math.sin(t)]); }
+  return fitBox(raw, x0, y0, w, h);
+}
+function pentagramPts(x0, y0, w, h){
+  const tips = []; for (let i = 0; i < 5; i++){ const t = -Math.PI / 2 + i * Math.PI * 2 / 5; tips.push([Math.cos(t), Math.sin(t)]); }
+  return fitBox([0, 2, 4, 1, 3].map(i => tips[i]), x0, y0, w, h);
+}
+function stadiumPts(x0, y0, w, h, n = 80){
+  const r = Math.min(w, h) / 2, pts = [], horiz = w >= h;
+  const c1 = horiz ? [x0 + r, y0 + r] : [x0 + r, y0 + r], c2 = horiz ? [x0 + w - r, y0 + r] : [x0 + r, y0 + h - r];
+  const half = n / 2;
+  for (let i = 0; i <= half; i++){ const t = (horiz ? -Math.PI / 2 : 0) + i / half * Math.PI; pts.push([c2[0] + r * Math.cos(t), c2[1] + r * Math.sin(t)]); }
+  for (let i = 0; i <= half; i++){ const t = (horiz ? Math.PI / 2 : Math.PI) + i / half * Math.PI; pts.push([c1[0] + r * Math.cos(t), c1[1] + r * Math.sin(t)]); }
+  return pts;
+}
+function fitBox(raw, x0, y0, w, h){
+  let a = 1e9, b = 1e9, c = -1e9, d = -1e9; raw.forEach(q => { a = Math.min(a, q[0]); b = Math.min(b, q[1]); c = Math.max(c, q[0]); d = Math.max(d, q[1]); });
+  return raw.map(q => [x0 + (q[0] - a) / (c - a || 1) * w, y0 + (q[1] - b) / (d - b || 1) * h]);
+}
+/* heart, star and rounded bar: compared against the usual shapes, wins only when it clearly fits better */
+function specialShape(P, x0, y0, w, h, size){
+  const A = resample(P.map(q => [q[0], q[1]]), 64, false);
+  const ell = []; for (let i = 0; i < 64; i++){ const t = i / 64 * Math.PI * 2; ell.push([x0 + w / 2 + w / 2 * Math.cos(t), y0 + h / 2 + h / 2 * Math.sin(t)]); }
+  const rect = resample([[x0, y0], [x0 + w, y0], [x0 + w, y0 + h], [x0, y0 + h]], 80, true);
+  const base = Math.min(chamfer(A, ell), chamfer(A, rect)) / size;
+  const cands = [
+    { k:'heart', e:chamfer(A, resample(heartPts(x0, y0, w, h), 96, true)) / size, out:() => heartPts(x0, y0, w, h, 96) },
+    { k:'star', e:Math.min(chamfer(A, resample(starPts(x0, y0, w, h), 100, true)), chamfer(A, resample(pentagramPts(x0, y0, w, h), 100, true))) / size, out:() => starPts(x0, y0, w, h, 0.4) },
+    { k:'pill', e:Math.max(w, h) / Math.max(1, Math.min(w, h)) > 1.6 ? chamfer(A, resample(stadiumPts(x0, y0, w, h), 96, true)) / size : 9, out:() => stadiumPts(x0, y0, w, h, 96) }
+  ].sort((m, n) => m.e - n.e);
+  const best = cands[0];
+  return best.e < 0.05 && best.e < base * 0.72 ? best : null;
+}
 function snapShape(){
   const a = active; if (!a || a.mode !== 'draw' || a.shape) return;
   const s = a.stroke, P = s.pts.slice(); if (P.length < 4) return;
@@ -2523,6 +2601,8 @@ function snapShape(){
   const closed = gap < 0.32 * size && len > 1.9 * size && Math.min(w, h) > 0.15 * size;
   let out = null, kindName = null;
   if (closed){
+    const sp = specialShape(P, x0, y0, w, h, size);
+    if (sp){ s.pts = sp.out().map(q => [q[0], q[1], W]); s.poly = true; s.closed = true; a.shape = sp.k; try { navigator.vibrate && navigator.vibrate(12); } catch(_){} drawLive(); return; }
     /* try simpler and simpler outlines; keep the one with fewest corners that still follows the drawing */
     const cands = [];
     for (const k of [0.04, 0.06, 0.08, 0.1, 0.13, 0.16, 0.2]){
@@ -2874,7 +2954,7 @@ viewer.addEventListener('pointermove', e => {
   }
   if (!active || e.pointerId !== active.id) return;
   if (active.mode === 'hold') return;
-  if (active.mode === 'lasso' || active.mode === 'lmove' || active.mode === 'lscale'){ const a = active; lassoMove(a, (e.clientX - a.rect.left) * a.k, (e.clientY - a.rect.top) * a.k); return; }
+  if (active.mode === 'lasso' || active.mode === 'lmove' || active.mode === 'lscale' || active.mode === 'lrot'){ const a = active; lassoMove(a, (e.clientX - a.rect.left) * a.k, (e.clientY - a.rect.top) * a.k); return; }
   if (active.mode === 'select'){ active.maxMove = Math.max(active.maxMove, Math.hypot(e.clientX - active.sx, e.clientY - active.sy)); moveSelect(active, e.clientX, e.clientY); return; }
   if (active.mode === 'pan'){
     viewer.scrollLeft -= e.clientX - active.x; viewer.scrollTop -= e.clientY - active.y;
@@ -2900,7 +2980,7 @@ function endPointer(e){
   if (active.lp) clearTimeout(active.lp);
   if (active.mode === 'hold'){ active = null; return; }
   if (active.mode === 'select'){ const a = active; active = null; endSelect(a); return; }
-  if (active.mode === 'lasso' || active.mode === 'lmove' || active.mode === 'lscale'){ const a = active; active = null; lassoEnd(a); return; }
+  if (active.mode === 'lasso' || active.mode === 'lmove' || active.mode === 'lscale' || active.mode === 'lrot'){ const a = active; active = null; lassoEnd(a); return; }
   const a = active, tap = prefs.dblTap && a.ptype === 'pen' && a.mode !== 'pan' && performance.now() - a.t0 < 220 && (a.maxMove || 0) < 6;
   let made = null;
   if (a.mode === 'draw') made = endStroke();
@@ -4379,16 +4459,28 @@ function inPoly(x, y, poly){
 function selBox(p, idx){
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   for (const i of idx){ const s = p.strokes[i]; if (!s) continue; const b = bbox(s), m = s.t === 'text' ? 0 : b[4] / 2; x0 = Math.min(x0, b[0] - m); y0 = Math.min(y0, b[1] - m); x1 = Math.max(x1, b[2] + m); y1 = Math.max(y1, b[3] + m); }
-  return [x0 - 4, y0 - 4, x1 + 4, y1 + 4];
+  return [x0 - 1.5, y0 - 1.5, x1 + 1.5, y1 + 1.5];
 }
-function clearLasso(){ lsel = null; document.querySelectorAll('.lassobox').forEach(e => e.remove()); lassoMenu.hidden = true; }
+function clearLasso(){ lsel = null; document.querySelectorAll('.lassobox,.lassoglow').forEach(e => e.remove()); lassoMenu.hidden = true; }
+/* the selection hugs the strokes: a soft glow behind each one, a tight frame, corner handles to resize and a top handle to rotate */
 function drawLassoBox(){
-  document.querySelectorAll('.lassobox').forEach(e => e.remove());
+  document.querySelectorAll('.lassobox,.lassoglow').forEach(e => e.remove());
   if (!lsel) return;
   const { p, box } = lsel, d = document.createElement('div');
+  const g = document.createElementNS(SVGNS, 'svg');
+  g.setAttribute('class', 'lassoglow'); g.setAttribute('viewBox', `0 0 ${p.wPt} ${p.hPt}`); g.setAttribute('preserveAspectRatio', 'none');
+  let h = '';
+  for (const i of lsel.idx){
+    const st = p.strokes[i]; if (!st) continue;
+    if (st.t === 'text'){ const b = bbox(st); h += `<rect x="${b[0] - 2}" y="${b[1] - 2}" width="${b[2] - b[0] + 4}" height="${b[3] - b[1] + 4}" rx="3"/>`; continue; }
+    const ge = strokeGeom(st), w = (ge.mode === 'fill' ? 0 : ge.w || st.size || 1) + 6;
+    h += `<path d="${ge.d}" stroke-width="${ge.mode === 'fill' ? 6 : w}"${ge.mode === 'fill' ? ' class="f"' : ''}/>`;
+  }
+  g.innerHTML = h;
+  p.el.insertBefore(g, p.hlS);
   d.className = 'lassobox';
   Object.assign(d.style, { left:box[0] / p.wPt * 100 + '%', top:box[1] / p.hPt * 100 + '%', width:(box[2] - box[0]) / p.wPt * 100 + '%', height:(box[3] - box[1]) / p.hPt * 100 + '%' });
-  d.innerHTML = '<span class="lasso-h" aria-hidden="true"></span>';
+  d.innerHTML = '<i class="lh tl"></i><i class="lh tr"></i><i class="lh bl"></i><i class="lh br"></i><span class="lrot-line"></span><i class="lrot" aria-hidden="true"></i>';
   p.el.appendChild(d);
 }
 function showLassoMenu(){
@@ -4398,9 +4490,9 @@ function showLassoMenu(){
   lassoMenu.innerHTML = cols.map(c => `<button type="button" class="lc" data-lc="${c}" aria-label="Cambiar a este color" style="--c:${c}"></button>`).join('') +
     `<button type="button" data-l="dup">${svg('copy', 16)}Duplicar</button><button type="button" data-l="del">${svg('trash', 16)}Eliminar</button>`;
   lassoMenu.hidden = false;
-  const top = r.top + box[1] * k - lassoMenu.offsetHeight - 10;
+  const top = r.top + box[1] * k - lassoMenu.offsetHeight - 56;
   lassoMenu.style.left = clamp(r.left + (box[0] + box[2]) / 2 * k - lassoMenu.offsetWidth / 2, 8, innerWidth - lassoMenu.offsetWidth - 8) + 'px';
-  lassoMenu.style.top = (top > 60 ? top : Math.min(innerHeight - lassoMenu.offsetHeight - 70, r.top + box[3] * k + 10)) + 'px';
+  lassoMenu.style.top = (top > 60 ? top : Math.min(innerHeight - lassoMenu.offsetHeight - 70, r.top + box[3] * k + 18)) + 'px';
 }
 function xfStroke(s, f, k){
   const n = Object.assign({}, s, { pts:s.pts.map(q => { const [x, y] = f(q[0], q[1]); return [r2(x), r2(y), r2(q[2] * k)]; }) });
@@ -4411,11 +4503,14 @@ function xfStroke(s, f, k){
 function lassoBegin(a, x, y){
   const s = lsel && lsel.p === a.p ? lsel : null;
   if (s){
-    const b = s.box, hs = 14 * a.k;
-    if (Math.abs(x - b[2]) < hs && Math.abs(y - b[3]) < hs){ a.mode = 'lscale'; }
-    else if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) a.mode = 'lmove';
+    const b = s.box, hs = 16 * a.k, cx = (b[0] + b[2]) / 2, ry = b[1] - 30 * a.k;
+    const corners = [[b[0], b[1], b[2], b[3]], [b[2], b[1], b[0], b[3]], [b[0], b[3], b[2], b[1]], [b[2], b[3], b[0], b[1]]];
+    const hit = corners.find(c => Math.abs(x - c[0]) < hs && Math.abs(y - c[1]) < hs);
+    if (Math.hypot(x - cx, y - ry) < hs * 1.2){ a.mode = 'lrot'; a.cx = cx; a.cy = (b[1] + b[3]) / 2; a.ang0 = Math.atan2(y - a.cy, x - a.cx); }
+    else if (hit){ a.mode = 'lscale'; a.ax = hit[2]; a.ay = hit[3]; a.d0 = Math.max(4, Math.hypot(hit[0] - hit[2], hit[1] - hit[3])); }
+    else if (x >= b[0] - 4 * a.k && x <= b[2] + 4 * a.k && y >= b[1] - 4 * a.k && y <= b[3] + 4 * a.k) a.mode = 'lmove';
   }
-  if (a.mode === 'lmove' || a.mode === 'lscale'){
+  if (a.mode === 'lmove' || a.mode === 'lscale' || a.mode === 'lrot'){
     lassoMenu.hidden = true;
     a.before = a.p.strokes.slice(); a.orig = lsel.idx.map(i => a.p.strokes[i]); a.box0 = lsel.box.slice(); a.x0 = x; a.y0 = y;
     return;
@@ -4439,9 +4534,15 @@ function lassoMove(a, x, y){
   const b = a.box0, p = a.p;
   let f, k = 1;
   if (a.mode === 'lmove'){ const dx = x - a.x0, dy = y - a.y0; f = (px, py) => [px + dx, py + dy]; }
-  else { k = clamp(Math.max((x - b[0]) / Math.max(4, b[2] - b[0]), (y - b[1]) / Math.max(4, b[3] - b[1])), 0.15, 8); f = (px, py) => [b[0] + (px - b[0]) * k, b[1] + (py - b[1]) * k]; }
+  else if (a.mode === 'lrot'){
+    let t = Math.atan2(y - a.cy, x - a.cx) - a.ang0;
+    const deg = t * 180 / Math.PI, snap = Math.round(deg / 45) * 45; if (Math.abs(deg - snap) < 4) t = snap * Math.PI / 180;
+    const c = Math.cos(t), sn = Math.sin(t), cx = a.cx, cy = a.cy;
+    f = (px, py) => [cx + (px - cx) * c - (py - cy) * sn, cy + (px - cx) * sn + (py - cy) * c];
+  }
+  else { const ax = a.ax, ay = a.ay; k = clamp(Math.hypot(x - ax, y - ay) / a.d0, 0.15, 8); f = (px, py) => [ax + (px - ax) * k, ay + (py - ay) * k]; }
   lsel.idx.forEach((i, j) => { p.strokes[i] = xfStroke(a.orig[j], f, k); });
-  lsel.box = a.mode === 'lmove' ? [b[0] + x - a.x0, b[1] + y - a.y0, b[2] + x - a.x0, b[3] + y - a.y0] : [b[0], b[1], b[0] + (b[2] - b[0]) * k, b[1] + (b[3] - b[1]) * k];
+  lsel.box = a.mode === 'lmove' ? [b[0] + x - a.x0, b[1] + y - a.y0, b[2] + x - a.x0, b[3] + y - a.y0] : selBox(p, lsel.idx);
   if (!a.raf) a.raf = requestAnimationFrame(() => { a.raf = 0; drawInk(p); drawLassoBox(); });
 }
 function lassoEnd(a){
@@ -5133,6 +5234,22 @@ cpHooks.fold = {
   visible:() => !dlgWrap.hidden && dlgState && dlgState.kind === 'fedit'
 };
 $('#palMgr').addEventListener('click', () => openPalManager());
+/* focus: hide the bars and see only the document (like Drawboard); the corner button brings everything back */
+const focusOut = document.createElement('button');
+focusOut.type = 'button'; focusOut.className = 'focus-out'; focusOut.hidden = true; focusOut.setAttribute('aria-label', 'Volver a ver las barras'); focusOut.title = 'Volver a ver las barras';
+focusOut.innerHTML = svg('shrink', 20); document.body.appendChild(focusOut);
+$('#focusBtn').innerHTML = svg('expand', 20);
+function setFocus(on){
+  const app = document.querySelector('.app');
+  app.classList.toggle('focus', on); focusOut.hidden = !on;
+  try {
+    if (on && !document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen({ navigationUI:'hide' }).catch(() => {});
+    if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  } catch(_){}
+  setTimeout(() => { placeFab(); updateVisible(); }, 60);
+}
+$('#focusBtn').addEventListener('click', () => setFocus(true));
+focusOut.addEventListener('click', () => setFocus(false));
 /* the guide opens inside the app, on top, with a way back */
 const guideWrap = document.createElement('div');
 guideWrap.className = 'guide-wrap'; guideWrap.hidden = true;
@@ -5140,7 +5257,6 @@ guideWrap.innerHTML = `<div class="guide-bar"><button type="button" class="btn" 
 document.body.appendChild(guideWrap);
 function openGuide(){ const f = $('#guideFrame'); if (!f.src) f.src = 'guia.html'; guideWrap.hidden = false; }
 function closeGuide(){ guideWrap.hidden = true; }
-$('#guideBtn').addEventListener('click', openGuide);
 $('#setGuide').addEventListener('click', () => { $('#sheetWrap').hidden = true; openGuide(); });
 $('#guideClose').addEventListener('click', closeGuide);
 window.addEventListener('message', e => { if (e.origin === location.origin && e.data === 'drawsky:closeGuide') closeGuide(); });
