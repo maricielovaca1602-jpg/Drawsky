@@ -822,7 +822,7 @@ input[type=range]{accent-color:var(--accent)}
       <div class="chips"><button type="button" class="cb" id="accAdd"></button></div>
     </div>
     <div class="row">
-      <div><div class="lab">Subir cambios automáticamente</div><p class="hint">Unos segundos después de que dejas de escribir, DrawSky guarda en el mismo archivo de Drive. Apagado: solo sube cuando tocas "Guardar en Drive".</p></div>
+      <div><div class="lab">Subir cambios automáticamente</div><p class="hint">Mientras escribes, DrawSky sube tus cambios al mismo archivo de Drive cada 3 minutos, y siempre al cerrar el archivo o salir de la app. Apagado: solo sube cuando tocas "Guardar en Drive".</p></div>
       <input type="checkbox" class="switch" id="autoSync" aria-label="Subir cambios automáticamente">
     </div>
     <div class="row">
@@ -838,7 +838,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (44)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (45)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -1648,7 +1648,7 @@ const G = { clientId:'484469934201-pri7mreqjttbktotiqbf3l41pudsbns6.apps.googleu
 const DRIVE = 'https://www.googleapis.com/drive/v3', UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
 const FFIELDS = 'id,name,mimeType,appProperties,headRevisionId,modifiedTime,parents,trashed,owners(displayName,emailAddress)';
 const PDFLIB_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
-const CACHE_MAX = 10, SYNC_WAIT = 12000;
+const CACHE_MAX = 10, SYNC_WAIT = 180000; /* while you write, changes go up to Drive at most every 3 minutes (and always when you leave the file or the app): fewer old versions filling your Drive */
 if (!Array.isArray(prefs.accounts)) prefs.accounts = [];
 if (prefs.autoSync === undefined) prefs.autoSync = true;
 if (prefs.autoUpload === undefined) prefs.autoUpload = true;
@@ -1959,7 +1959,7 @@ async function packDoc(d){
     if (idx.length){ const src = await PDFDocument.load(d.cleanBytes, { updateMetadata:false }); copied = await out.copyPages(src, idx); }
     let k = 0;
     for (const s of snap){ if (s.src.kind === 'pdf') out.addPage(copied[k++]); else out.addPage([s.wPt, s.hPt]); }
-    clean = await out.save({ useObjectStreams:false, updateFieldAppearances:false });
+    clean = await out.save({ useObjectStreams:true, updateFieldAppearances:false });
   }
   const pdf = await PDFDocument.load(clean, { updateMetadata:false });
   const ctx = pdf.context, pages = pdf.getPages(), enc = new TextEncoder();
@@ -2041,8 +2041,8 @@ async function packDoc(d){
   if (bms.length){ try { const ol = buildOutline(pdf, pages, bms); xrefs = xrefs.concat(ol.refs); data.outline = { orig:ol.orig }; } catch(e){ console.warn('índice no guardado en el PDF', e); } }
   if (xrefs.length) data.extra = xrefs.map(r => [r.objectNumber, r.generationNumber]);
   packFont = null; packStk = null; packFF = null;
-  pdf.catalog.set(PDFName.of('DrawSky'), ctx.register(ctx.flateStream(enc.encode(JSON.stringify(data)))));
-  const bytes = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
+  pdf.catalog.set(PDFName.of('DrawSky'), ctx.register(ctx.flateStream(enc.encode(JSON.stringify(data)), { Type:'DrawSkyData' })));
+  const bytes = await pdf.save({ useObjectStreams:true, updateFieldAppearances:false });
   data.pages.forEach(sp => { delete sp.base; delete sp.ink; });
   delete data.notesPages; delete data.extra; delete data.outline; delete data.stk; delete data.deep; delete data.stkx;
   return { bytes, clean, rebuilt:!inPlace, snap, ver, data, n:snap.length };
@@ -2109,7 +2109,7 @@ async function unpack(buf){
       if (xd) xd.keys().filter(n => /^\/DSkyS\d+$/.test(String(n))).forEach(n => xd.delete(n));
     }
     pdf.catalog.delete(K); ctx.delete(jr);
-    const clean = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
+    const clean = await pdf.save({ useObjectStreams:true, updateFieldAppearances:false });
     data.pages.forEach((sp, i) => { sp.src = { kind:'pdf', index:i }; delete sp.base; delete sp.ink; });
     if (data.stk) stkAdopt(data.stk);
     delete data.notesPages; delete data.extra; delete data.outline; delete data.stk; delete data.deep; delete data.stkx;
@@ -2154,7 +2154,7 @@ function localSavedMsg(d){
   if (d.readonly) return 'Guardado en esta tableta (este PDF está protegido y no se puede escribir en Drive)';
   if (!navigator.onLine) return 'Guardado en la tableta · se sube a Drive cuando vuelva internet';
   if (!tokenOk(d.drive.email)) return 'Guardado en la tableta · toca "Guardar en Drive" para subirlo';
-  return prefs.autoSync ? 'Guardado en la tableta · se sube a Drive en unos segundos' : 'Guardado en la tableta · toca "Guardar en Drive" para subirlo';
+  return prefs.autoSync ? 'Guardado en la tableta · se sube a Drive cada 3 minutos y al salir' : 'Guardado en la tableta · toca "Guardar en Drive" para subirlo';
 }
 function autoUpload(d){
   if (!prefs.autoUpload || d.drive || d.bg || d.syncing || d.autoUpT || d.autoFailed || d.kind === 'sample' || !prefs.accounts.length || !navigator.onLine) return;
@@ -2170,7 +2170,7 @@ function markDirty(d){
   d.dirty = true;
   const e = lib.find(x => x.key === d.key); if (e && !e.pending){ e.pending = true; libSave(); }
   if (!d.syncing) driveState(d, !navigator.onLine ? 'offline' : tokenOk(d.drive.email) ? 'dirty' : 'auth');
-  if (prefs.autoSync) scheduleSync(d, SYNC_WAIT);
+  if (prefs.autoSync && !d.syncT) scheduleSync(d, SYNC_WAIT);
 }
 function scheduleSync(d, ms){ clearTimeout(d.syncT); d.syncT = setTimeout(() => { d.syncT = 0; if (d.dirty) syncDoc(d); }, ms); }
 /* the doc now lives in Drive under a new file id */
@@ -2195,7 +2195,7 @@ async function finishSync(d, pk, res){
   store.set('drawsky:doc:' + d.key, serialize(d));
   libTouch(d, { drive:{ email:d.drive.email, id:d.drive.id }, pending:!!d.dirty });
   driveState(d, d.dirty ? 'dirty' : 'saved');
-  if (d.dirty && prefs.autoSync) scheduleSync(d, 3000);
+  if (d.dirty && prefs.autoSync) scheduleSync(d, SYNC_WAIT);
   if (d === doc && !homeOn) setStatus(d.dirty ? 'Subido a Drive · hay cambios nuevos por subir' : 'Guardado en Google Drive');
   if (homeOn) renderHome();
 }
@@ -2243,7 +2243,7 @@ async function syncDoc(d, opts = {}){
   } catch(e){ syncFailed(d, e, opts.interactive); }
   finally {
     d.syncing = false;
-    if (d.syncAgain){ d.syncAgain = false; if (d.dirty) scheduleSync(d, 2000); }
+    if (d.syncAgain){ d.syncAgain = false; if (d.dirty) scheduleSync(d, SYNC_WAIT); }
   }
 }
 async function uploadNew(d, email, auto){
@@ -2491,7 +2491,10 @@ window.addEventListener('online', () => {
   setTimeout(syncPending, 1500);
 });
 window.addEventListener('offline', () => docs.forEach(d => { if (d.drive && d.dirty && !d.syncing) driveState(d, 'offline'); }));
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible'){ setTimeout(syncPending, 800); setTimeout(() => refreshDriveList(true), 1200); } });
+document.addEventListener('visibilitychange', () => {
+  /* leaving the app (home button, another app): upload now what is pending */
+  if (document.visibilityState === 'hidden' && navigator.onLine) docs.forEach(d => { if (d.drive && d.dirty && !d.syncing && tokenOk(d.drive.email)){ flushSave(d); syncDoc(d); } });
+  if (document.visibilityState === 'visible'){ setTimeout(syncPending, 800); setTimeout(() => refreshDriveList(true), 1200); } });
 
 /* ---------- strokes ---------- */
 const r2 = v => Math.round(v * 100) / 100;
