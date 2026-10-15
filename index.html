@@ -49,6 +49,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .app{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);position:fixed;inset:0;height:auto;overflow:hidden}
 .app>*{min-width:0}
 .app.focus{grid-template-rows:minmax(0,1fr)}
+.scrub{position:absolute;top:10px;bottom:10px;right:4px;width:26px;z-index:8;touch-action:none;opacity:.0;transition:opacity .25s}
+.scrub.on,.scrub.drag,.scrub:hover{opacity:1}
+.scrub-th{position:absolute;right:7px;top:0;width:7px;border-radius:99px;background:color-mix(in srgb,var(--fg) 45%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--bg) 60%,transparent)}
+.scrub.drag .scrub-th{width:10px;right:5px;background:var(--accent)}
+.scrub-b{position:absolute;right:30px;top:0;white-space:nowrap;padding:6px 12px;border-radius:99px;background:var(--fg);color:var(--bg);font-size:13px;font-weight:700;box-shadow:var(--shadow);pointer-events:none}
+.scrub.thumbs-s{top:120px;right:2px}
 .app.focus>.top,.app.focus>.tabs,.app.focus>.bottom{display:none}
 .focus-out{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;z-index:24;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent);color:var(--fg);display:grid;place-items:center;box-shadow:var(--shadow);backdrop-filter:blur(6px)}
 #focusBtn{flex:none;border-radius:50%}
@@ -380,7 +386,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dr-h{flex-wrap:wrap}
 /* quick view: a slim strip of small pages; edit mode takes the whole screen */
 .drawer-wrap:not(.edit){background:transparent}
-.drawer-wrap:not(.edit) .drawer{width:min(250px,62vw)}
+.drawer-wrap:not(.edit) .drawer{width:min(206px,56vw)}
 .drawer-wrap:not(.edit) .dr-h{padding:10px;gap:6px}
 .drawer-wrap:not(.edit) .dr-h h2{font-size:15px;flex:1 1 100%}
 .drawer-wrap:not(.edit) .dr-h .btn{height:34px;padding:0 10px;font-size:13px;flex:1}
@@ -391,12 +397,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .tsize input{width:150px;margin:0}
 .drawer-wrap.edit .drawer{width:100%;border-right:0}
 .thumbs{flex:1;overflow:auto;padding:16px;display:grid;grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));gap:18px 14px;align-content:start;touch-action:none}
-.drawer-wrap.listm .drawer{width:min(380px,92vw)}
+.drawer-wrap.listm .drawer{width:min(320px,86vw)}
 .thumbs.listv{display:block;touch-action:pan-y}
 .dr-list{display:flex;flex-direction:column;gap:6px}
 .dr-list .idx-tabs{margin:0 0 4px}
 .dr-h .dr-mode{order:5;flex:1 1 100%;display:flex;min-width:0}
-.dr-mode button{flex:1;min-width:0;padding:7px 4px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dr-mode button{flex:1;min-width:0;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.dr-mode button small{font-size:10.5px;font-weight:600;line-height:1.1}
 .dr-sec,.dr-empty,.dr-note{grid-column:1/-1}
 .dr-sec{display:flex;align-items:center;gap:2px;margin-top:6px;border-bottom:1px solid var(--line);padding-bottom:4px}
 .dr-sec.lv2{padding-left:18px}
@@ -643,7 +650,7 @@ input[type=range]{accent-color:var(--accent)}
 
 <div class="drawer-wrap" id="drawerWrap" hidden>
   <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle">
-    <div class="dr-h"><h2 id="drTitle">Páginas</h2><div class="seg dr-mode" id="drMode"><button type="button" data-dm="pages">Páginas</button><button type="button" data-dm="toc">Índice</button><button type="button" data-dm="notes">Notas</button></div><label class="tsize" id="drSize"><span>Tamaño</span><input type="range" id="thumbW" min="70" max="260" step="10" aria-label="Tamaño de las miniaturas"></label><button class="btn" type="button" id="drEdit">Editar</button><button class="icon-btn" type="button" id="drClose" aria-label="Cerrar páginas"></button></div>
+    <div class="dr-h"><h2 id="drTitle">Páginas</h2><div class="seg dr-mode" id="drMode"><button type="button" data-dm="pages" aria-label="Páginas" title="Páginas"></button><button type="button" data-dm="toc" aria-label="Índice" title="Índice"></button><button type="button" data-dm="notes" aria-label="Notas" title="Notas"></button></div><label class="tsize" id="drSize"><span>Tamaño</span><input type="range" id="thumbW" min="70" max="260" step="10" aria-label="Tamaño de las miniaturas"></label><button class="btn" type="button" id="drEdit">Editar</button><button class="icon-btn" type="button" id="drClose" aria-label="Cerrar páginas"></button></div>
     <div class="thumbs" id="thumbs"></div>
     <div class="dr-foot" id="drFoot" hidden></div>
   </aside>
@@ -724,7 +731,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (32)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (33)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -804,7 +811,7 @@ $('#zOut').innerHTML = svg('minus', 20); $('#zIn').innerHTML = svg('plus', 20); 
 $('#icPages').innerHTML = svg('pages', 20); $('#tplBtn').innerHTML = svg('tpl', 20); $('#noteBtn').innerHTML = svg('note', 20); $('#markBtn').innerHTML = svg('bookmark', 20); $('#searchBtn').innerHTML = svg('search', 20);
 $('#findPrev').innerHTML = svg('up', 18); $('#findNext').innerHTML = svg('down', 18); $('#findClose').innerHTML = svg('close', 18);
 $('#icM1').innerHTML = svg('folder', 22); $('#icM2').innerHTML = svg('book', 22);
-$('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
+$('#icM6').innerHTML = svg('image', 22); $('#icNew').innerHTML = svg('plus', 20); document.querySelectorAll('#drMode [data-dm]').forEach(b => { b.innerHTML = svg({ pages:'pages', toc:'list', notes:'note' }[b.dataset.dm], 19) + `<small>${b.getAttribute('aria-label')}</small>`; }); $('#icM3').innerHTML = svg('cloud', 22); $('#icM4').innerHTML = svg('camera', 22); $('#icM5').innerHTML = svg('fplus', 22);
 $('#hView [data-hv="list"]').innerHTML = svg('list', 20); $('#hView [data-hv="grid"]').innerHTML = svg('covers', 20);
 
 /* ---------- prefs ---------- */
@@ -3612,6 +3619,7 @@ function queueThumb(p, cv){
   });
 }
 function renderDrawer(){
+  setTimeout(() => { thumbScrub.el.style.top = thumbsEl.offsetTop + 6 + 'px'; thumbScrub.sync(); }, 0);
   $('#drEdit').textContent = drawerEdit ? 'Listo' : 'Editar';
   $('#drTitle').textContent = drawerEdit ? 'Editar páginas' : 'Páginas';
   if (thumbObs) thumbObs.disconnect();
@@ -5234,6 +5242,44 @@ cpHooks.fold = {
   visible:() => !dlgWrap.hidden && dlgState && dlgState.kind === 'fedit'
 };
 $('#palMgr').addEventListener('click', () => openPalManager());
+/* a grab bar on the side: drag it to jump to any page, in the document and in the pages panel */
+function makeScrub(host, scroller, label){
+  const el = document.createElement('div');
+  el.className = 'scrub'; el.innerHTML = '<i class="scrub-th"></i><span class="scrub-b" hidden></span>';
+  host.appendChild(el);
+  const th = el.firstChild, bub = el.lastChild;
+  let drag = false, idle = 0;
+  const sync = () => {
+    const max = scroller.scrollHeight - scroller.clientHeight;
+    el.hidden = max < scroller.clientHeight * 0.5;
+    if (el.hidden) return;
+    const h = el.clientHeight, tH = Math.max(44, Math.min(h * 0.35, h * scroller.clientHeight / scroller.scrollHeight));
+    th.style.height = tH + 'px'; th.style.transform = `translateY(${(h - tH) * (max ? scroller.scrollTop / max : 0)}px)`;
+    el.classList.add('on'); clearTimeout(idle); if (!drag) idle = setTimeout(() => el.classList.remove('on'), 1400);
+    if (drag){ bub.hidden = false; bub.textContent = label(); bub.style.transform = `translateY(${(h - tH) * (max ? scroller.scrollTop / max : 0) + tH / 2 - 16}px)`; }
+  };
+  const go = y => {
+    const r = el.getBoundingClientRect(), tH = th.offsetHeight, f = clamp((y - r.top - tH / 2) / Math.max(1, r.height - tH), 0, 1);
+    scroller.scrollTop = f * (scroller.scrollHeight - scroller.clientHeight); sync();
+  };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); drag = true; el.classList.add('drag'); try { el.setPointerCapture(e.pointerId); } catch(_){} go(e.clientY); });
+  el.addEventListener('pointermove', e => { if (drag){ e.preventDefault(); go(e.clientY); } });
+  const end = () => { if (!drag) return; drag = false; el.classList.remove('drag'); bub.hidden = true; sync(); };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  scroller.addEventListener('scroll', sync, { passive:true });
+  new ResizeObserver(sync).observe(scroller);
+  return { el, sync };
+}
+const docScrub = makeScrub($('#stage'), viewer, () => doc ? `Página ${doc.cur + 1} de ${doc.pages.length}` : '');
+docScrub.el.classList.add('doc');
+const thumbScrub = makeScrub($('#drawerWrap .drawer'), thumbsEl, () => { const t = [...thumbsEl.querySelectorAll('.thumb')].find(b => b.getBoundingClientRect().bottom > thumbsEl.getBoundingClientRect().top + 30); return t ? 'Página ' + (+t.dataset.i + 1) : ''; });
+thumbScrub.el.classList.add('thumbs-s');
+function placeDocScrub(){
+  const st = $('#stage').getBoundingClientRect(), right = !rail.hidden && !rail.classList.contains('left') && !prefs.railMin ? Math.max(0, st.right - rail.getBoundingClientRect().left) + 6 : 4;
+  docScrub.el.style.right = right + 'px';
+  docScrub.el.style.display = homeOn || !doc ? 'none' : '';
+}
+setInterval(() => { if (!homeOn && doc) placeDocScrub(); }, 1500);
 /* focus: hide the bars and see only the document (like Drawboard); the corner button brings everything back */
 const focusOut = document.createElement('button');
 focusOut.type = 'button'; focusOut.className = 'focus-out'; focusOut.hidden = true; focusOut.setAttribute('aria-label', 'Volver a ver las barras'); focusOut.title = 'Volver a ver las barras';
