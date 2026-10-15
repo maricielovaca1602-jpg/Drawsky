@@ -11,16 +11,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
+  color-scheme:light;
   --paper:#f7fbfe; --grid:rgba(30,42,68,.05); --card:#ffffff; --ink:#1e2a44; --soft:#4a5872; --line:#dbe7f1;
   --pink:#ee7ea0; --rose:#ffa9ba; --blush:#ffd7d6; --coral:#ea7d70; --peach:#ffaf6e; --butter:#ffcc80; --cream:#ffe2a6;
   --sage:#bcc07b; --lime:#dbe098; --sky:#abcdde; --ice:#d5edf8; --mint:#d5e2d3; --lav:#cdbdeb; --plum:#9a81b0; --mocha:#8e715b; --sand:#e5daca;
   --tape-ink:#1e2a44; --desk:#e4f0f9; --desk-grid:rgba(30,42,68,.06); --desk-ink:#1e2a44; --shadow:none;
   --hand:'Caveat',cursive; --font:'Inter',system-ui,sans-serif;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){ --desk:#13202f; --desk-grid:rgba(200,225,255,.05); --desk-ink:#e4f0f9; --paper:#142131; --grid:rgba(200,225,255,.05); --card:#182738; --ink:#eaf2f9; --soft:#a3b6c9; --line:#26384c; --shadow:none; }
-}
-:root[data-theme="dark"]{ --desk:#13202f; --desk-grid:rgba(200,225,255,.05); --desk-ink:#e4f0f9; --paper:#142131; --grid:rgba(200,225,255,.05); --card:#182738; --ink:#eaf2f9; --soft:#a3b6c9; --line:#26384c; --shadow:none; }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--desk);color:var(--ink);font:400 16px/1.6 var(--font);
