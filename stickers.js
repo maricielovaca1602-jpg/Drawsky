@@ -60,7 +60,8 @@ const S = [
   { id:'underline', pack:'flechas', name:'Subrayado', svg:l('M10 58c20-8 40 8 60-2 8-4 14-6 20-4', 6, '#ffcc80') + l('M18 72c18-6 34 4 52-2', 4, '#ffcc80') }
 ];
 const PACKS = [
-  { id:'nutri', name:'🍎 Nutri' }, { id:'salud', name:'🩺 Salud' }, { id:'estudio', name:'✨ Estudio' }, { id:'washi', name:'🎀 Washi y notitas' }, { id:'flechas', name:'➡️ Flechas' }
+  /* nutri and salud stay drawn but hidden for now */
+  { id:'estudio', name:'✨ Estudio' }, { id:'washi', name:'🎀 Washi y notitas' }, { id:'flechas', name:'➡️ Flechas' }
 ];
 /* full SVG with a white die-cut border around the drawing */
 let uid = 0;

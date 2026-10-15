@@ -49,8 +49,33 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .app{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);position:fixed;inset:0;height:auto;overflow:hidden}
 .app>*{min-width:0}
 .app.focus{grid-template-rows:minmax(0,1fr)}
-.scrub{position:absolute;top:10px;bottom:10px;right:4px;width:0;z-index:8;pointer-events:none;opacity:.55;transition:opacity .25s;-webkit-tap-highlight-color:transparent;outline:0}
+.stk-tabs button{font-size:12.5px;padding-left:4px;padding-right:4px}
+.stk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:min(46vh,330px);overflow:auto;padding:2px}
+.stk-it{position:relative;display:block}
+.stk-it>button:first-child,.stk-new{width:100%;aspect-ratio:1;border-radius:14px;border:1.5px solid transparent;background:color-mix(in srgb,var(--fg) 5%,transparent);padding:6px;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stk-it>button:first-child[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.stk-it img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.stk-new{border:1.5px dashed var(--line);color:var(--fg);gap:2px;align-content:center}
+.stk-new small{font-size:10.5px;line-height:1.1}
+.stk-del{position:absolute;top:-5px;right:-5px;width:20px;height:20px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:var(--surface);color:var(--fg);box-shadow:0 0 0 1px var(--line)}
+.smk{position:fixed;inset:0;z-index:62;background:rgba(10,14,22,.45);display:grid;place-items:center;padding:14px}
+.smk[hidden]{display:none}
+.smk-card{width:min(900px,100%);max-height:calc(100vh - 28px);background:var(--surface);color:var(--fg);border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+.smk-h{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+.smk-body{display:flex;gap:14px;padding:14px;min-height:0;flex:1;overflow:auto}
+.smk-stage{flex:1;min-width:0;min-height:min(60vh,520px);display:grid;place-items:center;border-radius:14px;background:repeating-conic-gradient(color-mix(in srgb,var(--fg) 7%,transparent) 0 25%,transparent 0 50%) 0 0/18px 18px}
+.smk-stage canvas{touch-action:none;border-radius:6px;cursor:crosshair}
+.smk-empty{margin:0;opacity:.6;font-size:14px;text-align:center;padding:20px}
+.smk-side{width:250px;flex:none;display:flex;flex-direction:column;gap:10px}
+.smk-side .btn{justify-content:center}
+.smk-prev{display:grid;place-items:center;border-radius:14px;padding:6px;background:repeating-conic-gradient(color-mix(in srgb,var(--fg) 7%,transparent) 0 25%,transparent 0 50%) 0 0/14px 14px}
+.smk-act{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+@media (max-width:640px){.smk-body{flex-direction:column}.smk-side{width:auto}.smk-stage{min-height:46vh}}
+.scrub{position:absolute;top:10px;bottom:10px;right:4px;width:0;z-index:8;pointer-events:none;opacity:0;transition:opacity .3s;-webkit-tap-highlight-color:transparent;outline:0}
 .scrub.on,.scrub.drag{opacity:1}
+.scrub:not(.on):not(.drag) .scrub-th{pointer-events:none}
+.scrub-th:empty{min-width:10px;width:10px;padding:0}
+.scrub-th::before{content:"";position:absolute;inset:-8px -8px -8px -14px}
 .scrub-th{position:absolute;right:0;top:0;height:30px;min-width:34px;padding:0 9px;box-sizing:border-box;border:0;border-radius:99px;pointer-events:auto;touch-action:none;
   background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--fg);font:700 12.5px/30px var(--font);text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;
   box-shadow:0 1px 3px rgba(0,0,0,.18),0 0 0 1px var(--line);-webkit-tap-highlight-color:transparent;outline:0;user-select:none;-webkit-user-select:none;backdrop-filter:blur(6px)}
@@ -757,7 +782,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (37)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (38)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -767,6 +792,7 @@ input[type=range]{accent-color:var(--accent)}
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="stickers.js"></script>
 <script>
 (() => {
 'use strict';
@@ -782,6 +808,7 @@ const ecur = $('#ecur'), statusEl = $('#status');
 /* ---------- icons ---------- */
 const ICON = {
   table:'<rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M3.5 10h17M3.5 14.5h17M9.5 5v14M15 5v14"/>',
+  sticker:'<path d="M20 12.5V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h5.5z"/><path d="M12.5 20v-4.5a3 3 0 0 1 3-3H20"/><path d="M8.5 9.5h.01M13.5 9.5h.01"/>',
   aa:'<path d="M2.5 18l4-11 4 11M4 14h5"/><path d="M13.5 10c.8-1 2-1.4 3.2-1.1 1.4.4 1.8 1.4 1.8 2.7V18M18.5 13.2c-2.6-.2-5 .3-5 2.4 0 1.4 1.1 2.3 2.4 2.3 1.4 0 2.6-1 2.6-2.4"/>',
   expand:'<path d="M16 7v9H7"/>',
   shrink:'<path d="M8 17V8h9"/>',
@@ -848,14 +875,14 @@ const store = {
   set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } },
   del(k){ try { localStorage.removeItem(k); } catch(e){} }
 };
-const TOOL_INFO = { hand:{name:'Mover',icon:'hand'}, pen1:{name:'Bolígrafo 1',icon:'pen'}, pen2:{name:'Bolígrafo 2',icon:'pen'}, hl:{name:'Resaltador',icon:'hl'}, eraser:{name:'Borrador',icon:'eraser'}, select:{name:'Seleccionar texto',icon:'cursor'}, lasso:{name:'Lazo',icon:'lasso'}, text:{name:'Texto',icon:'text'}, table:{name:'Tabla',icon:'table'}, convert:{name:'Convertir a texto',icon:'aa'} };
+const TOOL_INFO = { hand:{name:'Mover',icon:'hand'}, pen1:{name:'Bolígrafo 1',icon:'pen'}, pen2:{name:'Bolígrafo 2',icon:'pen'}, hl:{name:'Resaltador',icon:'hl'}, eraser:{name:'Borrador',icon:'eraser'}, select:{name:'Seleccionar texto',icon:'cursor'}, lasso:{name:'Lazo',icon:'lasso'}, text:{name:'Texto',icon:'text'}, table:{name:'Tabla',icon:'table'}, stk:{name:'Stickers',icon:'sticker'}, convert:{name:'Convertir a texto',icon:'aa'} };
 const SIZE_RANGE = { pen:{min:0.1 / 0.3528,max:3 / 0.3528,step:0.01 / 0.3528,unit:'mm'}, hl:{min:3,max:30,step:0.5,unit:'pt'}, eraser:{min:6,max:80,step:1,unit:'px'}, text:{min:8,max:40,step:1,unit:'pt'}, table:{min:6,max:24,step:1,unit:'pt'} };
 const DEF_FAV = {
   pen:['#1d2b53','#111111','#d63a4a','#1c7ed6','#2f9e44','#e67700','#9c36b5','#7a8594'],
   hl:['#ffd43b','#8ce99a','#74c0fc','#ffa8a8','#e599f7','#ffc078','#63e6be','#ced4da']
 };
 const MAX_FAV = 8;
-const kind = t => t === 'hl' ? 'hl' : t === 'eraser' ? 'eraser' : t === 'hand' ? 'hand' : t === 'select' ? 'select' : t === 'lasso' || t === 'convert' ? 'lasso' : t === 'text' ? 'text' : t === 'table' ? 'table' : 'pen';
+const kind = t => t === 'hl' ? 'hl' : t === 'eraser' ? 'eraser' : t === 'hand' ? 'hand' : t === 'select' ? 'select' : t === 'lasso' || t === 'convert' ? 'lasso' : t === 'text' ? 'text' : t === 'table' ? 'table' : t === 'stk' ? 'stk' : 'pen';
 const noOpts = t => kind(t) === 'hand' || kind(t) === 'select' || kind(t) === 'lasso';
 const PEN_STYLES = { pluma:'Pluma', pincel:'Pluma pincel', boligrafo:'Bolígrafo', lapiz:'Lápiz', estilografo:'Estilógrafo', rotulador:'Rotulador' };
 const constStyle = s => s.t === 'pen' && (s.st === 'estilografo' || s.st === 'rotulador');
@@ -865,7 +892,7 @@ function toolName(t){
   return PEN_STYLES[st] + ' ' + (t === 'pen1' ? 1 : 2);
 }
 const DEF = { sens:0.7, snap:true, finger:false, theme:'system', tool:'pen1', dock:'float', fabPos:null, openNb:[], thumbCols:'1', editCols:'2x2', thumbW:120, presets:[], homeView:'list',
-  tools:{ pen1:{color:'#1d2b53',size:1.2}, pen2:{color:'#d63a4a',size:1.8}, hl:{color:'#ffd43b',size:12}, eraser:{size:24}, hand:{}, select:{}, lasso:{}, text:{color:'#1d2b53',size:14}, table:{rows:4,cols:3,size:10,head:true,color:'#7cb098',ff:'inter'}, convert:{} } };
+  tools:{ pen1:{color:'#1d2b53',size:1.2}, pen2:{color:'#d63a4a',size:1.8}, hl:{color:'#ffd43b',size:12}, eraser:{size:24}, hand:{}, select:{}, lasso:{}, text:{color:'#1d2b53',size:14}, table:{rows:4,cols:3,size:10,head:true,color:'#7cb098',ff:'inter'}, stk:{pack:'estudio',cur:'b:star',w:64}, convert:{} } };
 const saved = store.get('drawsky:prefs') || {};
 const prefs = Object.assign({}, DEF, saved, {
   tools: Object.assign({}, DEF.tools, saved.tools || {}),
@@ -1719,7 +1746,7 @@ async function cachePut(id, v){
   pruneCache(false);
 }
 async function pruneCache(all){
-  const items = (await idb.all()).filter(it => !/^(img|tpl):/.test(String(it.id))).sort((a, b) => b.t - a.t);
+  const items = (await idb.all()).filter(it => !/^(img|tpl|stk):/.test(String(it.id))).sort((a, b) => b.t - a.t);
   const keep = id => docs.some(d => d.drive && d.drive.id === id) || lib.some(e => e.drive && e.drive.id === id && e.pending);
   let n = 0;
   for (const it of items){
@@ -1731,7 +1758,7 @@ async function pruneCache(all){
 }
 async function cacheInfo(){
   const el = $('#cacheInfo'); if (!el) return;
-  const items = (await idb.all()).filter(it => !/^(img|tpl):/.test(String(it.id)));
+  const items = (await idb.all()).filter(it => !/^(img|tpl|stk):/.test(String(it.id)));
   const mb = items.reduce((s, it) => s + ((it.bytes && it.bytes.byteLength) || 0), 0) / 1048576;
   el.textContent = items.length
     ? `${items.length} ${items.length === 1 ? 'archivo de Drive guardado' : 'archivos de Drive guardados'} para usar sin internet (${mb < 0.1 ? '<0.1' : mb.toFixed(1)} MB). DrawSky guarda como máximo los ${CACHE_MAX} más recientes; los demás se vuelven a descargar al abrirlos.`
@@ -1757,7 +1784,7 @@ function cmdsPdf(cmds){
   }
   return o;
 }
-let packFont = null;
+let packFont = null, packStk = null;
 function pdfSafe(f, str){ return [...String(str)].map(ch => { try { f.encodeText(ch); return ch; } catch(_){ return '?'; } }).join(''); }
 function textPdf(s){
   if (!packFont) return '';
@@ -1769,6 +1796,7 @@ function strokePdf(s){
   if (!s.pts || !s.pts.length) return '';
   if (s.t === 'text') return textPdf(s);
   if (s.t === 'table') return tablePdf(s);
+  if (s.t === 'stk') return stkPdf(s);
   const g = strokeGeom(s), c = rgb(s.color), path = cmdsPdf(g.cmds);
   let o = g.mode === 'fill' ? `${c} rg\n${path}f\n` : `${c} RG ${nf(Math.max(0.2, g.w))} w ${g.cap === 'square' ? 2 : 1} J${g.dash ? ` [${g.dash.map(nf).join(' ')}] 0 d` : ''}\n${path}S\n`;
   if (g.alpha != null) o = `q /DSkyA${Math.round(g.alpha * 100)} gs\n${o}Q\n`;
@@ -1872,6 +1900,14 @@ async function packDoc(d){
     tplEmb[ty] = null;
     try { const v = await idb.get('tpl:' + ty.slice(4)); if (v && v.data){ const bytes = Uint8Array.from(atob(v.data.split(',')[1]), c => c.charCodeAt(0)); tplEmb[ty] = await pdf.embedJpg(bytes); } } catch(e){ console.warn(e); }
   }
+  /* stickers: each one embedded once as a PNG with transparency */
+  const stkEmb = {}; let stkN = 0;
+  for (const s of snap) for (const st of s.strokes){
+    if (st.t !== 'stk' || stkEmb[st.k] !== undefined) continue;
+    stkEmb[st.k] = null;
+    try { const by = await stkPng(st.k); if (by) stkEmb[st.k] = { img:await pdf.embedPng(by), name:'DSkyS' + (stkN++) }; } catch(e){ console.warn('sticker no guardado', e); }
+  }
+  packStk = {}; for (const k in stkEmb) if (stkEmb[k]) packStk[k] = stkEmb[k].name;
   if (allNotes.length || hasText){ bold = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold); regular = await pdf.embedFont(PDFLib.StandardFonts.Helvetica); }
   packFont = regular;
   const meta = snap.map((s, i) => {
@@ -1881,10 +1917,12 @@ async function packDoc(d){
     node.normalize();
     const res = node.Resources(), old = res.lookupMaybe(PDFName.of('ExtGState'), PDFDict);
     const pageText = s.strokes.some(t => t.t === 'text' || t.t === 'table') || !!(s.tpl && NUTRI_NAMES[s.tpl.type]);
-    const timg = s.tpl && tplEmb[String(s.tpl.type)];
-    if (timg){
+    const timg = s.tpl && tplEmb[String(s.tpl.type)], pstk = [...new Set(s.strokes.filter(t => t.t === 'stk' && stkEmb[t.k]).map(t => t.k))];
+    if (timg || pstk.length){
       const ox = res.lookupMaybe(PDFName.of('XObject'), PDFDict), xd = ox ? ox.clone(ctx) : ctx.obj({});
-      xd.set(PDFName.of('DSkyTpl'), timg.ref); res.set(PDFName.of('XObject'), xd); s.tplImg = true;
+      if (timg){ xd.set(PDFName.of('DSkyTpl'), timg.ref); s.tplImg = true; }
+      pstk.forEach(k => xd.set(PDFName.of(stkEmb[k].name), stkEmb[k].img.ref));
+      res.set(PDFName.of('XObject'), xd);
     }
     if (marks.length || pageText){
       const of = res.lookupMaybe(PDFName.of('Font'), PDFDict), fd = of ? of.clone(ctx) : ctx.obj({});
@@ -1894,7 +1932,7 @@ async function packDoc(d){
     }
     const gs = old ? old.clone(ctx) : ctx.obj({});
     const gsd = Object.assign({}, GS);
-    for (const st of s.strokes){ if (st.t === 'text' || st.t === 'table') continue; const g = strokeGeom(st); if (g.alpha != null){ const a = Math.round(g.alpha * 100); gsd['DSkyA' + a] = { Type:'ExtGState', CA:a / 100, ca:a / 100 }; } }
+    for (const st of s.strokes){ if (st.t === 'text' || st.t === 'table' || st.t === 'stk') continue; const g = strokeGeom(st); if (g.alpha != null){ const a = Math.round(g.alpha * 100); gsd['DSkyA' + a] = { Type:'ExtGState', CA:a / 100, ca:a / 100 }; } }
     for (const k in gsd) gs.set(PDFName.of(k), ctx.obj(gsd[k]));
     res.set(PDFName.of('ExtGState'), gs);
     const b = pg.getCropBox(), rot = ((pg.getRotation().angle % 360) + 360) % 360;
@@ -1904,7 +1942,9 @@ async function packDoc(d){
     return o;
   });
   const data = { v:1, app:'DrawSky', name:d.name, kind:d.kind, pages:meta };
-  let xrefs = Object.values(tplEmb).filter(Boolean).map(im => im.ref);
+  let xrefs = Object.values(tplEmb).filter(Boolean).map(im => im.ref).concat(Object.values(stkEmb).filter(Boolean).map(e => e.img.ref));
+  const myStk = {}; for (const k in stkEmb) if (stkEmb[k] && k.startsWith('u:') && stkData.get(k)) myStk[k] = stkData.get(k);
+  if (Object.keys(myStk).length) data.stk = myStk;
   if (bold){
     xrefs = xrefs.concat([bold.ref, regular.ref]);
     if (allNotes.length){ const made = await addNotesPages(pdf, allNotes, bold, regular); data.notesPages = made.pages; xrefs = xrefs.concat(made.refs); }
@@ -1912,11 +1952,11 @@ async function packDoc(d){
   const bms = []; snap.forEach((s, i) => s.bm.forEach(b => bms.push(Object.assign({}, b, { t:bmTitle(b, { i }), pi:i }))));
   if (bms.length){ try { const ol = buildOutline(pdf, pages, bms); xrefs = xrefs.concat(ol.refs); data.outline = { orig:ol.orig }; } catch(e){ console.warn('índice no guardado en el PDF', e); } }
   if (xrefs.length) data.extra = xrefs.map(r => [r.objectNumber, r.generationNumber]);
-  packFont = null;
+  packFont = null; packStk = null;
   pdf.catalog.set(PDFName.of('DrawSky'), ctx.register(ctx.flateStream(enc.encode(JSON.stringify(data)))));
   const bytes = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
   data.pages.forEach(sp => { delete sp.base; delete sp.ink; });
-  delete data.notesPages; delete data.extra; delete data.outline;
+  delete data.notesPages; delete data.extra; delete data.outline; delete data.stk;
   return { bytes, clean, rebuilt:!inPlace, snap, ver, data, n:snap.length };
 }
 /* removes DrawSky ink from a saved PDF: returns the clean PDF plus the editable strokes */
@@ -1954,18 +1994,24 @@ async function unpack(buf){
     }
     for (let i = all.length - 1; i >= pages.length; i--) pdf.removePage(i);
     if (data.outline){ if (data.outline.orig) pdf.catalog.set(PDFName.of('Outlines'), PDFRef.of(data.outline.orig[0], data.outline.orig[1])); else pdf.catalog.delete(PDFName.of('Outlines')); }
-    for (const r of data.extra || []) ctx.delete(PDFRef.of(r[0], r[1]));
+    for (const r of data.extra || []){
+      const ref = PDFRef.of(r[0], r[1]), o = ctx.lookup(ref), sm = o && o.dict && o.dict.get(PDFName.of('SMask'));
+      if (sm instanceof PDFRef) ctx.delete(sm);
+      ctx.delete(ref);
+    }
     for (const pg of pages){
       const res = pg.node.Resources(), fd = res && res.lookupMaybe(PDFName.of('Font'), PDFLib.PDFDict);
       if (fd && fd.get(PDFName.of('DSkyF'))) fd.delete(PDFName.of('DSkyF'));
       if (fd && fd.get(PDFName.of('DSkyR'))) fd.delete(PDFName.of('DSkyR'));
       const xd = res && res.lookupMaybe(PDFName.of('XObject'), PDFLib.PDFDict);
       if (xd && xd.get(PDFName.of('DSkyTpl'))) xd.delete(PDFName.of('DSkyTpl'));
+      if (xd) xd.keys().filter(n => /^\/DSkyS\d+$/.test(String(n))).forEach(n => xd.delete(n));
     }
     pdf.catalog.delete(K); ctx.delete(jr);
     const clean = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
     data.pages.forEach((sp, i) => { sp.src = { kind:'pdf', index:i }; delete sp.base; delete sp.ink; });
-    delete data.notesPages; delete data.extra; delete data.outline;
+    if (data.stk) stkAdopt(data.stk);
+    delete data.notesPages; delete data.extra; delete data.outline; delete data.stk;
     return { clean, data };
   } catch(e){ console.warn('Trazos de DrawSky no utilizables', e); return { clean:u8, data:null, broken:true }; }
 }
@@ -2439,6 +2485,7 @@ function drawStroke(ctx, s, sc, live){
   if (!s.pts.length) return;
   if (s.t === 'text'){ drawTextCanvas(ctx, s, sc); return; }
   if (s.t === 'table'){ drawTableCanvas(ctx, s, sc); return; }
+  if (s.t === 'stk'){ drawStkCanvas(ctx, s, sc); return; }
   const g = strokeGeom(s, live), path = g.p2 || (g.p2 = new Path2D(g.d));
   ctx.save(); ctx.scale(sc, sc);
   if (g.alpha != null) ctx.globalAlpha *= g.alpha;
@@ -2450,6 +2497,7 @@ function drawStroke(ctx, s, sc, live){
 function strokeEl(s){
   if (s.t === 'text'){ let el = elCache.get(s); if (!el){ el = textEl(s); elCache.set(s, el); } return el; }
   if (s.t === 'table'){ let el = elCache.get(s); if (!el){ el = tableEl(s); elCache.set(s, el); } return el; }
+  if (s.t === 'stk'){ let el = elCache.get(s); if (!el || !el.getAttribute('href')){ el = stkEl(s); elCache.set(s, el); } return el; }
   const g = strokeGeom(s);
   let el = elCache.get(s);
   if (el && el._g === g) return el;
@@ -2762,6 +2810,7 @@ function endStroke(){
 const bbCache = new WeakMap();
 function bbox(s){
   let b = bbCache.get(s); if (b) return b;
+  if (s.t === 'stk'){ const C = stkCorners(s), X = C.map(c => c[0]), Y = C.map(c => c[1]); b = [Math.min(...X), Math.min(...Y), Math.max(...X), Math.max(...Y), 0]; bbCache.set(s, b); return b; }
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, mw = s.t === 'hl' ? s.size : 0;
   for (const q of s.pts){ if (q[0] < x0) x0 = q[0]; if (q[0] > x1) x1 = q[0]; if (q[1] < y0) y0 = q[1]; if (q[1] > y1) y1 = q[1]; if (s.t !== 'hl' && q[2] > mw) mw = q[2]; }
   b = [x0, y0, x1, y1, mw]; bbCache.set(s, b); return b;
@@ -2772,6 +2821,7 @@ function segDist2(px, py, ax, ay, bx, by){
   const x = ax + t * dx - px, y = ay + t * dy - py; return x * x + y * y;
 }
 function hitStroke(s, x, y, r){
+  if (s.t === 'stk') return false; /* the eraser leaves stickers alone: delete them with the lasso */
   const b = bbox(s), pad = r + b[4] / 2;
   if (s.t === 'text' || s.t === 'table') return x >= b[0] - r && x <= b[2] + r && y >= b[1] - r && y <= b[3] + r;
   if (x < b[0] - pad || x > b[2] + pad || y < b[1] - pad || y > b[3] + pad) return false;
@@ -2954,7 +3004,7 @@ viewer.addEventListener('pointerdown', e => {
   if (e.target.closest && e.target.closest('.tbox')) return;
   hideNoteChip(); if (textSel || !selMenu.hidden) clearSel();
   if (textEdit){ e.preventDefault(); commitText(); if (tool === 'text') return; }
-  if (lsel && tool !== 'lasso') clearLasso();
+  if (lsel && tool !== 'lasso' && tool !== 'stk') clearLasso();
   if (placingNote){
     const pe = e.target.closest && e.target.closest('.page');
     if (pe){
@@ -2983,6 +3033,7 @@ viewer.addEventListener('pointerdown', e => {
   const rect = pageEl.getBoundingClientRect();
   if (t === 'select'){ beginSelect(e, p, rect); return; }
   if (t === 'text'){ const k = p.wPt / rect.width; openTextAt(p, (e.clientX - rect.left) * k, (e.clientY - rect.top) * k); return; }
+  if (t === 'stk'){ stickerDown(e, p, rect); return; }
   if (t === 'table'){ const k = p.wPt / rect.width; openTableAt(p, (e.clientX - rect.left) * k, (e.clientY - rect.top) * k); return; }
   if (t === 'lasso' || t === 'convert'){
     const k = p.wPt / rect.width;
@@ -3226,7 +3277,7 @@ window.addEventListener('pointercancel', e => endDrag(e, true));
 /* ---------- tools: rail ---------- */
 function setTool(t){ clearSel(); clearLasso(); if (textEdit) commitText(); tool = t; setTimeout(refreshToolPanel, 0); savePrefs(); renderRail(); if (!wheelWrap.hidden) renderWheelView(); if (t !== 'eraser') ecur.hidden = true; }
 function renderRail(){
-  const items = ['hand', 'select', 'lasso', 'convert', 'text', 'table', 'pen1', 'pen2', 'hl', 'eraser'];
+  const items = ['hand', 'select', 'lasso', 'convert', 'text', 'table', 'stk', 'pen1', 'pen2', 'hl', 'eraser'];
   const u = doc ? doc.undo.length : 0, r = doc ? doc.redo.length : 0;
   const fold = rail.classList.contains('left') ? (prefs.railMin ? 'right' : 'left') : (prefs.railMin ? 'left' : 'right');
   rail.classList.toggle('min', !!prefs.railMin);
@@ -3279,7 +3330,7 @@ rail.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.dataset.grip !== undefined) return;
   if (b.dataset.tool){
     if (b.dataset.tool === tool && !noOpts(tool)){ if (tpanel.hidden) openToolPanel(b); else closeToolPanel(); }
-    else setTool(b.dataset.tool);
+    else { setTool(b.dataset.tool); if (b.dataset.tool === 'stk') openToolPanel(b); }
   } else if (b.dataset.color){ applyColor(b.dataset.color); refreshToolPanel(); }
   else act(b.dataset.act);
 });
@@ -3308,7 +3359,7 @@ const lum = hex => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >>
 const sameColor = (a, b) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
 
 function viewMain(){
-  const items = ['hand', 'select', 'lasso', 'convert', 'text', 'table', 'pen1', 'pen2', 'hl', 'eraser', 'favs', 'undo', 'redo'], stepA = 360 / items.length;
+  const items = ['hand', 'select', 'lasso', 'convert', 'text', 'table', 'stk', 'pen1', 'pen2', 'hl', 'eraser', 'favs', 'undo', 'redo'], stepA = 360 / items.length;
   const names = { favs:'Bolígrafos favoritos', undo:'Deshacer', redo:'Rehacer' };
   let h = `<svg viewBox="0 0 200 200" class="wsvg" aria-hidden="true"><circle cx="100" cy="100" r="99" class="w-band"/><circle cx="100" cy="100" r="84" class="w-disc"/></svg>`;
   items.forEach((k, i) => {
@@ -3563,6 +3614,7 @@ wheelWrap.addEventListener('click', e => {
   else if (d.emode){ prefs.tools.eraser.mode = d.emode; savePrefs(); renderWheelView(); }
   else if (d.tool){
     tool = d.tool; savePrefs(); renderRail(); ecur.hidden = true;
+    if (tool === 'stk'){ closeWheel(); openToolPanel(null); return; }
     if (noOpts(tool)){ closeWheel(); if (tool === 'select') toast('Desliza el lápiz sobre el texto del PDF para seleccionarlo'); if (tool === 'lasso') toast('Encierra con el lápiz los trazos que quieres mover, cambiar o borrar'); return; }
     wheelView = 'tool'; renderWheelView();
   }
@@ -3675,7 +3727,7 @@ function queueThumb(p, cv){
   });
 }
 function renderDrawer(){
-  setTimeout(() => { thumbScrub.el.style.top = thumbsEl.offsetTop + 6 + 'px'; thumbScrub.sync(); }, 0);
+  setTimeout(() => { thumbScrub.el.style.top = thumbsEl.offsetTop + 6 + 'px'; thumbScrub.sync(false); }, 0);
   $('#drEdit').textContent = drawerEdit ? 'Listo' : 'Editar';
   $('#drTitle').textContent = drawerEdit ? 'Editar páginas' : 'Páginas';
   if (thumbObs) thumbObs.disconnect();
@@ -4369,6 +4421,7 @@ async function packImage(d){
   const x = c.getContext('2d'), sc = bmp.width / s.wPt;
   x.drawImage(bmp, 0, 0);
   drawTemplate(x, s, sc);
+  await stkPreload(s.strokes);
   for (const st of s.strokes.filter(t => t.t === 'hl')){ x.save(); x.globalCompositeOperation = 'multiply'; drawStroke(x, st, sc); x.restore(); }
   for (const st of s.strokes.filter(t => t.t !== 'hl')) drawStroke(x, st, sc);
   s.notes.forEach((n, i) => {
@@ -4383,6 +4436,8 @@ async function packImage(d){
   c.width = 0; c.height = 0;
   const notes = await exportNotes(s.notes);
   const data = { v:1, app:'DrawSky', kind:'image', name:d.name, mime:type, pages:[{ src:{ kind:'img' }, w:s.wPt, h:s.hPt, tpl:s.tpl, strokes:s.strokes, notes }] };
+  const myStk = {}; s.strokes.forEach(t => { if (t.t === 'stk' && t.k.startsWith('u:') && stkData.get(t.k)) myStk[t.k] = stkData.get(t.k); });
+  if (Object.keys(myStk).length) data.stk = myStk;
   return { bytes:new Uint8Array(await blob.arrayBuffer()), mime:type, clean:d.cleanBytes, rebuilt:false, snap, ver, data, n:1, image:true };
 }
 /* strokes and the original image live in a small companion file next to it, in the DrawSky folder */
@@ -4424,7 +4479,7 @@ async function openDriveImage(email, id, ctx){
     loading(true, 'Descargando ' + meta.name + '…');
     mime = meta.mimeType; rev = meta.headRevisionId;
     const sc = await loadSidecar(email, meta);
-    if (sc && sc.data){ clean = sc.orig; data = cdata = sc.data; sid = sc.sid; }
+    if (sc && sc.data){ clean = sc.orig; data = cdata = sc.data; sid = sc.sid; if (sc.data.stk) stkAdopt(sc.data.stk); }
     else {
       clean = new Uint8Array(await (await gfetch(email, `${DRIVE}/files/${id}?alt=media&supportsAllDrives=true`)).arrayBuffer());
       if (sc) sid = sc.sid;
@@ -4749,7 +4804,7 @@ function inPoly(x, y, poly){
 }
 function selBox(p, idx){
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-  for (const i of idx){ const s = p.strokes[i]; if (!s) continue; const b = bbox(s), m = s.t === 'text' || s.t === 'table' ? 0 : b[4] / 2; x0 = Math.min(x0, b[0] - m); y0 = Math.min(y0, b[1] - m); x1 = Math.max(x1, b[2] + m); y1 = Math.max(y1, b[3] + m); }
+  for (const i of idx){ const s = p.strokes[i]; if (!s) continue; const b = bbox(s), m = boxy(s) ? 0 : b[4] / 2; x0 = Math.min(x0, b[0] - m); y0 = Math.min(y0, b[1] - m); x1 = Math.max(x1, b[2] + m); y1 = Math.max(y1, b[3] + m); }
   return [x0 - 1.5, y0 - 1.5, x1 + 1.5, y1 + 1.5];
 }
 function clearLasso(){ lsel = null; document.querySelectorAll('.lassobox,.lassoglow').forEach(e => e.remove()); lassoMenu.hidden = true; }
@@ -4763,7 +4818,7 @@ function drawLassoBox(){
   let h = '';
   for (const i of lsel.idx){
     const st = p.strokes[i]; if (!st) continue;
-    if (st.t === 'text' || st.t === 'table'){ const b = bbox(st); h += `<rect x="${b[0] - 2}" y="${b[1] - 2}" width="${b[2] - b[0] + 4}" height="${b[3] - b[1] + 4}" rx="3"/>`; continue; }
+    if (boxy(st)){ const b = bbox(st); h += `<rect x="${b[0] - 2}" y="${b[1] - 2}" width="${b[2] - b[0] + 4}" height="${b[3] - b[1] + 4}" rx="3"/>`; continue; }
     const ge = strokeGeom(st), w = (ge.mode === 'fill' ? 0 : ge.w || st.size || 1) + 6;
     h += `<path d="${ge.d}" stroke-width="${ge.mode === 'fill' ? 6 : w}"${ge.mode === 'fill' ? ' class="f"' : ''}/>`;
   }
@@ -4778,14 +4833,20 @@ function showLassoMenu(){
   if (!lsel) return;
   const { p, box } = lsel, r = p.el.getBoundingClientRect(), k = r.width / p.wPt;
   const cols = favOf(['pen1', 'pen2', 'hl', 'text'].includes(tool) ? tool : 'pen1').slice(0, 6);
-  lassoMenu.innerHTML = cols.map(c => `<button type="button" class="lc" data-lc="${c}" aria-label="Cambiar a este color" style="--c:${c}"></button>`).join('') +
+  const onlyStk = lsel.idx.every(i => p.strokes[i] && p.strokes[i].t === 'stk');
+  lassoMenu.innerHTML = (onlyStk ? [] : cols).map(c => `<button type="button" class="lc" data-lc="${c}" aria-label="Cambiar a este color" style="--c:${c}"></button>`).join('') +
     `<button type="button" data-l="dup">${svg('copy', 16)}Duplicar</button><button type="button" data-l="del">${svg('trash', 16)}Eliminar</button>`;
   lassoMenu.hidden = false;
   const top = r.top + box[1] * k - lassoMenu.offsetHeight - 56;
   lassoMenu.style.left = clamp(r.left + (box[0] + box[2]) / 2 * k - lassoMenu.offsetWidth / 2, 8, innerWidth - lassoMenu.offsetWidth - 8) + 'px';
   lassoMenu.style.top = (top > 60 ? top : Math.min(innerHeight - lassoMenu.offsetHeight - 70, r.top + box[3] * k + 18)) + 'px';
 }
+function boxy(s){ return s.t === 'text' || s.t === 'table' || s.t === 'stk'; }
 function xfStroke(s, f, k){
+  if (s.t === 'stk'){
+    const g = stkGeom(s), c = f(g.cx, g.cy), e = f(g.cx + 1, g.cy), da = Math.atan2(e[1] - c[1], e[0] - c[0]) * 180 / Math.PI, w = g.w * k, h = g.h * k;
+    return Object.assign({}, s, { r:r2((((g.r + da) % 360) + 360) % 360), pts:[[r2(c[0] - w / 2), r2(c[1] - h / 2), 0], [r2(c[0] + w / 2), r2(c[1] + h / 2), 0]] });
+  }
   if (s.t === 'table'){
     const w = (s.pts[1][0] - s.pts[0][0]) * k, h = (s.pts[1][1] - s.pts[0][1]) * k, c = f((s.pts[0][0] + s.pts[1][0]) / 2, (s.pts[0][1] + s.pts[1][1]) / 2);
     return Object.assign({}, s, { size:r2(s.size * k), cells:s.cells.map(r => r.slice()), pts:[[r2(c[0] - w / 2), r2(c[1] - h / 2), 0], [r2(c[0] + w / 2), r2(c[1] + h / 2), 0]] });
@@ -4795,8 +4856,8 @@ function xfStroke(s, f, k){
   if (s.t === 'text'){ const b = textBox(s.text, n.size, s.ff); n.pts[1] = [r2(n.pts[0][0] + b.w), r2(n.pts[0][1] + b.h), 0]; }
   return n;
 }
-function lassoBegin(a, x, y){
-  const s = tool !== 'convert' && lsel && lsel.p === a.p ? lsel : null;
+function lassoHit(a, x, y){
+  const s = lsel && lsel.p === a.p ? lsel : null;
   if (s){
     const b = s.box, hs = 16 * a.k, cx = (b[0] + b[2]) / 2, ry = b[1] - 30 * a.k;
     const corners = [[b[0], b[1], b[2], b[3]], [b[2], b[1], b[0], b[3]], [b[0], b[3], b[2], b[1]], [b[2], b[3], b[0], b[1]]];
@@ -4808,8 +4869,12 @@ function lassoBegin(a, x, y){
   if (a.mode === 'lmove' || a.mode === 'lscale' || a.mode === 'lrot'){
     lassoMenu.hidden = true;
     a.before = a.p.strokes.slice(); a.orig = lsel.idx.map(i => a.p.strokes[i]); a.box0 = lsel.box.slice(); a.x0 = x; a.y0 = y;
-    return;
+    return true;
   }
+  return false;
+}
+function lassoBegin(a, x, y){
+  if (tool !== 'convert' && lassoHit(a, x, y)) return;
   clearLasso();
   a.mode = 'lasso'; a.poly = [[x, y]];
   sizeWet(); clearWet(); wetC.classList.remove('as-hl');
@@ -4847,7 +4912,7 @@ function lassoEnd(a){
     const poly = a.poly, p = a.p; if (poly.length < 3) return;
     const idx = [];
     p.strokes.forEach((s, i) => {
-      if (s.t === 'text' || s.t === 'table'){ const c = [(s.pts[0][0] + s.pts[1][0]) / 2, (s.pts[0][1] + s.pts[1][1]) / 2]; if (inPoly(c[0], c[1], poly)) idx.push(i); return; }
+      if (boxy(s)){ const c = [(s.pts[0][0] + s.pts[1][0]) / 2, (s.pts[0][1] + s.pts[1][1]) / 2]; if (inPoly(c[0], c[1], poly) && !(tool === 'convert')) idx.push(i); return; }
       let n = 0; for (const q of s.pts) if (inPoly(q[0], q[1], poly)) n++;
       if (n && n >= s.pts.length * 0.5) idx.push(i);
     });
@@ -4874,6 +4939,321 @@ lassoMenu.addEventListener('click', e => {
   if (b.dataset.l === 'del'){ clearLasso(); toast('Eliminado'); return; }
   lsel.box = selBox(p, lsel.idx); drawLassoBox(); showLassoMenu();
 });
+
+/* ---------- stickers: pick one, tap the page to stick it; move, resize and turn it with the handles; saved in the PDF as an image ---------- */
+const STK_PACKS = [{ id:'estudio', name:'Estudio' }, { id:'washi', name:'Washi' }, { id:'flechas', name:'Flechas' }, { id:'mine', name:'Mis stickers' }];
+const stkData = new Map(), stkImg = new Map(), stkSvgUrl = new Map(), stkWait = new Map();
+if (!Array.isArray(prefs.myStk)) prefs.myStk = [];
+const stkCm = v => (v / 28.35).toFixed(1) + ' cm';
+function stkBuiltin(id){ return (window.DSStickers && DSStickers.list.find(x => x.id === id && STK_PACKS.some(p => p.id === x.pack))) || null; }
+function stkSrc(k){
+  if (k.startsWith('b:')){
+    let u = stkSvgUrl.get(k);
+    if (!u){ const st = window.DSStickers && DSStickers.list.find(x => x.id === k.slice(2)); if (!st) return ''; u = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(DSStickers.svg(st, 240)); stkSvgUrl.set(k, u); }
+    return u;
+  }
+  return stkData.get(k) || '';
+}
+function stkLoad(k){
+  if (!k.startsWith('u:') || stkData.has(k)) return Promise.resolve();
+  if (!stkWait.has(k)) stkWait.set(k, idb.get('stk:' + k.slice(2)).then(v => {
+    if (!(v && v.data)) return;
+    stkData.set(k, v.data);
+    if (doc) doc.pages.forEach(p => { if (p.inkOn && p.strokes.some(s => s.k === k)) drawInk(p); });
+    if (!tpanel.hidden && tool === 'stk') renderToolPanel();
+  }).catch(() => {}));
+  return stkWait.get(k);
+}
+/* stickers that came inside a PDF (made on another tablet): keep them here too */
+function stkAdopt(map){
+  for (const k in map){
+    if (!k.startsWith('u:') || stkData.has(k) || !String(map[k]).startsWith('data:image/')) continue;
+    stkData.set(k, map[k]);
+    idb.put('stk:' + k.slice(2), { id:'stk:' + k.slice(2), data:map[k], t:Date.now() }).catch(() => {});
+  }
+}
+function stkImage(k){
+  let im = stkImg.get(k);
+  if (!im){ const u = stkSrc(k); if (!u){ stkLoad(k); return null; } im = new Image(); im.src = u; stkImg.set(k, im); }
+  return im.complete && im.naturalWidth ? im : null;
+}
+async function stkPreload(strokes){
+  for (const k of new Set(strokes.filter(s => s.t === 'stk').map(s => s.k))){
+    await stkLoad(k); stkImage(k);
+    const im = stkImg.get(k); if (im) await im.decode().catch(() => {});
+  }
+}
+function stkGeom(s){ const a = s.pts[0], b = s.pts[1]; return { cx:(a[0] + b[0]) / 2, cy:(a[1] + b[1]) / 2, w:b[0] - a[0], h:b[1] - a[1], r:s.r || 0 }; }
+function stkCorners(s){
+  const g = stkGeom(s), a = g.r * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a);
+  return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([u, v]) => [g.cx + u * g.w / 2 * c - v * g.h / 2 * sn, g.cy + u * g.w / 2 * sn + v * g.h / 2 * c]);
+}
+function stkEl(s){
+  const g = stkGeom(s), el = document.createElementNS(SVGNS, 'image');
+  el.setAttribute('x', g.cx - g.w / 2); el.setAttribute('y', g.cy - g.h / 2); el.setAttribute('width', g.w); el.setAttribute('height', g.h);
+  el.setAttribute('preserveAspectRatio', 'none');
+  if (g.r) el.setAttribute('transform', `rotate(${g.r} ${g.cx} ${g.cy})`);
+  const u = stkSrc(s.k); if (u) el.setAttribute('href', u); else stkLoad(s.k);
+  return el;
+}
+function drawStkCanvas(ctx, s, sc){
+  const im = stkImage(s.k); if (!im) return;
+  const g = stkGeom(s);
+  ctx.save(); ctx.scale(sc, sc); ctx.translate(g.cx, g.cy); ctx.rotate(g.r * Math.PI / 180); ctx.drawImage(im, -g.w / 2, -g.h / 2, g.w, g.h); ctx.restore();
+}
+const nf4 = v => { const r = Math.round(v * 10000) / 10000; return Object.is(r, -0) ? '0' : String(r); };
+function stkPdf(s){
+  const n = packStk && packStk[s.k]; if (!n) return '';
+  const g = stkGeom(s), a = g.r * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a);
+  return `q 1 0 0 1 ${nf(g.cx)} ${nf(g.cy)} cm ${nf4(c)} ${nf4(sn)} ${nf4(-sn)} ${nf4(c)} 0 0 cm ${nf(g.w)} 0 0 ${nf(-g.h)} ${nf(-g.w / 2)} ${nf(g.h / 2)} cm /${n} Do Q\n`;
+}
+async function stkPng(k){
+  if (k.startsWith('u:')){ await stkLoad(k); const u = stkData.get(k); if (!u) return null; return Uint8Array.from(atob(u.split(',')[1]), c => c.charCodeAt(0)); }
+  const u = stkSrc(k); if (!u) return null;
+  const im = new Image(); im.src = u; await im.decode();
+  const c = document.createElement('canvas'); c.width = c.height = 480; c.getContext('2d').drawImage(im, 0, 0, 480, 480);
+  const b = await new Promise(r => c.toBlob(r, 'image/png'));
+  return new Uint8Array(await b.arrayBuffer());
+}
+function stkAt(p, x, y){
+  for (let i = p.strokes.length - 1; i >= 0; i--){
+    const s = p.strokes[i]; if (s.t !== 'stk') continue;
+    const g = stkGeom(s), a = -g.r * Math.PI / 180, dx = x - g.cx, dy = y - g.cy;
+    const u = dx * Math.cos(a) - dy * Math.sin(a), v = dx * Math.sin(a) + dy * Math.cos(a);
+    if (Math.abs(u) <= g.w / 2 + 3 && Math.abs(v) <= g.h / 2 + 3) return i;
+  }
+  return -1;
+}
+function stkAspect(k){ if (k.startsWith('u:')){ const m = prefs.myStk.find(x => 'u:' + x.id === k); return (m && m.ar) || 1; } return 1; }
+function selectStrokes(p, idx){ lsel = { p, idx, box:selBox(p, idx) }; drawLassoBox(); showLassoMenu(); }
+function stickerDown(e, p, rect){
+  const k = p.wPt / rect.width, x = (e.clientX - rect.left) * k, y = (e.clientY - rect.top) * k;
+  const a = { id:e.pointerId, mode:'', p, rect, k, sx:e.clientX, sy:e.clientY, maxMove:0, t0:performance.now() };
+  if (lassoHit(a, x, y)){ active = a; return; }
+  clearLasso();
+  const i = stkAt(p, x, y);
+  if (i >= 0){ selectStrokes(p, [i]); return; }
+  const cfg = prefs.tools.stk, key = cfg.cur;
+  if (!key || (key.startsWith('b:') && !stkBuiltin(key.slice(2))) || (key.startsWith('u:') && !prefs.myStk.some(m => 'u:' + m.id === key))){ openToolPanel(null); toast('Elige un sticker primero'); return; }
+  const ar = stkAspect(key), base = clamp(cfg.w || 64, 16, Math.min(p.wPt, p.hPt) * 0.9);
+  const w = ar >= 1 ? base : base * ar, h = ar >= 1 ? base / ar : base;
+  const s = { t:'stk', k:key, pts:[[r2(x - w / 2), r2(y - h / 2), 0], [r2(x + w / 2), r2(y + h / 2), 0]] };
+  const before = p.strokes.slice(); p.strokes.push(s);
+  p.doc.undo.push({ k:'snap', page:p, before, after:p.strokes.slice() }); p.doc.redo.length = 0;
+  drawInk(p); renderRail(); save();
+  selectStrokes(p, [p.strokes.length - 1]);
+}
+function stickerPanelHTML(cfg){
+  const pack = STK_PACKS.some(x => x.id === cfg.pack) ? cfg.pack : 'estudio';
+  let h = `<div class="seg tp-seg stk-tabs">${STK_PACKS.map(x => `<button type="button" data-stkpack="${x.id}" aria-pressed="${x.id === pack}">${x.name}</button>`).join('')}</div><div class="stk-grid">`;
+  if (pack === 'mine'){
+    h += `<button type="button" class="stk-new" data-stknew aria-label="Crear sticker desde una foto">${svg('plus', 22)}<small>Crear sticker</small></button>`;
+    for (const m of prefs.myStk){
+      const k = 'u:' + m.id, u = stkSrc(k); if (!u) stkLoad(k);
+      h += `<span class="stk-it"><button type="button" data-stk="${k}" aria-pressed="${k === cfg.cur}" aria-label="Mi sticker">${u ? `<img src="${u}" alt="">` : ''}</button><button type="button" class="stk-del" data-stkdel="${m.id}" aria-label="Quitar de mis stickers">${svg('close', 12)}</button></span>`;
+    }
+  } else if (window.DSStickers){
+    for (const st of DSStickers.list.filter(x => x.pack === pack)) h += `<span class="stk-it"><button type="button" data-stk="b:${st.id}" aria-pressed="${'b:' + st.id === cfg.cur}" aria-label="${esc(st.name)}" title="${esc(st.name)}"><img src="${stkSrc('b:' + st.id)}" alt=""></button></span>`;
+  }
+  h += '</div>';
+  h += rangeRow('stkW', 'Tamaño', 24, 220, 2, cfg.w || 64, stkCm(cfg.w || 64));
+  h += `<p class="hint" style="margin:0">Elige un sticker y toca la hoja para pegarlo. Arrástralo para moverlo, usa las esquinas para el tamaño y el círculo de arriba para girarlo.${pack === 'mine' ? ' En «Crear sticker» recortas cualquier foto con el lápiz.' : ''}</p>`;
+  return h;
+}
+function stickerPanelClick(b){
+  const d = b.dataset, cfg = prefs.tools.stk;
+  if (d.stkpack){ cfg.pack = d.stkpack; savePrefs(); renderToolPanel(); placeToolPanel(); return true; }
+  if (d.stk){ cfg.cur = d.stk; savePrefs(); closeToolPanel(); toast('Toca la hoja donde quieras pegarlo'); return true; }
+  if (d.stknew !== undefined){ closeToolPanel(); openStickerMaker(); return true; }
+  if (d.stkdel){ prefs.myStk = prefs.myStk.filter(m => m.id !== d.stkdel); if (cfg.cur === 'u:' + d.stkdel) cfg.cur = ''; savePrefs(); renderToolPanel(); toast('Quitado de tus stickers. Las páginas que ya lo tienen lo conservan.'); return true; }
+  return false;
+}
+
+/* ---------- Crear sticker: cut out any photo with the pen, smooth edge, white border and shadow ---------- */
+const smk = document.createElement('div');
+smk.className = 'smk'; smk.hidden = true; smk.setAttribute('role', 'dialog'); smk.setAttribute('aria-label', 'Crear sticker');
+smk.innerHTML = `<div class="smk-card">
+  <div class="smk-h"><strong>Crear sticker</strong><button type="button" class="tp-x" data-smk="close" aria-label="Cerrar">${svg('close', 18)}</button></div>
+  <div class="smk-body">
+    <div class="smk-stage"><canvas id="smkCv"></canvas><p class="smk-empty">Elige una foto o imagen para recortar</p></div>
+    <div class="smk-side">
+      <button type="button" class="btn" data-smk="pick">${svg('image', 18)}Elegir imagen</button>
+      <div class="seg tp-seg"><button type="button" data-smkmode="cut" aria-pressed="true">Recortar a mano</button><button type="button" data-smkmode="all" aria-pressed="false">Imagen completa</button></div>
+      <p class="hint smk-tip">Dibuja con el lápiz alrededor de lo que quieres. Al soltar, DrawSky alisa el borde.</p>
+      <label class="tp-row tp-tg"><span class="tp-lab wide">Quitar fondo blanco</span><input type="checkbox" class="switch" id="smkBg"></label>
+      <label class="tp-row tp-tg"><span class="tp-lab wide">Borde blanco</span><input type="checkbox" class="switch" id="smkBorder" checked></label>
+      <label class="tp-row tp-tg"><span class="tp-lab wide">Sombra suave</span><input type="checkbox" class="switch" id="smkShadow"></label>
+      <div class="smk-prev"><canvas id="smkPv" width="150" height="150"></canvas></div>
+      <div class="smk-act"><button type="button" class="btn" data-smk="redo">Volver a recortar</button><button type="button" class="btn primary" data-smk="save">Guardar sticker</button></div>
+    </div>
+  </div></div>
+  <input type="file" accept="image/*" hidden id="smkFile">`;
+document.body.appendChild(smk);
+const smkCv = smk.querySelector('#smkCv'), smkPv = smk.querySelector('#smkPv'), smkFile = smk.querySelector('#smkFile');
+let smkSt = null;
+function openStickerMaker(){ smk.hidden = false; smkSt = { img:null, path:null, draw:null, mode:'cut' }; smkMode('cut'); smkPaint(); smkFile.value = ''; smkFile.click(); }
+function closeStickerMaker(){ smk.hidden = true; smkSt = null; }
+function smkMode(m){
+  smkSt.mode = m;
+  smk.querySelectorAll('[data-smkmode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.smkmode === m)));
+  smk.querySelector('.smk-tip').hidden = m !== 'cut';
+  smk.querySelector('[data-smk="redo"]').hidden = m !== 'cut';
+}
+smkFile.addEventListener('change', async () => {
+  const f = smkFile.files && smkFile.files[0]; if (!f || !smkSt) return;
+  try {
+    const bmp = await createImageBitmap(f), sc = Math.min(1, 1100 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    smkSt.img = c; smkSt.path = null; smkPaint(); smkPreview();
+  } catch(e){ console.warn(e); toast('No pude abrir esa imagen.'); }
+});
+function smkFit(){
+  const st = smk.querySelector('.smk-stage'), im = smkSt.img, W = st.clientWidth, H = st.clientHeight;
+  const sc = Math.min(W / im.width, H / im.height), d = DPR();
+  smkCv.width = Math.round(im.width * sc * d); smkCv.height = Math.round(im.height * sc * d);
+  smkCv.style.width = im.width * sc + 'px'; smkCv.style.height = im.height * sc + 'px';
+  return smkCv.width / im.width;
+}
+function smkPathObj(P){ const pa = new Path2D(); P.forEach((q, i) => i ? pa.lineTo(q[0], q[1]) : pa.moveTo(q[0], q[1])); pa.closePath(); return pa; }
+function smkPaint(){
+  const has = !!(smkSt && smkSt.img);
+  smk.querySelector('.smk-empty').hidden = has; smkCv.hidden = !has; if (!has) return;
+  const im = smkSt.img, k = smkFit(), x = smkCv.getContext('2d');
+  x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, smkCv.width, smkCv.height); x.setTransform(k, 0, 0, k, 0, 0);
+  const P = smkSt.mode === 'cut' ? smkSt.path : null;
+  if (P){
+    x.globalAlpha = 0.3; x.drawImage(im, 0, 0); x.globalAlpha = 1;
+    const pa = smkPathObj(P); x.save(); x.clip(pa); x.drawImage(im, 0, 0); x.restore();
+    x.lineJoin = 'round'; x.lineWidth = 5 / k; x.strokeStyle = 'rgba(0,183,222,.45)'; x.stroke(pa);
+    x.lineWidth = 2 / k; x.strokeStyle = '#fff'; x.setLineDash([6 / k, 5 / k]); x.stroke(pa); x.setLineDash([]);
+  } else x.drawImage(im, 0, 0);
+  if (smkSt.draw && smkSt.draw.length > 1){
+    x.beginPath(); smkSt.draw.forEach((q, i) => i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]));
+    x.lineWidth = 3 / k; x.strokeStyle = '#1b7bd3'; x.lineJoin = x.lineCap = 'round'; x.stroke();
+  }
+}
+/* the hand-drawn outline: drop the wobble (Ramer–Douglas–Peucker), then round it (Chaikin) */
+function rdp(P, eps){
+  if (P.length < 3) return P;
+  let dm = 0, j = 0; const a = P[0], b = P[P.length - 1];
+  for (let i = 1; i < P.length - 1; i++){ const d = Math.sqrt(segDist2(P[i][0], P[i][1], a[0], a[1], b[0], b[1])); if (d > dm){ dm = d; j = i; } }
+  return dm > eps ? rdp(P.slice(0, j + 1), eps).slice(0, -1).concat(rdp(P.slice(j), eps)) : [a, b];
+}
+function chaikin(P, n){
+  for (let it = 0; it < n; it++){
+    const o = [];
+    for (let i = 0; i < P.length; i++){ const a = P[i], b = P[(i + 1) % P.length]; o.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]); }
+    P = o;
+  }
+  return P;
+}
+function smoothOutline(P, size){
+  const half = Math.floor(P.length / 2);
+  const s = rdp(P.slice(0, half + 1), size * 0.004).slice(0, -1).concat(rdp(P.slice(half), size * 0.004));
+  return chaikin(s.length >= 3 ? s : P, 3);
+}
+smkCv.addEventListener('pointerdown', e => {
+  if (!smkSt || !smkSt.img || smkSt.mode !== 'cut') return;
+  e.preventDefault(); try { smkCv.setPointerCapture(e.pointerId); } catch(_){}
+  const r = smkCv.getBoundingClientRect(), k = smkSt.img.width / r.width;
+  smkSt.draw = [[(e.clientX - r.left) * k, (e.clientY - r.top) * k]]; smkSt.path = null; smkPaint();
+});
+smkCv.addEventListener('pointermove', e => {
+  if (!smkSt || !smkSt.draw) return;
+  const r = smkCv.getBoundingClientRect(), k = smkSt.img.width / r.width;
+  for (const ev of (e.getCoalescedEvents ? e.getCoalescedEvents() : [e])) smkSt.draw.push([clamp((ev.clientX - r.left) * k, 0, smkSt.img.width), clamp((ev.clientY - r.top) * k, 0, smkSt.img.height)]);
+  smkPaint();
+});
+const smkUp = () => {
+  if (!smkSt || !smkSt.draw) return;
+  const P = smkSt.draw; smkSt.draw = null;
+  const im = smkSt.img, size = Math.max(im.width, im.height);
+  let area = 0; for (let i = 0; i < P.length; i++){ const a = P[i], b = P[(i + 1) % P.length]; area += a[0] * b[1] - b[0] * a[1]; }
+  if (P.length < 8 || Math.abs(area) / 2 < size * size * 0.002){ smkPaint(); toast('Rodea con el lápiz lo que quieres recortar'); return; }
+  smkSt.path = smoothOutline(P, size); smkPaint(); smkPreview();
+};
+smkCv.addEventListener('pointerup', smkUp); smkCv.addEventListener('pointercancel', smkUp);
+/* white background → transparent, only where it touches the edge (so white inside the drawing stays) */
+function dropWhite(c){
+  const x = c.getContext('2d'), W = c.width, H = c.height, id = x.getImageData(0, 0, W, H), d = id.data, seen = new Uint8Array(W * H), st = [];
+  const white = i => { const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2]; return d[i * 4 + 3] > 0 && r > 222 && g > 222 && b > 222 && Math.max(r, g, b) - Math.min(r, g, b) < 26; };
+  for (let i = 0; i < W; i++){ st.push(i, (H - 1) * W + i); } for (let j = 0; j < H; j++){ st.push(j * W, j * W + W - 1); }
+  while (st.length){ const i = st.pop(); if (seen[i]) continue; seen[i] = 1; if (!white(i)) continue; d[i * 4 + 3] = 0; const xx = i % W, yy = (i / W) | 0; if (xx > 0) st.push(i - 1); if (xx < W - 1) st.push(i + 1); if (yy > 0) st.push(i - W); if (yy < H - 1) st.push(i + W); }
+  /* soften the cut edge: half-transparent ring where a kept pixel meets a removed one */
+  for (let i = 0; i < W * H; i++){ if (!d[i * 4 + 3]) continue; const xx = i % W, yy = (i / W) | 0; if ((xx > 0 && !d[(i - 1) * 4 + 3]) || (xx < W - 1 && !d[(i + 1) * 4 + 3]) || (yy > 0 && !d[(i - W) * 4 + 3]) || (yy < H - 1 && !d[(i + W) * 4 + 3])) d[i * 4 + 3] = Math.min(d[i * 4 + 3], 150); }
+  x.putImageData(id, 0, 0);
+}
+function alphaBox(c){
+  const W = c.width, H = c.height, d = c.getContext('2d').getImageData(0, 0, W, H).data;
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 8){ if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  return x1 < 0 ? null : { x:x0, y:y0, w:x1 - x0 + 1, h:y1 - y0 + 1 };
+}
+function makeSticker(){
+  const im = smkSt.img, opt = { bg:smk.querySelector('#smkBg').checked, border:smk.querySelector('#smkBorder').checked, shadow:smk.querySelector('#smkShadow').checked };
+  let cut = document.createElement('canvas'); cut.width = im.width; cut.height = im.height;
+  const cx = cut.getContext('2d'); cx.drawImage(im, 0, 0);
+  if (opt.bg) dropWhite(cut);
+  const P = smkSt.mode === 'cut' ? smkSt.path : null;
+  if (P){ cx.globalCompositeOperation = 'destination-in'; cx.fill(smkPathObj(P)); cx.globalCompositeOperation = 'source-over'; }
+  else if (!opt.bg){ /* whole picture: soft rounded corners */ const r = Math.min(im.width, im.height) * 0.06, m = new Path2D(); m.roundRect(0, 0, im.width, im.height, r); cx.globalCompositeOperation = 'destination-in'; cx.fill(m); cx.globalCompositeOperation = 'source-over'; }
+  const bx = alphaBox(cut); if (!bx) return null;
+  const big = Math.max(bx.w, bx.h), sc = Math.min(1, 640 / big), bw = opt.border ? Math.max(4, Math.round(big * sc * 0.035)) : 0, sh = opt.shadow ? Math.round(big * sc * 0.04) + 2 : 0, pad = bw + sh + 2;
+  const W = Math.round(bx.w * sc) + pad * 2, H = Math.round(bx.h * sc) + pad * 2;
+  const art = document.createElement('canvas'); art.width = W; art.height = H;
+  art.getContext('2d').drawImage(cut, bx.x, bx.y, bx.w, bx.h, pad, pad, bx.w * sc, bx.h * sc);
+  cut.width = 0;
+  let back = art;
+  if (bw){
+    const sil = document.createElement('canvas'); sil.width = W; sil.height = H;
+    const s = sil.getContext('2d'); s.drawImage(art, 0, 0); s.globalCompositeOperation = 'source-in'; s.fillStyle = '#fff'; s.fillRect(0, 0, W, H);
+    back = document.createElement('canvas'); back.width = W; back.height = H;
+    const b = back.getContext('2d');
+    for (const rr of [bw, bw * 0.66, bw * 0.33]) for (let i = 0; i < 28; i++){ const a = i / 28 * Math.PI * 2; b.drawImage(sil, Math.cos(a) * rr, Math.sin(a) * rr); }
+    b.drawImage(sil, 0, 0);
+  }
+  const out = document.createElement('canvas'); out.width = W; out.height = H;
+  const o = out.getContext('2d');
+  if (sh){ o.save(); o.shadowColor = 'rgba(40,30,30,.3)'; o.shadowBlur = sh; o.shadowOffsetY = sh * 0.35; o.drawImage(back, 0, 0); o.restore(); }
+  else if (back !== art) o.drawImage(back, 0, 0);
+  o.drawImage(art, 0, 0);
+  return out;
+}
+let smkPvT = 0;
+function smkPreview(){
+  clearTimeout(smkPvT);
+  smkPvT = setTimeout(() => {
+    const x = smkPv.getContext('2d'); x.clearRect(0, 0, 150, 150);
+    if (!smkSt || !smkSt.img) return;
+    const c = makeSticker(); if (!c) return;
+    const sc = Math.min(140 / c.width, 140 / c.height);
+    x.drawImage(c, (150 - c.width * sc) / 2, (150 - c.height * sc) / 2, c.width * sc, c.height * sc);
+  }, 120);
+}
+smk.addEventListener('change', e => { if (e.target.classList.contains('switch')) smkPreview(); });
+smk.addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b || !smkSt) return;
+  const a = b.dataset.smk;
+  if (b.dataset.smkmode){ smkMode(b.dataset.smkmode); smkPaint(); smkPreview(); return; }
+  if (a === 'close'){ closeStickerMaker(); return; }
+  if (a === 'pick'){ smkFile.value = ''; smkFile.click(); return; }
+  if (a === 'redo'){ smkSt.path = null; smkPaint(); smkPreview(); return; }
+  if (a === 'save'){
+    if (!smkSt.img){ toast('Primero elige una imagen'); return; }
+    if (smkSt.mode === 'cut' && !smkSt.path){ toast('Rodea con el lápiz lo que quieres, o elige «Imagen completa»'); return; }
+    const c = makeSticker(); if (!c){ toast('No quedó nada para el sticker. Prueba sin «Quitar fondo blanco».'); return; }
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6), url = c.toDataURL('image/png'), k = 'u:' + id;
+    try { await idb.put('stk:' + id, { id:'stk:' + id, data:url, t:Date.now() }); } catch(err){ console.warn(err); toast('La tableta no tiene espacio para guardar el sticker.'); return; }
+    stkData.set(k, url);
+    prefs.myStk.unshift({ id, ar:r2(c.width / c.height) });
+    Object.assign(prefs.tools.stk, { pack:'mine', cur:k }); savePrefs();
+    closeStickerMaker();
+    if (tool !== 'stk') setTool('stk');
+    toast('Sticker guardado en «Mis stickers». Toca la hoja para pegarlo.');
+  }
+});
+window.addEventListener('resize', () => { if (!smk.hidden && smkSt && smkSt.img) smkPaint(); });
 
 /* ---------- search inside the PDF ---------- */
 const normTxt = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -5775,13 +6155,14 @@ function makeScrub(host, scroller, label){
   host.appendChild(el);
   const th = el.firstChild, TH = 30;
   let drag = false, idle = 0, grab = 0;
-  const sync = () => {
+  const sync = show => {
     const max = scroller.scrollHeight - scroller.clientHeight;
     el.hidden = max < scroller.clientHeight * 0.5;
     if (el.hidden) return;
     const h = el.clientHeight;
     th.style.transform = `translateY(${(h - TH) * (max ? scroller.scrollTop / max : 0)}px)`;
-    th.textContent = label(drag);
+    th.textContent = drag ? label(true) : '';
+    if (show === false) return;
     el.classList.add('on'); clearTimeout(idle); if (!drag) idle = setTimeout(() => el.classList.remove('on'), 1600);
   };
   const go = y => {
@@ -5792,8 +6173,8 @@ function makeScrub(host, scroller, label){
   th.addEventListener('pointermove', e => { if (drag){ e.preventDefault(); go(e.clientY); } });
   const end = () => { if (!drag) return; drag = false; el.classList.remove('drag'); sync(); };
   th.addEventListener('pointerup', end); th.addEventListener('pointercancel', end);
-  scroller.addEventListener('scroll', sync, { passive:true });
-  new ResizeObserver(sync).observe(scroller);
+  scroller.addEventListener('scroll', () => sync(), { passive:true });
+  new ResizeObserver(() => sync(false)).observe(scroller);
   return { el, sync };
 }
 const docScrub = makeScrub($('#stage'), viewer, full => doc ? (full ? `${doc.cur + 1} / ${doc.pages.length}` : String(doc.cur + 1)) : '');
@@ -5893,6 +6274,8 @@ function renderToolPanel(){
     h += `<div class="tp-lab wide" style="margin-top:2px">Tipo de letra</div>` + fontChips(cfg.ff, 'data-tfont');
     h += `<p class="hint" style="margin:0">Toca la hoja para poner una tabla. Toca una tabla con esta herramienta para escribir o agregar filas y columnas. Para moverla o agrandarla, usa el lazo.</p>`;
     h += paletteHTML(cfg.color);
+  } else if (kd === 'stk'){
+    h += stickerPanelHTML(cfg);
   } else if (kd === 'text'){
     const rg = SIZE_RANGE.text;
     h += rangeRow('tpSize', 'Tamaño', rg.min, rg.max, rg.step, cfg.size, cfg.size + ' pt');
@@ -5924,14 +6307,14 @@ function openToolPanel(anchor){
 function closeToolPanel(){ tpanel.hidden = true; }
 function refreshToolPanel(){ if (!tpanel.hidden){ if (noOpts(tool)) closeToolPanel(); else { renderToolPanel(); placeToolPanel(); } } }
 document.addEventListener('pointerdown', e => { if (!tpanel.hidden && !tpanel.contains(e.target) && !rail.contains(e.target) && !e.target.closest('.cpwrap')){ closeToolPanel(); if (viewer.contains(e.target)){ e.stopPropagation(); e.preventDefault(); } } }, true);
-const TP_KEYS = { tpSize:'size', tpAlpha:'alpha', tpStab:'stab', tpSens:'sens', tpHlA:'alpha', tbRows:'rows', tbCols:'cols' };
+const TP_KEYS = { stkW:'w', tpSize:'size', tpAlpha:'alpha', tpStab:'stab', tpSens:'sens', tpHlA:'alpha', tbRows:'rows', tbCols:'cols' };
 function setTpValue(id, v){
   const cfg = prefs.tools[tool], k = TP_KEYS[id]; if (!k) return;
   const pct = ['tpAlpha', 'tpStab', 'tpSens', 'tpHlA'].includes(id), kd = kind(tool);
   cfg[k] = pct ? v / 100 : kd === 'pen' ? +(v / PT2MM).toFixed(4) : v;
   savePrefs(); renderRail();
   const out = tpanel.querySelector(`output[for="${id}"]`);
-  if (out) out.textContent = pct ? v + '%' : id === 'tbRows' || id === 'tbCols' ? v : kd === 'pen' ? (+v).toFixed(2) + ' mm' : kd === 'eraser' ? v + ' px' : kd === 'text' || kd === 'table' ? v + ' pt' : fmtSize(kd, v);
+  if (out) out.textContent = id === 'stkW' ? stkCm(v) : pct ? v + '%' : id === 'tbRows' || id === 'tbCols' ? v : kd === 'pen' ? (+v).toFixed(2) + ' mm' : kd === 'eraser' ? v + ' px' : kd === 'text' || kd === 'table' ? v + ' pt' : fmtSize(kd, v);
   updateTip();
 }
 /* the real size of the tip, as it will look on the page at the current zoom */
@@ -5962,6 +6345,7 @@ tpanel.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   const cfg = prefs.tools[tool], d = b.dataset;
   if (d.tp === 'close'){ closeToolPanel(); return; }
+  if (stickerPanelClick(b)) return;
   if (d.tfont){ cfg.ff = d.tfont; savePrefs(); renderToolPanel(); return; }
   if (d.tp === 'savepen'){ togglePreset(); return; }
   if (d.tp === 'fav'){ toggleFav(); renderToolPanel(); return; }
