@@ -16,7 +16,7 @@
   --paper:#f7fbfe; --grid:rgba(30,42,68,.05); --card:#ffffff; --ink:#1e2a44; --soft:#4a5872; --line:#dbe7f1;
   --pink:#ee7ea0; --rose:#ffa9ba; --blush:#ffd7d6; --coral:#ea7d70; --peach:#ffaf6e; --butter:#ffcc80; --cream:#ffe2a6;
   --sage:#bcc07b; --lime:#dbe098; --sky:#abcdde; --ice:#d5edf8; --mint:#d5e2d3; --lav:#cdbdeb; --plum:#9a81b0; --mocha:#8e715b; --sand:#e5daca;
-  --tape-ink:#1e2a44; --desk:#e4f0f9; --desk-grid:rgba(30,42,68,.06); --desk-ink:#1e2a44; --shadow:none;
+  --tape-ink:#1e2a44; --desk:#e4f0f9; --desk-grid:rgba(30,42,68,.06); --desk-ink:#1e2a44; --shadow:0 1px 1px rgba(30,42,68,.05),0 8px 18px -10px rgba(30,42,68,.28);
   --hand:'Caveat',cursive; --font:'Inter',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
@@ -180,6 +180,14 @@ footer .btn{margin-top:12px}
 .menudemo{display:flex;flex-wrap:wrap;gap:4px;padding:5px;border:1.5px solid var(--ink);border-radius:12px;width:max-content;max-width:100%;font-size:12.5px;font-weight:600}
 .menudemo span{padding:5px 9px;border-radius:8px}
 .menudemo.two{margin-top:8px;border-radius:20px}.menudemo .on{background:var(--ink);color:#fff;border-radius:16px}
+
+/* just a little paper shadow */
+.hero,.sec,.toc a,.demo{box-shadow:var(--shadow)}
+.sticky{box-shadow:0 6px 12px -8px rgba(30,42,68,.3)}
+.sec .label{box-shadow:0 2px 4px -2px rgba(30,42,68,.25)}
+.dimg{display:flex;justify-content:center;margin:2px 0 4px}
+.dimg svg{width:100%;max-width:220px;height:auto}
+.mini{font:600 11px var(--font);fill:var(--ink)}.mini.w{fill:#fff}.mini.b{font-weight:800;font-size:13px}
 </style>
 </head>
 <body>
@@ -254,9 +262,8 @@ footer .btn{margin-top:12px}
     <a href="#indice" style="--c:var(--rose)"><span class="n">8</span><span><b>Índice y marcadores</b><small>Encuentra cada tema al toque</small></span></a>
     <a href="#colores" style="--c:var(--lav)"><span class="n">9</span><span><b>Paletas de colores</b><small>Tu propio código de colores</small></span></a>
     <a href="#drive" style="--c:var(--mint)"><span class="n">10</span><span><b>Drive y sin internet</b><small>Estudia en cualquier lugar</small></span></a>
-    <a href="#herramientas" style="--c:var(--mocha)"><span class="n">11</span><span><b>Tus herramientas</b><small>Barra lateral o ruedita</small></span></a>
-    <a href="#ejemplos" style="--c:var(--lav)"><span class="n">12</span><span><b>Repasa y decora</b><small>Stickers, tablas, cinta y tarjetas</small></span></a>
-    <a href="#trucos" style="--c:var(--peach)"><span class="n">13</span><span><b>¿Sabías que…?</b><small>Trucos para estudiar mejor</small></span></a>
+    <a href="#herramientas" style="--c:var(--mocha)"><span class="n">11</span><span><b>Tus herramientas</b><small>Ruedita, cinta, tarjetas y más</small></span></a>
+    <a href="#trucos" style="--c:var(--peach)"><span class="n">12</span><span><b>¿Sabías que…?</b><small>Trucos para estudiar mejor</small></span></a>
   </nav>
 
   <!-- 1 -->
@@ -516,8 +523,9 @@ footer .btn{margin-top:12px}
   <!-- 11 -->
   <section class="sec" id="herramientas" style="--c:var(--mocha)">
     <span class="label"><svg class="i"><use href="#settings"/></svg>11 · Tus herramientas</span>
-    <h2>Barra lateral o ruedita, como te acomode</h2>
-<figure class="wheelfig">
+    <h2>Todo lo que tienes a mano</h2>
+    <p class="lead">Así funciona la ruedita, y debajo cada herramienta con su ejemplo. Toca la cinta y la tarjeta para probarlas.</p>
+    <figure class="wheelfig">
 <svg viewBox="0 0 760 480" role="img" aria-label="Cómo funciona la ruedita: tocas el botón flotante, se abre la ruedita con tus herramientas, el lápiz marca en celeste la opción que vas a elegir">
   <g transform="translate(36 462) rotate(-38)" fill="none" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
     <path d="M0 -9 H215 L248 0 L215 9 H0 Q-8 9 -8 0 Q-8 -9 0 -9Z" fill="var(--card)"/>
@@ -546,33 +554,22 @@ footer .btn{margin-top:12px}
 </svg>
 <figcaption>Arrastra la ruedita a un borde de la pantalla y se convierte en <b>barra lateral</b>; arrástrala al centro y vuelve a ser ruedita.</figcaption>
 </figure>
-    <div class="grid2">
-      <ul class="dots">
-        <li><strong>Ruedita flotante:</strong> la arrastras a donde quieras y te muestra tus colores, el grosor y deshacer. "Más ajustes" abre el panel completo.</li>
-        <li><strong>Barra a la izquierda o derecha:</strong> arrastra la ruedita a un borde y se convierte en barra. Puedes contraerla para que ocupe lo mínimo.</li>
-      </ul>
-      <ul class="dots">
-        <li><strong>Plantillas de hoja</strong> <span class="k"><svg class="i"><use href="#tpl"/></svg></span> en packs: <strong>Básicas</strong> (lisa, rayada, cuadriculada, punteada, Cornell), <strong>Pack Nutri</strong> (recordatorio 24 h, frecuencia de consumo, historia clínica nutricional, antropometría, menú semanal, plan por porciones) y <strong>Mis plantillas</strong>, que creas desde una foto o un PDF.</li>
-        <li><strong>Barrita lateral</strong>: aparece solo cuando deslizas las páginas; arrástrala para saltar a cualquier página y te dice en cuál vas.</li>
-        <li><strong>Cinta para repasar</strong>: con la herramienta Cinta arrastra sobre una respuesta y queda tapada (rayas, puntos, cuadros, zigzag o lisa, en varios colores). Toca la cinta con el dedo o el lápiz para espiar y otra vez para taparla.</li>
-        <li><strong>Tarjetas de repaso</strong>: con el lazo encierra una figura, tabla o tu resumen y toca «Tarjeta»; escribe la pregunta. El botón de tarjetas abajo te las muestra cuando toca repasarlas (Otra vez, Difícil, Bien, Fácil).</li>
-        <li><strong>Copiar, cortar y pegar</strong>: selecciona con el lazo (o mantén presionada una imagen) y toca Copiar o Cortar. Para pegar, mantén presionado con el dedo o el lápiz donde quieras y toca «Pegar». También pega imágenes copiadas de una página web. «Fijar» deja una imagen quieta.</li>
-        <li><strong>Tablas</strong>: arrastra las agarraderas de arriba o de la izquierda para hacer más ancha una columna o más alta una fila.</li>
-        <li><strong>Stickers</strong>: packs Estudio, Washi y Flechas. Toca uno y luego la hoja; lo mueves, agrandas y giras con sus esquinas. En <strong>Mis stickers → Crear sticker</strong> recortas cualquier foto con el lápiz, con borde blanco y sombra.</li>
-        <li><strong>Zoom hasta 1250%</strong>, pellizcando con dos dedos: perfecto para leer letras pequeñas de tablas y figuras.</li>
-        <li><strong>Ampliar</strong> con el botón de la esquina superior izquierda: se esconden las barras y la hoja ocupa toda la pantalla. El mismo botón te regresa.</li>
-        <li><strong>Tema claro, oscuro o del sistema</strong>, en Ajustes.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- 12 -->
-  <!-- 12 -->
-  <section class="sec" id="ejemplos" style="--c:var(--lav)">
-    <span class="label"><svg class="i"><use href="#spark"/></svg>12 · Repasa y decora</span>
-    <h2>Míralo en acción</h2>
-    <p class="lead">Así se ven las herramientas para estudiar y decorar tus apuntes. Toca la cinta y la tarjeta para probarlas.</p>
     <div class="demos">
+      <div class="demo">
+        <h4>Ruedita o barra</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="20" y="10" width="34" height="74" rx="17" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/><g fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 26h14M30 40h14M30 54h14M30 68h14"/></g><path d="M66 46h40" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5"/><path d="M98 40l8 6-8 6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="160" cy="46" r="30" fill="#2a2d33" stroke="var(--ink)" stroke-width="2"/><circle cx="160" cy="46" r="11" fill="#d6e9f5"/></svg></div>
+        <p>Arrástrala a un borde y se vuelve barra; al centro, ruedita.</p>
+      </div>
+      <div class="demo">
+        <h4>Plantillas</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"><rect x="16" y="8" width="52" height="74" rx="4"/><rect x="84" y="8" width="52" height="74" rx="4"/><rect x="152" y="8" width="52" height="74" rx="4"/></g><g stroke="#8fb3d6" stroke-width="1.4"><path d="M22 26h40M22 36h40M22 46h40M22 56h40M22 66h40"/><path d="M94 8v74M104 8v74M114 8v74M124 8v74M84 22h52M84 34h52M84 46h52M84 58h52M84 70h52"/><path d="M168 8v58M152 66h52"/></g></svg></div>
+        <p>Básicas, Pack Nutri y las tuyas desde una foto o un PDF.</p>
+      </div>
+      <div class="demo">
+        <h4>Barrita de páginas</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="60" y="6" width="80" height="80" rx="4" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/><g stroke="#c9d6e3" stroke-width="3" stroke-linecap="round"><path d="M72 22h50M72 32h56M72 42h44M72 52h52M72 62h40"/></g><rect x="148" y="30" width="54" height="24" rx="12" fill="var(--ink)"/><text x="175" y="47" text-anchor="middle" class="mini w">3 / 12</text><path d="M175 12v12M175 60v14M170 18l5-6 5 6M170 68l5 6 5-6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <p>Sale al deslizar: arrástrala y salta a cualquier página.</p>
+      </div>
       <div class="demo">
         <h4>Stickers</h4>
         <div class="stkdemo" id="stkDemo" aria-label="Algunos stickers de DrawSky"></div>
@@ -602,11 +599,26 @@ footer .btn{margin-top:12px}
         <div class="menudemo two"><span class="on">Pegar</span><span>Nota aquí</span></div>
         <p>Selecciona con el lazo y elige. Para pegar, <b>mantén presionado</b> donde quieras. También pega imágenes copiadas de la web.</p>
       </div>
+      <div class="demo">
+        <h4>Zoom 1250%</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><g stroke="#c9d6e3" stroke-width="3" stroke-linecap="round"><path d="M20 22h70M20 34h60M20 46h66M20 58h50"/></g><circle cx="130" cy="42" r="28" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/><path d="M150 62l22 20" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><text x="130" y="49" text-anchor="middle" class="mini b">1250%</text></svg></div>
+        <p>Pellizca con dos dedos para leer letras pequeñas.</p>
+      </div>
+      <div class="demo">
+        <h4>Ampliar</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="40" y="8" width="140" height="76" rx="8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/><rect x="40" y="8" width="140" height="14" rx="6" fill="#dbe7f1"/><circle cx="56" cy="15" r="9" fill="#fff" stroke="var(--ink)" stroke-width="2"/><path d="M53 13v5h5" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M80 52h60" stroke="#c9d6e3" stroke-width="3" stroke-linecap="round"/><path d="M94 40l-8-8M126 40l8-8M94 66l-8 8M126 66l8 8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <p>El botón de la esquina esconde las barras: solo tu hoja.</p>
+      </div>
+      <div class="demo">
+        <h4>Claro u oscuro</h4>
+        <div class="dimg"><svg viewBox="0 0 220 90" aria-hidden="true"><rect x="40" y="25" width="140" height="40" rx="20" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/><rect x="44" y="29" width="66" height="32" rx="16" fill="#fde7b0"/><circle cx="77" cy="45" r="8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M77 31v4M77 55v4M63 45h4M87 45h4" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M152 36a10 10 0 1 0 9 14 8 8 0 0 1-9-14z" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <p>Tema claro, oscuro o del sistema, en Ajustes.</p>
+      </div>
     </div>
   </section>
 
   <section class="sec" id="trucos" style="--c:var(--peach)">
-    <span class="label"><svg class="i"><use href="#star"/></svg>13 · ¿Sabías que…?</span>
+    <span class="label"><svg class="i"><use href="#star"/></svg>12 · ¿Sabías que…?</span>
     <h2>Trucos para estudiar mejor</h2>
     <div class="tiles">
       <div class="tile" style="--c:var(--butter)"><h4>Método Cornell</h4><p>Crea un cuaderno con plantilla Cornell: a la izquierda las preguntas, a la derecha tus notas y abajo el resumen. Tapa la derecha y repasa respondiendo.</p></div>
