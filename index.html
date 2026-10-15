@@ -260,6 +260,20 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .sq.fav{background:var(--surface-2);color:var(--fg)}
 .wpal{display:flex;flex-wrap:wrap;gap:5px;width:100%;max-width:330px;margin-top:6px}
 .wpal .sq{width:24px;min-width:24px;height:24px;border-radius:7px}
+.link-btn{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:var(--accent);font:600 13px var(--font);padding:2px 4px;cursor:pointer}
+.tpl-tabs{margin:8px 0 4px}
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:14px 12px;margin-top:10px;max-height:min(46vh,430px);overflow:auto;padding:6px 4px 8px}
+.tpl-grid.small{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));max-height:none}
+.tpl-card{display:flex;flex-direction:column;align-items:center;gap:7px;border:0;background:transparent;padding:0;color:var(--fg);cursor:pointer;font:inherit}
+.tpl-card b{font-size:12px;font-weight:600;text-align:center;line-height:1.25;max-width:100%}
+.tpl-paper{position:relative;width:100%;aspect-ratio:595/842;border-radius:6px 10px 10px 6px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.12),0 6px 16px rgba(20,30,50,.14);transition:transform .15s,box-shadow .15s}
+.tpl-paper::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(90deg,rgba(0,0,0,.10),transparent);z-index:1}
+.tpl-paper canvas{display:block;width:100%;height:100%}
+.tpl-card[aria-pressed="true"] .tpl-paper{box-shadow:0 0 0 3px var(--accent),0 8px 20px rgba(20,30,50,.18);transform:translateY(-2px)}
+.tpl-card[aria-pressed="true"] b{color:var(--accent)}
+.tpl-paper.add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--surface-2);color:var(--muted);box-shadow:inset 0 0 0 2px var(--line);border:0}
+.tpl-paper.add::before{display:none}
+.tpl-paper.add small{font-size:11px;font-weight:600}
 .cp{display:flex;flex-direction:column;gap:10px;background:var(--surface-2);border-radius:18px;padding:10px;margin-top:8px}
 .cp .ptabs{margin:-2px -2px 0}
 .cp .ptabs button[aria-pressed="true"]{background:var(--surface)}
@@ -731,7 +745,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="btn" type="button" id="freeSpace">Liberar espacio</button>
     </div>
     <div class="group">
-      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (33)</small></div>
+      <div class="lab">Cómo se guarda <small style="font-weight:500;color:var(--muted)">· versión 14-oct-2026 (34)</small></div>
       <p class="hint">Los archivos de Drive se guardan dentro del mismo PDF: tus trazos se ven en Drive desde el celular o la computadora, y en DrawSky siguen siendo editables. Sin internet puedes seguir escribiendo en los archivos que ya abriste; se suben solos cuando vuelve la conexión. Si alguien cambió el archivo en otro lugar, DrawSky guarda tus trazos como copia para no pisar nada. Los cuadernos y PDFs de la tableta se suben con "Subir a Drive" a una carpeta llamada DrawSky.</p>
     </div>
   </section>
@@ -879,6 +893,12 @@ function cornellSegs(W, H, sp){
 }
 function drawTemplate(ctx, p, sc){
   const t = p.tpl; if (!t || t.type === 'none') return;
+  if (NUTRI_NAMES[t.type]){ ctx.save(); ctx.scale(sc, sc); drawNutri(ctx, t.type, p.wPt, p.hPt); ctx.restore(); return; }
+  if (String(t.type).startsWith('img:')){
+    const im = tplImage(t.type, () => { if (p.el && p.rendered){ p.rendered = false; if (typeof updateVisible === 'function') updateVisible(); } });
+    if (im) ctx.drawImage(im, 0, 0, p.wPt * sc, p.hPt * sc);
+    return;
+  }
   const sp = clamp(t.mm || 7, 2, 30) * MM, W = p.wPt, H = p.hPt;
   ctx.save(); ctx.scale(sc, sc);
   ctx.strokeStyle = 'rgba(105,140,185,.42)'; ctx.fillStyle = 'rgba(95,125,170,.62)'; ctx.lineWidth = 0.55;
@@ -1685,7 +1705,7 @@ async function cachePut(id, v){
   pruneCache(false);
 }
 async function pruneCache(all){
-  const items = (await idb.all()).filter(it => !String(it.id).startsWith('img:')).sort((a, b) => b.t - a.t);
+  const items = (await idb.all()).filter(it => !/^(img|tpl):/.test(String(it.id))).sort((a, b) => b.t - a.t);
   const keep = id => docs.some(d => d.drive && d.drive.id === id) || lib.some(e => e.drive && e.drive.id === id && e.pending);
   let n = 0;
   for (const it of items){
@@ -1697,7 +1717,7 @@ async function pruneCache(all){
 }
 async function cacheInfo(){
   const el = $('#cacheInfo'); if (!el) return;
-  const items = (await idb.all()).filter(it => !String(it.id).startsWith('img:'));
+  const items = (await idb.all()).filter(it => !/^(img|tpl):/.test(String(it.id)));
   const mb = items.reduce((s, it) => s + ((it.bytes && it.bytes.byteLength) || 0), 0) / 1048576;
   el.textContent = items.length
     ? `${items.length} ${items.length === 1 ? 'archivo de Drive guardado' : 'archivos de Drive guardados'} para usar sin internet (${mb < 0.1 ? '<0.1' : mb.toFixed(1)} MB). DrawSky guarda como máximo los ${CACHE_MAX} más recientes; los demás se vuelven a descargar al abrirlos.`
@@ -1742,6 +1762,8 @@ function strokePdf(s){
 }
 function tplOps(sp){
   const t = sp.tpl; if (!t || t.type === 'none') return '';
+  if (NUTRI_NAMES[t.type]) return nutriOps(t.type, sp.wPt, sp.hPt);
+  if (String(t.type).startsWith('img:')) return '';
   const g = clamp(t.mm || 7, 2, 30) * MM, W = sp.wPt, H = sp.hPt;
   let o = '';
   if (t.type === 'cornell'){
@@ -1770,7 +1792,8 @@ function pageOps(sp, b, rot, marks){
   const { x0, y0, x1, y1 } = b;
   const m = { 0:[1, 0, 0, -1, x0, y1], 90:[0, 1, 1, 0, x0, y0], 180:[-1, 0, 0, 1, x1, y0], 270:[0, -1, -1, 0, x1, y1] }[rot] || [1, 0, 0, -1, x0, y1];
   let o = 'q\n' + m.map(nf).join(' ') + ' cm\n1 J 1 j\n';
-  const tp = tplOps(sp); if (tp) o += 'q /DSkyT gs\n' + tp + 'Q\n';
+  if (sp.tplImg) o += `q ${nf(sp.wPt)} 0 0 ${nf(-sp.hPt)} 0 ${nf(sp.hPt)} cm /DSkyTpl Do Q\n`;
+  const tp = tplOps(sp); if (tp) o += (NUTRI_NAMES[sp.tpl.type] ? 'q\n' : 'q /DSkyT gs\n') + tp + 'Q\n';
   const hl = sp.strokes.filter(s => s.t === 'hl'), pen = sp.strokes.filter(s => s.t !== 'hl');
   if (hl.length) o += 'q /DSkyHL gs\n' + hl.map(strokePdf).join('') + 'Q\n';
   for (const s of pen.filter(x => x.st === 'lapiz').concat(pen.filter(x => x.st !== 'lapiz'))) o += strokePdf(s);
@@ -1825,7 +1848,15 @@ async function packDoc(d){
   let num = 0, bold = null, regular = null;
   const allNotes = [];
   snap.forEach((s, i) => s.notes.forEach((n, j) => { num++; allNotes.push({ num, page:i + 1, n, x:n.x, y:n.y, imgs:(notesData[i] && notesData[i][j] && notesData[i][j].imgData) || [], pi:i }); }));
-  const hasText = snap.some(s => s.strokes.some(t => t.t === 'text'));
+  const hasText = snap.some(s => s.strokes.some(t => t.t === 'text') || (s.tpl && NUTRI_NAMES[s.tpl.type]));
+  /* my own templates are images: embed each one once */
+  const tplEmb = {};
+  for (const s of snap){
+    const ty = s.tpl && String(s.tpl.type);
+    if (!ty || !ty.startsWith('img:') || tplEmb[ty] !== undefined) continue;
+    tplEmb[ty] = null;
+    try { const v = await idb.get('tpl:' + ty.slice(4)); if (v && v.data){ const bytes = Uint8Array.from(atob(v.data.split(',')[1]), c => c.charCodeAt(0)); tplEmb[ty] = await pdf.embedJpg(bytes); } } catch(e){ console.warn(e); }
+  }
   if (allNotes.length || hasText){ bold = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold); regular = await pdf.embedFont(PDFLib.StandardFonts.Helvetica); }
   packFont = regular;
   const meta = snap.map((s, i) => {
@@ -1834,7 +1865,12 @@ async function packDoc(d){
     if (!s.strokes.length && !marks.length && !(s.tpl && s.tpl.type !== 'none')) return o;
     node.normalize();
     const res = node.Resources(), old = res.lookupMaybe(PDFName.of('ExtGState'), PDFDict);
-    const pageText = s.strokes.some(t => t.t === 'text');
+    const pageText = s.strokes.some(t => t.t === 'text') || !!(s.tpl && NUTRI_NAMES[s.tpl.type]);
+    const timg = s.tpl && tplEmb[String(s.tpl.type)];
+    if (timg){
+      const ox = res.lookupMaybe(PDFName.of('XObject'), PDFDict), xd = ox ? ox.clone(ctx) : ctx.obj({});
+      xd.set(PDFName.of('DSkyTpl'), timg.ref); res.set(PDFName.of('XObject'), xd); s.tplImg = true;
+    }
     if (marks.length || pageText){
       const of = res.lookupMaybe(PDFName.of('Font'), PDFDict), fd = of ? of.clone(ctx) : ctx.obj({});
       if (marks.length) fd.set(PDFName.of('DSkyF'), bold.ref);
@@ -1853,9 +1889,9 @@ async function packDoc(d){
     return o;
   });
   const data = { v:1, app:'DrawSky', name:d.name, kind:d.kind, pages:meta };
-  let xrefs = [];
+  let xrefs = Object.values(tplEmb).filter(Boolean).map(im => im.ref);
   if (bold){
-    xrefs = [bold.ref, regular.ref];
+    xrefs = xrefs.concat([bold.ref, regular.ref]);
     if (allNotes.length){ const made = await addNotesPages(pdf, allNotes, bold, regular); data.notesPages = made.pages; xrefs = xrefs.concat(made.refs); }
   }
   const bms = []; snap.forEach((s, i) => s.bm.forEach(b => bms.push(Object.assign({}, b, { t:bmTitle(b, { i }), pi:i }))));
@@ -1908,6 +1944,8 @@ async function unpack(buf){
       const res = pg.node.Resources(), fd = res && res.lookupMaybe(PDFName.of('Font'), PDFLib.PDFDict);
       if (fd && fd.get(PDFName.of('DSkyF'))) fd.delete(PDFName.of('DSkyF'));
       if (fd && fd.get(PDFName.of('DSkyR'))) fd.delete(PDFName.of('DSkyR'));
+      const xd = res && res.lookupMaybe(PDFName.of('XObject'), PDFLib.PDFDict);
+      if (xd && xd.get(PDFName.of('DSkyTpl'))) xd.delete(PDFName.of('DSkyTpl'));
     }
     pdf.catalog.delete(K); ctx.delete(jr);
     const clean = await pdf.save({ useObjectStreams:false, updateFieldAppearances:false });
@@ -3634,7 +3672,7 @@ function renderDrawer(){
   document.querySelectorAll('#drMode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dm === mode)));
   const thumbHTML = p => `<button type="button" class="thumb${sel.has(p) ? ' sel' : ''}" data-i="${p.i}" aria-current="${p.i === doc.cur}" aria-label="Página ${p.i + 1}"${drawerEdit ? ` aria-pressed="${sel.has(p)}"` : ''}>
       <span class="tc" style="aspect-ratio:${r2(p.wPt)}/${r2(p.hPt)}${rowH ? `;width:min(100%,${Math.round(rowH * p.wPt / p.hPt)}px)` : ''}"><canvas></canvas>${drawerEdit ? `<i class="ck">${sel.has(p) ? svg('check', 14) : ''}</i>` : ''}</span>
-      <span class="lbl2">${p.i + 1}${p.tpl && p.tpl.type !== 'none' ? ' · ' + TPL_NAMES[p.tpl.type] : ''}</span>
+      <span class="lbl2">${p.i + 1}${p.tpl && p.tpl.type !== 'none' ? ' · ' + tplName(p.tpl.type) : ''}</span>
     </button>`;
   thumbsEl.classList.toggle('listv', listMode);
   thumbsEl.innerHTML = listMode ? drawerListHTML(mode) : doc.pages.map(thumbHTML).join('');
@@ -3817,16 +3855,7 @@ let dlgState = null;
 function closeDlg(){ const st = dlgState; dlgWrap.hidden = true; dlgState = null; if (st && st.kind === 'note') finishNote(st); }
 dlgWrap.addEventListener('click', e => { if (e.target === dlgWrap) closeDlg(); });
 const chip = (f, v, label, on, extra = '') => `<button type="button" class="cb" data-f="${f}" data-v="${v}" aria-pressed="${on}">${extra}${label}</button>`;
-function tplFields(st){
-  let h = `<div class="group"><div class="lab">Plantilla</div><div class="chips">` +
-    Object.keys(TPL_NAMES).map(t => chip('tpl', t, TPL_NAMES[t], st.tpl === t, tplSvg(t))).join('') + `</div>`;
-  if (st.tpl !== 'none'){
-    h += `<div class="lab" style="margin-top:14px">Espaciado</div><div class="chips">` +
-      [5, 7, 10].map(m => chip('mm', m, m + ' mm', st.mm === m)).join('') +
-      `</div><div class="fields"><label class="field">Otro espaciado (mm)<input type="number" id="fMm" inputmode="decimal" min="2" max="30" step="0.5" value="${st.mm}"></label></div>`;
-  }
-  return h + `</div>`;
-}
+function tplFields(st){ return tplPickerHTML(st); }
 function curPaper(p){
   const wmm = p.wPt / MM, hmm = p.hPt / MM, a = Math.min(wmm, hmm), b = Math.max(wmm, hmm);
   for (const k in PAPER){ const [x, y] = PAPER[k]; if (Math.abs(x - a) < 2 && Math.abs(y - b) < 2) return { size:k, orient:wmm > hmm ? 'l' : 'p', cw:Math.round(wmm), ch:Math.round(hmm) }; }
@@ -3849,6 +3878,7 @@ function renderTplDialog(){
     `<div class="group"><div class="lab">Aplicar a</div><div class="chips">${scopes.map(([v, l]) => chip('scope', v, l, st.scope === v)).join('')}</div>
       <p class="hint">Tus apuntes no se tocan: la plantilla va debajo de la tinta. Elige "Lisa" para quitarla.</p></div>
     <div class="dlg-foot"><button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="applyTpl">Aplicar</button></div>`;
+  paintTplThumbs(dlg);
 }
 function applyTpl(){
   const st = dlgState, P = doc.pages, cur = doc.cur;
@@ -3857,7 +3887,7 @@ function applyTpl(){
   list.forEach(p => { p.tpl = tpl ? Object.assign({}, tpl) : null; p.rendered = false; });
   updateVisible(); save();
   if (!drawerWrap.hidden) renderDrawer();
-  toast(tpl ? `Plantilla ${TPL_NAMES[tpl.type].toLowerCase()} aplicada a ${list.length} ${list.length === 1 ? 'página' : 'páginas'}` : `Plantilla quitada de ${list.length} ${list.length === 1 ? 'página' : 'páginas'}`);
+  toast(tpl ? `Plantilla "${tplName(tpl.type)}" aplicada a ${list.length} ${list.length === 1 ? 'página' : 'páginas'}` : `Plantilla quitada de ${list.length} ${list.length === 1 ? 'página' : 'páginas'}`);
   closeDlg();
 }
 
@@ -3895,6 +3925,7 @@ function renderNewDialog(){
   }
   h += `<div class="dlg-foot"><button type="button" class="btn" data-do="cancel">Cancelar</button><button type="button" class="btn primary" data-do="${isNew ? 'create' : 'insert'}">${isNew ? 'Crear cuaderno' : 'Insertar'}</button></div>`;
   dlg.innerHTML = h;
+  paintTplThumbs(dlg);
 }
 function paperPts(st){
   let w, h;
@@ -3932,12 +3963,14 @@ dlg.addEventListener('click', e => {
     const v = b.dataset.v;
     st[b.dataset.f] = b.dataset.f === 'mm' ? +v : v;
     if (b.dataset.f === 'size' && v !== 'custom'){ const [x, y] = PAPER[v]; st.cw = x; st.ch = y; }
+    if (b.dataset.f === 'tpl' && st.kind === 'new'){ const ar = String(v).startsWith('img:') && (prefs.myTpls.find(t => 'img:' + t.id === v) || {}).ar; if (ar && st.size !== 'custom') st.orient = ar > 1.05 ? 'l' : 'p'; }
     st.kind === 'tpl' ? renderTplDialog() : renderNewDialog();
     return;
   }
   const d = b.dataset.do;
   if (d === 'cancel') closeDlg();
   else if (d === 'applyTpl') applyTpl();
+  else if (d === 'tplPacks'){ const st0 = st; openTplPacks(() => { if (dlgState === st0) (st0.kind === 'tpl' ? renderTplDialog : renderNewDialog)(); }); }
   else if (d === 'create') createNotebook();
   else if (d === 'insert') insertPages();
   else if (d === 'rename') doRename();
@@ -3950,6 +3983,14 @@ dlg.addEventListener('click', e => {
   else if (d === 'acc'){ const cb = st.cb, em = b.dataset.email; closeDlg(); cb(em); }
   else if (d === 'accNew'){ const cb = st.cb; closeDlg(); requestToken(null, em => { if (em) cb(em); }); }
   else if (d === 'minus' || d === 'plus'){ st.count = clamp(st.count + (d === 'plus' ? 1 : -1), 1, 50); $('#fCount').textContent = st.count; }
+});
+dlg.addEventListener('change', async e => {
+  if (e.target.id !== 'tplFile' || !dlgState) return;
+  const st = dlgState, made = await addTplFiles(e.target.files); e.target.value = '';
+  if (!made.length || dlgState !== st) return;
+  st.tpl = made[0]; st.tplTab = 'mine';
+  toast(made.length === 1 ? 'Plantilla añadida' : `${made.length} plantillas añadidas`);
+  (st.kind === 'tpl' ? renderTplDialog : renderNewDialog)();
 });
 dlg.addEventListener('input', e => {
   if (!dlgState) return;
@@ -5241,6 +5282,243 @@ cpHooks.fold = {
   rerender:() => { const st = dlgState; if (!st || st.kind !== 'fedit') return; const n = $('#feName'); if (n) st.name = n.value; renderFolderEdit(); },
   visible:() => !dlgWrap.hidden && dlgState && dlgState.kind === 'fedit'
 };
+/* ---------- template packs: Básicas, Pack Nutri, my own templates (from an image or a PDF) ---------- */
+const NUTRI_NAMES = { n24:'Recordatorio 24 h', nfreq:'Frecuencia de consumo', nhcn:'Historia clínica nutricional', nantro:'Antropometría', nmenu:'Menú semanal', nint:'Plan por porciones' };
+const TPL_PACKS = [
+  { id:'basic', name:'Básicas', items:['none', 'lines', 'grid', 'dots', 'cornell'] },
+  { id:'nutri', name:'Pack Nutri', items:Object.keys(NUTRI_NAMES) }
+];
+function tplName(type){
+  if (!type) return 'Lisa';
+  if (TPL_NAMES[type]) return TPL_NAMES[type];
+  if (NUTRI_NAMES[type]) return NUTRI_NAMES[type];
+  if (String(type).startsWith('img:')){ const t = (prefs.myTpls || []).find(x => 'img:' + x.id === type); return t ? t.name : 'Mi plantilla'; }
+  return 'Plantilla';
+}
+const tplHasSpacing = type => ['lines', 'grid', 'dots', 'cornell'].includes(type);
+
+/* the nutrition forms, drawn as lines, boxes and labels in page points (top-left origin) */
+function nutriEls(type, W, H){
+  const M = 34, E = [], x0 = M, x1 = W - M, cw = x1 - x0;
+  const T = (x, y, str, s = 9, b = false, al) => E.push({ k:'t', x, y, str, s, b, al });
+  const L = (xa, ya, xb, yb, w = 0.6) => E.push({ k:'l', x1:xa, y1:ya, x2:xb, y2:yb, w });
+  const R = (x, y, w, h, fill, lw = 0.8) => E.push({ k:'r', x, y, w, h, fill, lw });
+  const title = (str, sub) => { R(x0, M, cw, 30, 'head', 0); T(x0 + 12, M + 20, str, 14, true); if (sub) T(x1 - 12, M + 20, sub, 8.5, false, 'r'); return M + 42; };
+  const field = (y, items) => { let x = x0; const tw = cw; items.forEach(([lab, f]) => { const w = tw * f; T(x, y, lab, 8.5, true); L(x + lab.length * 4.6 + 6, y + 2, x + w - 10, y + 2, 0.5); x += w; }); return y + 20; };
+  const table = (y, h, cols, head, rows, opt = {}) => {
+    const fr = cols.reduce((a, b) => a + b, 0), xs = [x0]; cols.forEach(c => xs.push(xs[xs.length - 1] + cw * c / fr));
+    const hh = opt.hh || 26, rh = (h - hh) / rows.length;
+    R(x0, y, cw, hh, 'head2', 0);
+    head.forEach((t, i) => { const lines = String(t).split('\n'); lines.forEach((ln, j) => T((xs[i] + xs[i + 1]) / 2, y + hh / 2 + 3 - (lines.length - 1) * 4.5 + j * 9, ln, 7.6, true, 'c')); });
+    R(x0, y, cw, h, null, 0.9);
+    for (let i = 1; i < xs.length - 1; i++) L(xs[i], y, xs[i], y + h, 0.5);
+    L(x0, y + hh, x1, y + hh, 0.8);
+    rows.forEach((r, i) => {
+      const yy = y + hh + rh * i;
+      if (i) L(x0, yy, x1, yy, 0.5);
+      if (opt.zebra && i % 2) R(x0, yy, cw, rh, 'zebra', 0);
+      if (r) String(r).split('\n').forEach((ln, j) => T(xs[0] + 6, yy + Math.min(rh / 2 + 3, 13) + j * 9.5, ln, 8.2, true));
+      if (opt.inner) for (let k = 1; k < opt.inner; k++) L(xs[1], yy + rh * k / opt.inner, x1, yy + rh * k / opt.inner, 0.3);
+    });
+    return y + h + 14;
+  };
+  const box = (y, h, label, lines = 0) => {
+    R(x0, y, cw, h, null, 0.8); R(x0, y, cw, 18, 'head2', 0); T(x0 + 8, y + 12.5, label, 8.5, true);
+    if (lines){ const st = (h - 22) / (lines + 0.4); for (let i = 1; i <= lines; i++) L(x0 + 8, y + 18 + st * i, x1 - 8, y + 18 + st * i, 0.35); }
+    return y + h + 10;
+  };
+  let y;
+  if (type === 'n24'){
+    y = title('RECORDATORIO DE 24 HORAS', 'Evaluación dietética');
+    y = field(y + 4, [['Nombre:', 0.55], ['Fecha:', 0.25], ['Edad:', 0.2]]);
+    y = field(y, [['Día recordado:', 0.5], ['¿Fue un día habitual?  Sí  /  No', 0.5]]);
+    y = table(y + 4, H - y - M - 64, [1.25, 0.6, 0.85, 1.4, 2.2, 1.35, 0.75], ['Tiempo de\ncomida', 'Hora', 'Lugar', 'Preparación', 'Alimentos /\ningredientes', 'Cantidad\n(medida casera)', 'Gramos'], ['Desayuno', 'Media\nmañana', 'Almuerzo', 'Media\ntarde', 'Cena', 'Otros'], { inner:3 });
+    box(y - 4, H - M - y + 4, 'Observaciones');
+  } else if (type === 'nfreq'){
+    y = title('FRECUENCIA DE CONSUMO DE ALIMENTOS', 'Evaluación dietética');
+    y = field(y + 4, [['Nombre:', 0.6], ['Fecha:', 0.4]]);
+    const g = ['Lácteos', 'Carnes rojas', 'Aves', 'Pescados y mariscos', 'Huevos', 'Menestras', 'Cereales y tubérculos', 'Pan y galletas', 'Verduras', 'Frutas', 'Grasas y aceites', 'Azúcares y dulces', 'Bebidas azucaradas', 'Comida rápida', 'Agua (vasos/día)'];
+    y = table(y + 4, H - y - M - 74, [2.3, 0.85, 0.85, 0.85, 0.85, 0.85, 1.4], ['Grupo de\nalimentos', 'Diario', '4–6 /\nsemana', '1–3 /\nsemana', '1–3 /\nmes', 'Nunca', 'Porción\nhabitual'], g, { zebra:true });
+    box(y - 4, H - M - y + 4, 'Observaciones');
+  } else if (type === 'nhcn'){
+    y = title('HISTORIA CLÍNICA NUTRICIONAL', 'Fecha: ______________');
+    y = field(y + 4, [['Nombre:', 0.6], ['Edad:', 0.2], ['Sexo:', 0.2]]);
+    y = field(y, [['Ocupación:', 0.6], ['Teléfono:', 0.4]]);
+    const avail = H - M - y - 8, parts = [['Motivo de consulta', 2], ['Antecedentes patológicos, familiares y quirúrgicos', 3], ['Medicamentos y suplementos', 2], ['Hábitos: actividad física, sueño, alcohol, tabaco', 3], ['Signos y síntomas gastrointestinales', 2], ['Datos bioquímicos', 2], ['Diagnóstico nutricional (PES)', 2], ['Plan y objetivos', 3]];
+    const tot = parts.reduce((a, p) => a + p[1] + 1.4, 0);
+    parts.forEach(([lab, n]) => { y = box(y, avail * (n + 1.4) / tot - 10, lab, n); });
+  } else if (type === 'nantro'){
+    y = title('EVALUACIÓN ANTROPOMÉTRICA', 'Fecha: ______________');
+    y = field(y + 4, [['Nombre:', 0.6], ['Edad:', 0.2], ['Sexo:', 0.2]]);
+    const rows = ['Peso (kg)', 'Talla (cm)', 'IMC (kg/m²)', 'Circ. cintura (cm)', 'Circ. cadera (cm)', 'Índice cintura/cadera', 'Circ. brazo (cm)', 'Pliegue tricipital (mm)', 'Pliegue bicipital (mm)', 'Pliegue subescapular (mm)', 'Pliegue suprailíaco (mm)', '% de grasa corporal', 'Masa magra (kg)'];
+    y = table(y + 4, Math.min(H - y - M - 120, rows.length * 30 + 26), [2.4, 1, 1, 1, 2.2], ['Medida', '1.ª toma', '2.ª toma', 'Promedio', 'Interpretación'], rows, { zebra:true });
+    box(y - 4, H - M - y + 4, 'Diagnóstico antropométrico y observaciones', 5);
+  } else if (type === 'nmenu'){
+    y = title('MENÚ SEMANAL', 'Semana del ____ al ____');
+    y = table(y + 6, H - y - M - 70, [0.9, 1, 1, 1, 1, 1], ['Día', 'Desayuno', 'Media\nmañana', 'Almuerzo', 'Media\ntarde', 'Cena'], ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'], { zebra:true });
+    box(y - 4, H - M - y + 4, 'Lista de compras / notas');
+  } else if (type === 'nint'){
+    y = title('PLAN DE ALIMENTACIÓN POR PORCIONES', 'Intercambios');
+    y = field(y + 4, [['Nombre:', 0.6], ['Fecha:', 0.4]]);
+    y = field(y, [['Kcal/día:', 0.25], ['CHO %:', 0.25], ['Proteínas %:', 0.25], ['Grasas %:', 0.25]]);
+    y = table(y + 4, Math.min(H - y - M - 130, 8 * 40 + 26), [2, 0.95, 1, 1, 1, 1, 1], ['Grupo', 'Porciones\n/ día', 'Desayuno', 'Media\nmañana', 'Almuerzo', 'Media\ntarde', 'Cena'], ['Lácteos', 'Carnes y huevos', 'Menestras', 'Cereales y\ntubérculos', 'Verduras', 'Frutas', 'Grasas', 'Azúcares'], { zebra:true });
+    box(y - 4, H - M - y + 4, 'Ejemplo de menú / indicaciones', 6);
+  }
+  return E;
+}
+const NUTRI_FILL = { head:'rgba(124,176,152,.32)', head2:'rgba(124,176,152,.18)', zebra:'rgba(124,176,152,.07)' };
+const NUTRI_FILL_PDF = { head:'0.82 0.9 0.86', head2:'0.9 0.95 0.92', zebra:'0.97 0.985 0.975' };
+function drawNutri(ctx, type, W, H){
+  for (const e of nutriEls(type, W, H)){
+    if (e.k === 'r'){
+      if (e.fill){ ctx.fillStyle = NUTRI_FILL[e.fill]; ctx.fillRect(e.x, e.y, e.w, e.h); }
+      if (e.lw){ ctx.strokeStyle = 'rgba(80,120,105,.65)'; ctx.lineWidth = e.lw; ctx.strokeRect(e.x, e.y, e.w, e.h); }
+    } else if (e.k === 'l'){ ctx.strokeStyle = 'rgba(80,120,105,.55)'; ctx.lineWidth = e.w; ctx.beginPath(); ctx.moveTo(e.x1, e.y1); ctx.lineTo(e.x2, e.y2); ctx.stroke(); }
+    else { ctx.fillStyle = 'rgba(52,84,72,.9)'; ctx.font = `${e.b ? 700 : 500} ${e.s}px Inter, Helvetica, Arial, sans-serif`; ctx.textAlign = e.al === 'c' ? 'center' : e.al === 'r' ? 'right' : 'left'; ctx.fillText(e.str, e.x, e.y); }
+  }
+  ctx.textAlign = 'left';
+}
+function nutriOps(type, W, H){
+  let o = '';
+  for (const e of nutriEls(type, W, H)){
+    if (e.k === 'r'){
+      if (e.fill) o += `${NUTRI_FILL_PDF[e.fill]} rg ${nf(e.x)} ${nf(e.y)} ${nf(e.w)} ${nf(e.h)} re f\n`;
+      if (e.lw) o += `0.31 0.47 0.41 RG ${nf(e.lw)} w ${nf(e.x)} ${nf(e.y)} ${nf(e.w)} ${nf(e.h)} re S\n`;
+    } else if (e.k === 'l') o += `0.31 0.47 0.41 RG ${nf(e.w)} w ${nf(e.x1)} ${nf(e.y1)} m ${nf(e.x2)} ${nf(e.y2)} l S\n`;
+    else if (packFont){
+      const str = pdfSafe(packFont, e.str), wpt = packFont.widthOfTextAtSize(str, e.s), x = e.al === 'c' ? e.x - wpt / 2 : e.al === 'r' ? e.x - wpt : e.x;
+      o += `0.2 0.33 0.28 rg BT /DSkyR ${nf(e.s)} Tf 1 0 0 -1 ${nf(x)} ${nf(e.y)} Tm ${packFont.encodeText(str).toString()} Tj ET\n`;
+    }
+  }
+  return o;
+}
+
+/* my templates: images kept in the tablet (IndexedDB), drawn stretched to the page */
+if (!Array.isArray(prefs.myTpls)) prefs.myTpls = [];
+if (!Array.isArray(prefs.tplPacks)) prefs.tplPacks = [];
+const tplImgCache = new Map();
+function tplImage(type, onReady){
+  const id = String(type).slice(4);
+  const c = tplImgCache.get(id);
+  if (c && c.img) return c.img;
+  if (!c){
+    const ent = { img:null, wait:[] }; tplImgCache.set(id, ent);
+    idb.get('tpl:' + id).then(v => {
+      if (!v || !v.data) return;
+      const im = new Image(); im.onload = () => { ent.img = im; ent.wait.forEach(f => f()); ent.wait = []; }; im.src = v.data;
+    }).catch(() => {});
+  }
+  if (onReady) tplImgCache.get(id).wait.push(onReady);
+  return null;
+}
+async function addTplFiles(files){
+  const made = [];
+  for (const f of Array.from(files || []).slice(0, 8)){
+    const base = (f.name || 'Plantilla').replace(/\.[a-z0-9]+$/i, '').slice(0, 40);
+    try {
+      if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)){
+        if (!window.pdfjsLib){ toast('No se pudo cargar el lector de PDF.'); continue; }
+        if (!workerMode) setupWorker();
+        const pdf = await loadPdfDoc(new Uint8Array(await f.arrayBuffer()));
+        const n = Math.min(pdf.numPages, 12);
+        for (let i = 1; i <= n; i++){
+          const pg = await pdf.getPage(i), v1 = pg.getViewport({ scale:1 }), sc = 1500 / Math.max(v1.width, v1.height);
+          const cv = document.createElement('canvas'); cv.width = Math.round(v1.width * sc); cv.height = Math.round(v1.height * sc);
+          const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+          await pg.render({ canvasContext:cx, viewport:pg.getViewport({ scale:sc }) }).promise;
+          made.push(await saveTplImage(cv, n > 1 ? `${base} · p. ${i}` : base));
+        }
+      } else {
+        const im = await new Promise((ok, no) => { const u = URL.createObjectURL(f), i = new Image(); i.onload = () => { ok(i); }; i.onerror = no; i.src = u; });
+        const sc = Math.min(1, 1500 / Math.max(im.naturalWidth, im.naturalHeight)), cv = document.createElement('canvas');
+        cv.width = Math.round(im.naturalWidth * sc); cv.height = Math.round(im.naturalHeight * sc);
+        const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height);
+        made.push(await saveTplImage(cv, base));
+      }
+    } catch(e){ console.warn(e); toast('No pude usar "' + base + '" como plantilla.'); }
+  }
+  return made;
+}
+async function saveTplImage(cv, name){
+  const id = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  await idb.put('tpl:' + id, { id:'tpl:' + id, data:cv.toDataURL('image/jpeg', 0.86), w:cv.width, h:cv.height, name });
+  prefs.myTpls.push({ id, name, ar:cv.width / cv.height }); savePrefs();
+  return 'img:' + id;
+}
+function allTplPacks(){
+  return TPL_PACKS.concat([{ id:'mine', name:'Mis plantillas', items:prefs.myTpls.map(t => 'img:' + t.id), mine:true }]).concat(prefs.tplPacks.map(p => Object.assign({ user:true }, p)));
+}
+/* a cover per template: a little sheet of paper with the template drawn on it */
+function paintTplThumbs(root){
+  root.querySelectorAll('canvas[data-tt]').forEach(cv => {
+    const type = cv.dataset.tt, W = 595, H = 842, w = cv.clientWidth || 96, d = DPR();
+    cv.width = Math.round(w * d); cv.height = Math.round(w * H / W * d);
+    const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+    if (type.startsWith('img:')){
+      const im = tplImage(type, () => paintTplThumbs(root));
+      if (im) cx.drawImage(im, 0, 0, cv.width, cv.height);
+      return;
+    }
+    drawTemplate(cx, { tpl:{ type, mm:7 }, wPt:W, hPt:H }, cv.width / W);
+  });
+}
+function tplPickerHTML(st){
+  const packs = allTplPacks();
+  let tab = st.tplTab || (packs.find(p => p.items.includes(st.tpl)) || packs[0]).id;
+  if (!packs.some(p => p.id === tab)) tab = 'basic';
+  const pk = packs.find(p => p.id === tab);
+  let h = `<div class="group"><div class="lab">Plantilla<button type="button" class="link-btn" data-do="tplPacks">${svg('folder', 15)}Mis packs</button></div>
+    <div class="ptabs tpl-tabs">${packs.map(p => `<button type="button" data-f="tplTab" data-v="${esc(p.id)}" aria-pressed="${p.id === tab}">${p.id === 'nutri' ? '🍎 ' : ''}${esc(p.name)}</button>`).join('')}</div>
+    <div class="tpl-grid">` + pk.items.map(t => `<button type="button" class="tpl-card" data-f="tpl" data-v="${esc(t)}" aria-pressed="${st.tpl === t}"><span class="tpl-paper"><canvas data-tt="${esc(t)}"></canvas></span><b>${esc(tplName(t))}</b></button>`).join('') +
+    (tab === 'mine' || pk.user ? `<label class="tpl-card tpl-add"><span class="tpl-paper add">${svg('plus', 26)}<small>Imagen o PDF</small></span><b>Añadir plantilla</b><input type="file" id="tplFile" accept="image/*,application/pdf,.pdf" multiple hidden></label>` : '') + `</div>`;
+  if (!pk.items.length && tab === 'mine') h += `<p class="hint">Sube la ficha de tu universidad, un formato de historia clínica o cualquier hoja: se usa como fondo de tus páginas.</p>`;
+  if (tplHasSpacing(st.tpl)){
+    h += `<div class="lab" style="margin-top:14px">Espaciado</div><div class="chips">` +
+      [5, 7, 10].map(m => chip('mm', m, m + ' mm', st.mm === m)).join('') +
+      `</div><div class="fields"><label class="field">Otro espaciado (mm)<input type="number" id="fMm" inputmode="decimal" min="2" max="30" step="0.5" value="${st.mm}"></label></div>`;
+  }
+  return h + `</div>`;
+}
+/* "Mis packs": group templates the way palettes are grouped */
+function openTplPacks(back){
+  cps = { mode:'tpacks', edit:null, delArmed:false, back:back || null };
+  renderTplPacks(); cpWrap.hidden = false;
+}
+function renderTplPacks(){
+  const s = cps;
+  if (s.edit){
+    const p = prefs.tplPacks.find(x => x.id === s.edit); if (!p){ s.edit = null; return renderTplPacks(); }
+    const all = TPL_PACKS.flatMap(x => x.items).concat(prefs.myTpls.map(t => 'img:' + t.id));
+    cpSheet.innerHTML = `<header class="sheet-h"><button class="icon-btn" type="button" data-tp2="back" aria-label="Volver">${svg('back')}</button><h2 style="flex:1">Editar pack</h2><button class="icon-btn" type="button" data-cx="close" aria-label="Cerrar">${svg('close')}</button></header>
+      <div class="cn-body"><label class="field">Nombre<input type="text" id="tpName" maxlength="30" value="${esc(p.name)}"></label>
+      <div class="lab" style="margin-top:14px">Toca las plantillas que van en este pack</div>
+      <div class="tpl-grid small">${all.map(t => `<button type="button" class="tpl-card" data-tp2="tog" data-t="${esc(t)}" aria-pressed="${p.items.includes(t)}"><span class="tpl-paper"><canvas data-tt="${esc(t)}"></canvas></span><b>${esc(tplName(t))}</b></button>`).join('')}</div></div>
+      <div class="dlg-foot"><button type="button" class="btn danger${s.delArmed ? ' armed' : ''}" data-tp2="del">${svg('trash', 18)}${s.delArmed ? 'Toca otra vez' : 'Eliminar pack'}</button><span style="flex:1"></span><button type="button" class="btn primary" data-tp2="back">Listo</button></div>`;
+  } else {
+    cpSheet.innerHTML = `<header class="sheet-h"><h2>Mis packs de plantillas</h2><button class="icon-btn" type="button" data-cx="close" aria-label="Cerrar">${svg('close')}</button></header>
+      <div class="cn-body"><p class="hint" style="margin:0 0 10px">Agrupa tus plantillas como quieras, por ejemplo "Consulta" o "Prácticas de Pediatría". Aparecen como pestañas al elegir el papel.</p>
+      ${prefs.tplPacks.map(p => `<div class="pm-row"><span class="pm-name"><strong>${esc(p.name)}</strong><small>${p.items.length} ${p.items.length === 1 ? 'plantilla' : 'plantillas'}</small></span><button type="button" class="icon-btn sm" data-tp2="edit" data-id="${p.id}" aria-label="Editar ${esc(p.name)}">${svg('edit', 18)}</button></div>`).join('') || '<p class="hint">Aún no tienes packs.</p>'}
+      ${prefs.myTpls.length ? `<div class="lab" style="margin-top:16px">Mis plantillas</div>${prefs.myTpls.map(t => `<div class="pm-row"><span class="pm-name"><strong>${esc(t.name)}</strong></span><button type="button" class="icon-btn sm" data-tp2="deltpl" data-id="${t.id}" aria-label="Eliminar ${esc(t.name)}">${svg('trash', 18)}</button></div>`).join('')}` : ''}
+      <button type="button" class="btn pm-new" data-tp2="new">${svg('plus', 18)}Crear pack</button></div>
+      <div class="dlg-foot"><button type="button" class="btn primary" data-cx="close">Listo</button></div>`;
+  }
+  paintTplThumbs(cpSheet);
+}
+cpSheet.addEventListener('click', e => {
+  const b = e.target.closest('[data-tp2]'); if (!b || !cps || cps.mode !== 'tpacks') return;
+  e.stopPropagation();
+  const k = b.dataset.tp2, p = prefs.tplPacks.find(x => x.id === cps.edit);
+  const nm = $('#tpName'); if (p && nm) p.name = nm.value.trim().slice(0, 30) || p.name;
+  if (k === 'new'){ const np = { id:'tp' + Date.now().toString(36), name:'Mi pack ' + (prefs.tplPacks.length + 1), items:[] }; prefs.tplPacks.push(np); cps.edit = np.id; }
+  else if (k === 'edit'){ cps.edit = b.dataset.id; cps.delArmed = false; }
+  else if (k === 'back'){ cps.edit = null; }
+  else if (k === 'tog' && p){ const t = b.dataset.t, i = p.items.indexOf(t); if (i >= 0) p.items.splice(i, 1); else p.items.push(t); }
+  else if (k === 'del' && p){ if (!cps.delArmed){ cps.delArmed = true; renderTplPacks(); return; } prefs.tplPacks = prefs.tplPacks.filter(x => x !== p); cps.edit = null; }
+  else if (k === 'deltpl'){ const id = b.dataset.id; prefs.myTpls = prefs.myTpls.filter(t => t.id !== id); prefs.tplPacks.forEach(x => { x.items = x.items.filter(t => t !== 'img:' + id); }); toast('Plantilla quitada de tu lista. Las páginas que ya la usan la conservan.'); }
+  savePrefs(); renderTplPacks();
+}, true);
+cpSheet.addEventListener('input', e => { if (e.target.id === 'tpName' && cps && cps.edit){ const p = prefs.tplPacks.find(x => x.id === cps.edit); if (p){ p.name = e.target.value.slice(0, 30); savePrefs(); } } });
+
 $('#palMgr').addEventListener('click', () => openPalManager());
 /* a grab bar on the side: drag it to jump to any page, in the document and in the pages panel */
 function makeScrub(host, scroller, label){
